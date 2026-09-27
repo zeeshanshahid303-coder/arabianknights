@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { GoldDust } from "@/components/home/GoldDust";
 
 type HeroSectionProps = {
@@ -244,24 +245,15 @@ export function HeroSection({
           Copy
           ========================================================== */}
       <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-6 pt-24 text-center sm:pt-28">
-        {/* Placeholder for the main hero logo - empty box to hold space,
-            styled like a piece of glass so it looks deliberate. */}
-        <div
-          className="hero-logo-slot mb-10 flex h-20 w-40 shrink-0 items-center justify-center rounded-sm sm:h-24 sm:w-48"
-          style={{
-            background: "rgba(212,175,55,0.03)",
-            border: "1px solid rgba(212,175,55,0.12)",
-            boxShadow: "inset 0 0 20px rgba(212,175,55,0.05)",
-          }}
-          aria-hidden="true"
-        >
-          {/* Logo asset will drop in here */}
-          <span
-            className="text-[0.625rem] tracking-[0.3em] text-[var(--color-gold)] opacity-40 uppercase"
-            style={{ fontFamily: "var(--font-sans)" }}
-          >
-            Reserved
-          </span>
+        <div className="hero-logo-slot mb-10 flex shrink-0 items-center justify-center">
+          <Image
+            src="/logo.png"
+            alt="Arabian Knights Logo"
+            width={160}
+            height={160}
+            className="h-auto w-[120px] sm:w-[150px]"
+            priority
+          />
         </div>
 
         {/* Status */}

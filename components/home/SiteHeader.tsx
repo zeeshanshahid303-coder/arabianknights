@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type SiteHeaderProps = {
@@ -50,22 +51,16 @@ export function SiteHeader({ name, phone, reservationHref }: SiteHeaderProps) {
           aria-label={name ? `${name} — home` : "Home"}
           className="logo-slot"
         >
-          <span
-            className="logo-mark flex items-center justify-center rounded-[2px]"
-            style={{
-              background: "rgba(212,175,55,0.03)",
-              border: "1px solid rgba(212,175,55,0.12)",
-              boxShadow: "inset 0 0 10px rgba(212,175,55,0.05)",
-            }}
-            aria-hidden
-          >
-            <span
-              className="text-[0.45rem] tracking-[0.2em] text-[var(--color-gold)] opacity-40 uppercase"
-              style={{ fontFamily: "var(--font-sans)" }}
-            >
-              Logo
-            </span>
-          </span>
+          <div className="relative flex shrink-0 items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="Arabian Knights Logo"
+              width={80}
+              height={80}
+              className="h-auto w-[60px] md:w-[76px]"
+              priority
+            />
+          </div>
           {name ? <span className="logo-wordmark">{name}</span> : null}
         </Link>
 
