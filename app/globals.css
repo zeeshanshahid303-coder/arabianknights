@@ -393,8 +393,9 @@ body {
   box-shadow: 0 24px 60px -40px rgba(0, 0, 0, 1);
 }
 
-/* Reserved logo frame. Sized and laid out now so the artwork can be
-   dropped in later without moving anything around it. */
+/* Logo lockup. The artwork sits bare — no frame, no plate, nothing
+   behind it — sized entirely from CSS. Height is fixed and width is
+   left to auto so the mark always keeps its own proportions. */
 .logo-slot {
   display: inline-flex;
   align-items: center;
@@ -408,11 +409,22 @@ body {
   opacity: 0.82;
 }
 
-/* The mark's footprint. Invisible until the logo is supplied. */
 .logo-mark {
-  width: 2.5rem;
-  height: 2.5rem;
+  height: 2.75rem;
+  width: auto;
   flex: none;
+}
+
+/* The same artwork, given the room the hero can afford. */
+.hero-logo-mark {
+  height: 6.5rem;
+  width: auto;
+}
+
+@media (min-width: 640px) {
+  .hero-logo-mark {
+    height: 8rem;
+  }
 }
 
 .logo-wordmark {

@@ -22,10 +22,8 @@ const NAV = [
  * Fixed masthead. Sits over the hero on its own, then condenses to a
  * glass bar once the page scrolls.
  *
- * There is deliberately no mark or wordmark here: the logo slot is
- * reserved and left empty until the artwork arrives. The block is
- * always laid out at its final size so inserting a logo later is a
- * drop-in, not a re-layout.
+ * The logo lockup is always laid out at its final size, so the masthead
+ * reads the same whether the name is present or not.
  */
 export function SiteHeader({ name, phone, reservationHref }: SiteHeaderProps) {
   const [condensed, setCondensed] = useState(false);
@@ -44,23 +42,22 @@ export function SiteHeader({ name, phone, reservationHref }: SiteHeaderProps) {
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 lg:px-12">
-        {/* ---------- Logo slot ----------
-            A fixed-size frame. Drop the artwork in here and it is done. */}
+        {/* ---------- Logo ----------
+            The artwork, bare. `.logo-mark` fixes the height in CSS and
+            leaves the width to the image, so proportions are untouched. */}
         <Link
           href="/"
           aria-label={name ? `${name} — home` : "Home"}
           className="logo-slot"
         >
-          <div className="relative flex shrink-0 items-center justify-center">
-            <Image
-              src="/logo.png"
-              alt="Arabian Knights Logo"
-              width={80}
-              height={80}
-              className="h-auto w-[60px] md:w-[76px]"
-              priority
-            />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Arabian Knights Logo"
+            className="logo-mark"
+            width={160}
+            height={160}
+            priority
+          />
           {name ? <span className="logo-wordmark">{name}</span> : null}
         </Link>
 

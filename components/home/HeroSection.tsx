@@ -249,9 +249,9 @@ export function HeroSection({
           <Image
             src="/logo.png"
             alt="Arabian Knights Logo"
+            className="hero-logo-mark"
             width={160}
             height={160}
-            className="h-auto w-[120px] sm:w-[150px]"
             priority
           />
         </div>
