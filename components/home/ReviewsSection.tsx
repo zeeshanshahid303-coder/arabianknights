@@ -52,19 +52,32 @@ function ReviewCard({
   return (
     <Reveal
       delay={delay}
-      className="flex h-full flex-col px-6 py-8"
-      style={{
-        borderLeft: "1px solid rgba(212,175,55,0.15)",
-      }}
+      variant="up"
+      className="group relative flex h-full flex-col px-6 py-10 sm:px-8"
     >
-      <div className="mb-6 flex gap-1" role="img" aria-label={`${rating} out of 5 stars`}>
+      {/* Subtle top rule that blooms on hover */}
+      <div
+        className="absolute inset-x-0 top-0 h-px transition-colors duration-500 group-hover:bg-[var(--color-gold)]"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent)" }}
+      />
+
+      {/* Decorative quote mark */}
+      <div
+        aria-hidden
+        className="absolute left-1/2 top-4 -translate-x-1/2 text-5xl opacity-10 transition-opacity duration-500 group-hover:opacity-20"
+        style={{ fontFamily: "var(--font-display)", color: "var(--color-gold)" }}
+      >
+        &ldquo;
+      </div>
+
+      <div className="relative mb-8 flex justify-center gap-1.5" role="img" aria-label={`${rating} out of 5 stars`}>
         {[1, 2, 3, 4, 5].map((s) => (
           <span
             key={s}
             aria-hidden
             style={{
-              color: s <= rating ? "var(--color-gold)" : "rgba(244,239,228,0.1)",
-              fontSize: "0.875rem",
+              color: s <= rating ? "var(--color-gold)" : "rgba(244,239,228,0.06)",
+              fontSize: "0.75rem",
             }}
           >
             ★
@@ -74,31 +87,31 @@ function ReviewCard({
 
       {quote ? (
         <p
-          className="mb-8 flex-1 text-balance text-base italic leading-relaxed"
+          className="relative mb-10 flex-1 text-balance text-center text-[1.0625rem] italic leading-relaxed"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 300,
             color: "var(--color-ivory)",
-            letterSpacing: "0.02em"
+            textShadow: "0 1px 2px rgba(0,0,0,0.4)"
           }}
         >
-          &ldquo;{quote}&rdquo;
+          {quote}
         </p>
       ) : (
         <div className="flex-1" />
       )}
 
-      <div className="mt-auto pt-4">
+      <div className="mt-auto text-center">
         {name ? (
           <>
             <p
-              className="text-sm tracking-widest uppercase"
-              style={{ fontFamily: "var(--font-sans)", color: "var(--color-gold)", opacity: 0.9 }}
+              className="text-[0.6875rem] tracking-[0.2em] uppercase"
+              style={{ fontFamily: "var(--font-sans)", color: "var(--color-gold)", opacity: 0.9, letterSpacing: "0.15em" }}
             >
-              — {name}
+              {name}
             </p>
             <p
-              className="mt-1 text-xs tracking-wider"
+              className="mt-2 text-xs tracking-wider"
               style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
             >
               {meta}
