@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #050706;
+  --color-ink-raised: #0a0d0b;
+  --color-emerald-deep: #04160f;
+  --color-emerald-core: #0a3b28;
+  --color-emerald-lit: #10percent;
+  --color-gold: #d4af37;
+  --color-gold-soft: #e8cc72;
+  --color-gold-dim: #8a7222;
+  --color-bone: #f2ede1;
+  --color-ash: #9a9c95;
+  --color-hairline: rgba(212, 175, 55, 0.18);
+  --color-hairline-strong: rgba(212, 175, 55, 0.38);
+
+  --font-display: var(--font-cormorant), "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  background-color: #050706;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #050706;
+  color: #f2ede1;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Texture & atmosphere ---------- */
+
+.veil-emerald {
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(10, 59, 40, 0.55) 0%,
+      rgba(4, 22, 15, 0.35) 45%,
+      transparent 100%
+    ),
+    linear-gradient(180deg, #04160f 0%, #050706 70%);
+}
+
+.veil-emerald-soft {
+  background:
+    radial-gradient(
+      90% 60% at 20% 0%,
+      rgba(10, 59, 40, 0.4) 0%,
+      transparent 100%
+    ),
+    radial-gradient(
+      70% 60% at 85% 100%,
+      rgba(10, 59, 40, 0.28) 0%,
+      transparent 100%
+    );
+}
+
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+}
+
+/* ---------- Gold accents ---------- */
+
+.rule-gold {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.05) 15%,
+    rgba(212, 175, 55, 0.45) 50%,
+    rgba(212, 175, 55, 0.05) 85%,
+    transparent 100%
+  );
+}
+
+.text-gold-gradient {
+  background: linear-gradient(180deg, #f0d98a 0%, #d4af37 45%, #9c7f24 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glow-gold {
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.22),
+    0 0 40px -12px rgba(212, 175, 55, 0.35);
+}
+
+.glow-emerald {
+  box-shadow:
+    0 0 0 1px rgba(10, 59, 40, 0.9),
+    0 30px 80px -40px rgba(10, 59, 40, 0.9);
+}
+
+.edge-hair {
+  border: 1px solid rgba(212, 175, 55, 0.18);
+}
+
+/* Fine double rule used under section eyebrows */
+.eyebrow {
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
