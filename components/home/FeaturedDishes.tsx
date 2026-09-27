@@ -21,7 +21,7 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
   const displayed = dishes.slice(0, DISPLAY_LIMIT);
 
   return (
-    <section className="veil-emerald-soft max-w-6xl mx-auto px-6 py-20 lg:px-12 lg:py-28">
+    <section className="veil-emerald grain relative max-w-6xl overflow-hidden px-6 py-20 lg:px-12 lg:py-28">
       <SectionHeading
         eyebrow="Our Signature Dishes"
         heading={
@@ -68,10 +68,11 @@ function DishCard({ dish }: { dish: MenuItem }) {
 
   return (
     <article
-      className="group edge-hair flex h-full flex-col overflow-hidden rounded-[20px] transition-[transform,box-shadow] duration-350 ease-out hover:-translate-y-1.5"
+      className="group edge-hair flex h-full flex-col overflow-hidden rounded-[20px] transition-[transform,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-[var(--color-hairline-strong)]"
       style={{
-        background: "rgba(255,255,255,0.04)",
-        boxShadow: "0 24px 60px -16px rgba(0,0,0,0.5)",
+        background: "linear-gradient(180deg, rgba(244,239,228,0.055) 0%, rgba(244,239,228,0.02) 100%)",
+        backdropFilter: "blur(12px)",
+        boxShadow: "0 28px 64px -28px rgba(0,0,0,0.9)",
       }}
     >
       {/* Image */}
@@ -89,7 +90,7 @@ function DishCard({ dish }: { dish: MenuItem }) {
             className="absolute inset-0 grid place-items-center"
             style={{
               background:
-                "radial-gradient(120% 100% at 50% 0%, rgba(212,175,55,0.16) 0%, var(--color-ink-raised) 70%)",
+                "radial-gradient(120% 100% at 50% 0%, rgba(212,175,55,0.16) 0%, var(--color-night-raised) 70%)",
             }}
           >
             <span
@@ -105,7 +106,7 @@ function DishCard({ dish }: { dish: MenuItem }) {
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
           style={{
-            background: "linear-gradient(to top, rgba(10,11,10,0.85) 0%, transparent 100%)",
+            background: "linear-gradient(to top, rgba(7,4,10,0.9) 0%, transparent 100%)",
           }}
         />
       </div>
@@ -130,7 +131,7 @@ function DishCard({ dish }: { dish: MenuItem }) {
             fontFamily: "var(--font-display)",
             fontSize: "1.375rem",
             fontWeight: 500,
-            color: "var(--color-bone)",
+            color: "var(--color-ivory)",
             lineHeight: 1.2,
           }}
         >
@@ -139,7 +140,7 @@ function DishCard({ dish }: { dish: MenuItem }) {
         {dish.description ? (
           <p
             className="mb-4 flex-1 text-sm leading-relaxed"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}
+            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-muted)" }}
           >
             {dish.description}
           </p>
@@ -164,7 +165,7 @@ function DishCard({ dish }: { dish: MenuItem }) {
           <Link
             href="/menu"
             className="text-xs transition-colors duration-200 hover:text-[var(--color-gold-soft)]"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}
+            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
           >
             Order Now →
           </Link>

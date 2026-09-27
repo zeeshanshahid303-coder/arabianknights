@@ -1,71 +1,139 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #050706;
-  --color-ink-raised: #0a0d0b;
-  --color-emerald-deep: #04160f;
-  --color-emerald-core: #0a3b28;
+  /* ---------- Night & atmosphere ---------- */
+  --color-night: #07040a;
+  --color-night-raised: #0e080c;
+  --color-night-deep: #040206;
+
+  /* ---------- Deep maroon ---------- */
+  --color-maroon-deep: #3a0d12;
+  --color-maroon-core: #4d1118;
+  --color-maroon-lit: #6b1a22;
+
+  /* ---------- Deep emerald ---------- */
+  --color-emerald-night: #051b16;
+  --color-emerald-core: #0b2d24;
+  --color-emerald-lit: #12463a;
+
+  /* ---------- Gold ---------- */
   --color-gold: #d4af37;
   --color-gold-soft: #e8cc72;
+  --color-gold-lumen: #f3e0a4;
   --color-gold-dim: #8a7222;
-  --color-bone: #f2ede1;
-  --color-ash: #9a9c95;
-  --color-hairline: rgba(212, 175, 55, 0.18);
-  --color-hairline-strong: rgba(212, 175, 55, 0.38);
+
+  /* ---------- Ink on parchment ---------- */
+  --color-ivory: #f4efe4;
+  --color-ivory-muted: #a9a294;
+  --color-ivory-faint: #6f6a60;
+
+  --color-hairline: rgba(212, 175, 55, 0.16);
+  --color-hairline-strong: rgba(212, 175, 55, 0.36);
 
   --font-display: var(--font-cormorant), "Times New Roman", serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 html {
-  background-color: #050706;
+  background-color: var(--color-night);
   scroll-behavior: smooth;
 }
 
 body {
-  background-color: #050706;
-  color: #f2ede1;
+  background-color: var(--color-night);
+  color: var(--color-ivory);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- Texture & atmosphere ---------- */
+/* =====================================================================
+   Mashrabiya — the pierced lattice screen of an Arabian window.
+   Drawn as a repeating data-URI so the pattern costs no network request
+   and scales to any surface. Used at very low opacity as light, never
+   as a decorative motif on its own: always behind a glow, so it reads
+   as the shadow a lamp casts through a screen.
+   ===================================================================== */
+
+/* 64px khatam cell — eight-point star interlaced with its octagon,
+   inside the 45° diamond that links it to its neighbours. */
+.mashrabiya-gold {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1'%3E%3Cpolygon points='32,16.5 35.25,24.15 42.96,21.04 39.85,28.75 47.5,32 39.85,35.25 42.96,42.96 35.25,39.85 32,47.5 28.75,39.85 21.04,42.96 24.15,35.25 16.5,32 24.15,28.75 21.04,21.04 28.75,24.15'/%3E%3Cpolygon points='32,16.5 42.96,21.04 47.5,32 42.96,42.96 32,47.5 21.04,42.96 16.5,32 21.04,21.04'/%3E%3Cpolygon points='32,8 56,32 32,56 8,32'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 64px 64px;
+}
+
+/* A coarser cell, drawn in maroon rather than gold. Two scales of the
+   same lattice at different opacities is what gives the night air its
+   depth — the second is far enough away to be barely legible. */
+.mashrabiya-maroon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23a8464f' stroke-width='0.75'%3E%3Cpolygon points='48,26 52.5,39.5 66,34.5 61,46 70.5,48 61,50 66,61.5 52.5,56.5 48,70 43.5,56.5 30,61.5 35,50 25.5,48 35,46 30,34.5 43.5,39.5'/%3E%3Cpolygon points='48,12 84,48 48,84 12,48'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 96px 96px;
+}
+
+/* =====================================================================
+   Layered atmosphere
+   ===================================================================== */
+
+/* The base the whole page sits in: maroon rising from the bottom,
+   emerald pooling in the lower left, a warm lamp glow overhead. */
+.veil-night {
+  background:
+    radial-gradient(
+      80% 50% at 50% -10%,
+      rgba(212, 175, 55, 0.13) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      70% 55% at 8% 85%,
+      rgba(11, 45, 36, 0.75) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      65% 50% at 95% 30%,
+      rgba(77, 17, 24, 0.6) 0%,
+      transparent 65%
+    ),
+    linear-gradient(180deg, #0a0509 0%, #120709 45%, #07040a 100%);
+}
+
+/* Quieter variant for alternating content bands. */
+.veil-maroon {
+  background:
+    radial-gradient(
+      90% 60% at 50% 0%,
+      rgba(77, 17, 24, 0.55) 0%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, #0b0609 0%, var(--color-night) 100%);
+}
 
 .veil-emerald {
   background:
     radial-gradient(
-      120% 80% at 50% 0%,
-      rgba(10, 59, 40, 0.55) 0%,
-      rgba(4, 22, 15, 0.35) 45%,
-      transparent 100%
-    ),
-    linear-gradient(180deg, #04160f 0%, #050706 70%);
-}
-
-.veil-emerald-soft {
-  background:
-    radial-gradient(
-      90% 60% at 20% 0%,
-      rgba(10, 59, 40, 0.4) 0%,
-      transparent 100%
+      85% 60% at 50% 0%,
+      rgba(18, 70, 58, 0.5) 0%,
+      transparent 70%
     ),
     radial-gradient(
-      70% 60% at 85% 100%,
-      rgba(10, 59, 40, 0.28) 0%,
-      transparent 100%
-    );
+      70% 50% at 90% 100%,
+      rgba(77, 17, 24, 0.35) 0%,
+      transparent 70%
+    ),
+    linear-gradient(180deg, #060a09 0%, var(--color-night) 100%);
 }
 
-.grain::before {
+/* Film grain, to stop the large gradients from banding. */
+.grain::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
-/* ---------- Gold accents ---------- */
+/* =====================================================================
+   Gold accents
+   ===================================================================== */
 
 .rule-gold {
   height: 1px;
@@ -80,7 +148,7 @@ body {
 }
 
 .text-gold-gradient {
-  background: linear-gradient(180deg, #f0d98a 0%, #d4af37 45%, #9c7f24 100%);
+  background: linear-gradient(180deg, #f7ecc4 0%, #e2c766 42%, #b4912c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -94,15 +162,45 @@ body {
 
 .glow-emerald {
   box-shadow:
-    0 0 0 1px rgba(10, 59, 40, 0.9),
-    0 30px 80px -40px rgba(10, 59, 40, 0.9);
+    0 0 0 1px rgba(18, 70, 58, 0.9),
+    0 30px 80px -40px rgba(18, 70, 58, 0.9);
+}
+
+/* Hairline rule that carries a small rotated lozenge at its centre — the
+   divider used between the eyebrow and the headline. */
+.ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 11rem;
+}
+
+.ornament::before,
+.ornament::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.42)
+  );
+}
+
+.ornament::after {
+  background: linear-gradient(
+    90deg,
+    rgba(212, 175, 55, 0.42),
+    transparent
+  );
 }
 
 .edge-hair {
-  border: 1px solid rgba(212, 175, 55, 0.18);
+  border: 1px solid var(--color-hairline);
 }
 
-/* Fine double rule used under section eyebrows */
+/* Eyebrow label above a section heading. */
 .eyebrow {
   letter-spacing: 0.42em;
   text-transform: uppercase;
@@ -110,9 +208,358 @@ body {
   font-weight: 500;
 }
 
-/* ---------- Entrances ---------- */
+/* =====================================================================
+   Buttons
+   ===================================================================== */
 
-/* Used by elements that animate in on mount (hero) rather than on scroll. */
+/* Glassmorphic secondary action: Takeaway, Delivery, and every neutral
+   link on the site. Hover lifts the hairline from faint to solid and
+   pulls a soft gold bloom out from under the surface. */
+.btn-glass {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.09) 0%,
+      rgba(255, 255, 255, 0.025) 100%
+    );
+  border: 1px solid rgba(212, 175, 55, 0.26);
+  color: var(--color-ivory);
+  backdrop-filter: blur(14px) saturate(120%);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 239, 228, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 18px 40px -24px rgba(0, 0, 0, 0.9);
+  transition:
+    border-color 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 400ms ease;
+}
+
+.btn-glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  background: radial-gradient(
+    120% 140% at 50% 120%,
+    rgba(212, 175, 55, 0.28) 0%,
+    transparent 65%
+  );
+  transition: opacity 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-glass:hover,
+.btn-glass:focus-visible {
+  border-color: rgba(212, 175, 55, 0.6);
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 239, 228, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 0 34px -10px rgba(212, 175, 55, 0.42),
+    0 22px 46px -22px rgba(0, 0, 0, 0.95);
+}
+
+.btn-glass:hover::after,
+.btn-glass:focus-visible::after {
+  opacity: 1;
+}
+
+/* Primary CTA. Brushed gold, dark warm ink, and a highlight that
+   travels across the face once on hover. */
+.btn-gold {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(160deg, #f7ecc4 0%, #e0c05a 46%, #b8942c 100%);
+  border: 1px solid rgba(247, 236, 196, 0.75);
+  color: #1a0a0c;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(120, 88, 20, 0.4),
+    0 0 0 1px rgba(212, 175, 55, 0.3),
+    0 16px 38px -18px rgba(0, 0, 0, 0.9),
+    0 0 46px -16px rgba(212, 175, 55, 0.45);
+  transition:
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The travelling highlight. */
+.btn-gold::after {
+  content: "";
+  position: absolute;
+  top: -60%;
+  bottom: -60%;
+  left: -70%;
+  width: 45%;
+  z-index: -1;
+  transform: rotate(18deg) translateX(-260%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-gold:hover,
+.btn-gold:focus-visible {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -2px 6px rgba(120, 88, 20, 0.4),
+    0 0 0 1px rgba(212, 175, 55, 0.55),
+    0 20px 44px -18px rgba(0, 0, 0, 0.95),
+    0 0 60px -10px rgba(212, 175, 55, 0.6);
+}
+
+.btn-gold:hover::after,
+.btn-gold:focus-visible::after {
+  transform: rotate(18deg) translateX(420%);
+}
+
+.btn-label {
+  display: inline-block;
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-glass:hover .btn-label,
+.btn-gold:hover .btn-label,
+.btn-glass:focus-visible .btn-label,
+.btn-gold:focus-visible .btn-label {
+  transform: translateY(-1px);
+}
+
+.btn-icon {
+  display: inline-flex;
+  flex: none;
+  transition: transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.btn-glass:hover .btn-icon,
+.btn-gold:hover .btn-icon,
+.btn-glass:focus-visible .btn-icon,
+.btn-gold:focus-visible .btn-icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.btn-ghost-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ivory-muted);
+  transition: color 300ms ease;
+}
+
+.btn-ghost-row:hover,
+.btn-ghost-row:focus-visible {
+  color: var(--color-gold);
+}
+
+/* Visible focus ring, in gold, on every interactive surface. */
+.btn-glass:focus-visible,
+.btn-gold:focus-visible,
+.btn-ghost-row:focus-visible {
+  outline: 1px solid var(--color-gold-soft);
+  outline-offset: 3px;
+}
+
+/* =====================================================================
+   Masthead
+   ===================================================================== */
+
+.site-header {
+  padding-block: 1.75rem;
+}
+
+.site-header.is-condensed {
+  padding-block: 0.75rem;
+  background: rgba(7, 4, 10, 0.72);
+  backdrop-filter: blur(18px) saturate(130%);
+  border-bottom: 1px solid var(--color-hairline);
+  box-shadow: 0 24px 60px -40px rgba(0, 0, 0, 1);
+}
+
+/* Reserved logo frame. Sized and laid out now so the artwork can be
+   dropped in later without moving anything around it. */
+.logo-slot {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-height: 3rem;
+  padding-right: 0.5rem;
+  transition: opacity 300ms ease;
+}
+
+.logo-slot:hover {
+  opacity: 0.82;
+}
+
+/* The mark's footprint. Invisible until the logo is supplied. */
+.logo-mark {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: none;
+}
+
+.logo-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ivory);
+  line-height: 1.2;
+  max-width: 14rem;
+}
+
+.nav-link {
+  position: relative;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ivory-muted);
+  transition: color 300ms ease;
+}
+
+/* Gold underline that grows from the centre on hover. */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.5rem;
+  width: 0;
+  height: 1px;
+  transform: translateX(-50%);
+  background: var(--color-gold);
+  transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--color-gold-soft);
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  width: 100%;
+}
+
+/* A phone number is data, not a label: set in the sans face with
+   tabular figures so the digits read as digits. */
+.header-phone {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--color-ivory-muted);
+}
+
+.header-cta {
+  padding: 0.7rem 1.6rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  flex: none;
+}
+
+.site-header :focus-visible {
+  outline: 1px solid var(--color-gold-soft);
+  outline-offset: 3px;
+}
+
+/* =====================================================================
+   Hero atmosphere
+   ===================================================================== */
+
+/* Drifting orbs of bounced light. Each is a blurred radial wash that
+   breathes on its own long cycle so the room never feels static. */
+.orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@keyframes orb-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(3%, -4%, 0) scale(1.12);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(-2%, 3%, 0) scale(0.96);
+    opacity: 0.5;
+  }
+}
+
+/* Gold dust. One mote rises the height of the hero over its own cycle,
+   swaying on a sine-ish path and fading at both ends of its life.
+   The mote is anchored by its bottom edge, so `top` is where the rise
+   begins and the -100vh travel always reads as a full rise. */
+@keyframes dust-rise {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.5);
+    opacity: 0;
+  }
+  14% {
+    opacity: var(--dust-opacity, 0.5);
+  }
+  50% {
+    transform: translate3d(var(--dust-drift, 30px), -50vh, 0) scale(1);
+  }
+  86% {
+    opacity: var(--dust-opacity, 0.5);
+  }
+  100% {
+    transform: translate3d(calc(var(--dust-drift, 30px) * -0.45), -100vh, 0)
+      scale(0.6);
+    opacity: 0;
+  }
+}
+
+.dust {
+  position: absolute;
+  transform-origin: 50% 100%;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(243, 224, 164, 0.95) 0%,
+    rgba(212, 175, 55, 0.45) 45%,
+    transparent 70%
+  );
+  animation: dust-rise var(--dust-duration, 26s) linear infinite;
+  animation-delay: var(--dust-delay, 0s);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* =====================================================================
+   Entrances
+   ===================================================================== */
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -124,7 +571,38 @@ body {
   }
 }
 
-/* ---------- Scroll reveal animations ---------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrollLine {
+  0% {
+    transform: translateY(-110%);
+  }
+  100% {
+    transform: translateY(320%);
+  }
+}
+
+/* Staged entrance. One orchestrated load sequence: the room lights
+   first, then the wordmark, then the headline, then the actions. */
+.hero-lights  { animation: fadeIn 1400ms ease-out both; }
+.hero-crest   { animation: fadeUp 1000ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-status  { animation: fadeUp 1000ms 300ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-headline{ animation: fadeUp 1100ms 420ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-rule    { animation: fadeIn 1200ms 620ms ease-out both; }
+.hero-subtitle{ animation: fadeUp 1000ms 700ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-buttons { animation: fadeUp 1000ms 860ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-cue     { animation: fadeIn 1400ms 1200ms ease-out both; }
+
+/* =====================================================================
+   Scroll reveal
+   ===================================================================== */
 
 .reveal-up,
 .reveal-left,
@@ -159,8 +637,6 @@ body {
 .reveal-scale.is-visible {
   opacity: 1;
   transform: none;
-  /* Promote off the compositor only after the transition, so the
-     animation stays smooth without pinning a layer for the page's life. */
   will-change: auto;
 }
 
@@ -177,5 +653,27 @@ body {
     transform: none;
     transition: none;
     will-change: auto;
+  }
+
+  /* Ambient motion is atmosphere, not information — it stops entirely
+     rather than merely slowing down. */
+  .dust,
+  .orb {
+    animation: none;
+  }
+
+  .orb {
+    opacity: 0.7;
+  }
+
+  .hero-lights,
+  .hero-crest,
+  .hero-status,
+  .hero-headline,
+  .hero-rule,
+  .hero-subtitle,
+  .hero-buttons,
+  .hero-cue {
+    animation: none;
   }
 }

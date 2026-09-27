@@ -21,11 +21,12 @@ export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
 
   return (
     <section
-      className="py-8"
+      className="py-9"
       style={{
-        background: "rgba(255,255,255,0.025)",
+        background: "rgba(244,239,228,0.018)",
         borderTop: "1px solid var(--color-hairline)",
         borderBottom: "1px solid var(--color-hairline)",
+        backdropFilter: "blur(6px)",
       }}
     >
       <div className="mx-auto max-w-6xl px-6 lg:px-12">
@@ -38,7 +39,7 @@ export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
             >
               <span
                 className="eyebrow mb-1"
-                style={{ color: "var(--color-ash)", fontFamily: "var(--font-sans)" }}
+                style={{ color: "var(--color-ivory-faint)", fontFamily: "var(--font-sans)" }}
               >
                 {item.label}
               </span>
@@ -48,7 +49,7 @@ export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
                   fontFamily: "var(--font-display)",
                   fontSize: "clamp(1.25rem, 3vw, 1.75rem)",
                   fontWeight: 400,
-                  color: "var(--color-bone)",
+                  color: "var(--color-ivory)",
                   lineHeight: 1.2,
                 }}
               >
@@ -58,8 +59,7 @@ export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
                 className="mt-1 text-xs"
                 style={{
                   fontFamily: "var(--font-sans)",
-                  color: "var(--color-ash)",
-                  opacity: 0.7,
+                  color: "var(--color-ivory-faint)",
                 }}
               >
                 {item.sub}

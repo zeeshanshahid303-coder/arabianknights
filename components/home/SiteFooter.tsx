@@ -20,10 +20,27 @@ export function SiteFooter({
 }: SiteFooterProps) {
   return (
     <footer
-      className="border-t py-12"
-      style={{ borderColor: "var(--color-hairline)", background: "var(--color-ink)" }}
+      className="grain relative overflow-hidden border-t py-14"
+      style={{ borderColor: "var(--color-hairline)" }}
     >
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 text-center lg:px-12">
+      <div
+        aria-hidden
+        className="mashrabiya-maroon pointer-events-none absolute inset-0 h-full w-full opacity-[0.05]"
+        style={{
+          maskImage: "linear-gradient(to bottom, #000 0%, transparent 70%)",
+          WebkitMaskImage: "linear-gradient(to bottom, #000 0%, transparent 70%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(60% 100% at 50% 0%, rgba(77,17,24,0.4) 0%, transparent 70%)",
+        }}
+      />
+
+      <div className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 px-6 text-center lg:px-12">
         <div>
           <p
             className="text-gold-gradient"
@@ -35,8 +52,8 @@ export function SiteFooter({
         </div>
 
         <div className="flex flex-col items-center gap-2 text-sm">
-          <p style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}>{address}</p>
-          <p style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}>
+          <p style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-muted)" }}>{address}</p>
+          <p style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-muted)" }}>
             <a
               href={`tel:${phone.replace(/\s+/g, "")}`}
               className="transition-colors duration-200 hover:text-[var(--color-gold)]"
@@ -61,7 +78,7 @@ export function SiteFooter({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs uppercase tracking-widest transition-colors duration-200 hover:text-[var(--color-gold)]"
-                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}
+                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
               >
                 Facebook
               </a>
@@ -72,7 +89,7 @@ export function SiteFooter({
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs uppercase tracking-widest transition-colors duration-200 hover:text-[var(--color-gold)]"
-                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}
+                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
               >
                 Instagram
               </a>
@@ -82,7 +99,7 @@ export function SiteFooter({
 
         <p
           className="text-xs"
-          style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)", opacity: 0.5 }}
+          style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
         >
           {text}
         </p>

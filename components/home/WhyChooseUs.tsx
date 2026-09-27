@@ -26,7 +26,7 @@ const features = [
 
 export function WhyChooseUs() {
   return (
-    <section className="py-20 lg:py-28">
+    <section className="grain relative overflow-hidden py-20 lg:py-28">
       <div className="mx-auto max-w-6xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="The Arabian Knights Difference"
@@ -39,12 +39,16 @@ export function WhyChooseUs() {
             <Reveal
               key={f.title}
               delay={i * 80}
-              className="edge-hair cursor-default rounded-[20px] p-8 transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:border-[var(--color-hairline-strong)] hover:shadow-[0_16px_48px_-16px_rgba(0,0,0,0.5)]"
-              style={{ background: "rgba(255,255,255,0.04)" }}
+              className="edge-hair group cursor-default rounded-[20px] p-8 transition-[transform,border-color,box-shadow] duration-500 ease-out hover:-translate-y-1 hover:border-[var(--color-hairline-strong)]"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(244,239,228,0.05) 0%, rgba(244,239,228,0.018) 100%)",
+                backdropFilter: "blur(12px)",
+              }}
             >
               <div
                 aria-hidden
-                className="mb-5 select-none text-3xl"
+                className="mb-5 select-none text-3xl transition-transform duration-500 ease-out group-hover:scale-110"
                 style={{ color: "var(--color-gold)", lineHeight: 1 }}
               >
                 {f.glyph}
@@ -56,7 +60,7 @@ export function WhyChooseUs() {
                   fontFamily: "var(--font-display)",
                   fontSize: "1.375rem",
                   fontWeight: 500,
-                  color: "var(--color-bone)",
+                  color: "var(--color-ivory)",
                 }}
               >
                 {f.title}
@@ -67,7 +71,7 @@ export function WhyChooseUs() {
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 300,
-                  color: "var(--color-ash)",
+                  color: "var(--color-ivory-muted)",
                 }}
               >
                 {f.body}

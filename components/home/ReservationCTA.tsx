@@ -11,24 +11,32 @@ type ReservationCTAProps = {
 
 export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
   return (
-    <section
-      className="relative overflow-hidden py-20 lg:py-28 grain"
-      style={{ background: "var(--color-ink)" }}
-    >
-      {/* Gold radial glow behind the content */}
+    <section className="veil-night grain relative overflow-hidden py-20 lg:py-28">
+      {/* Maroon pooling low, emerald at the shoulders — the room lit
+          for a celebration rather than a transaction. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(212,175,55,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 62% 58% at 50% 46%, rgba(212,175,55,0.10) 0%, transparent 68%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="mashrabiya-gold pointer-events-none absolute inset-0 h-full w-full opacity-[0.09]"
+        style={{
+          maskImage:
+            "radial-gradient(58% 52% at 50% 50%, #000 0%, transparent 78%)",
+          WebkitMaskImage:
+            "radial-gradient(58% 52% at 50% 50%, #000 0%, transparent 78%)",
         }}
       />
 
       <Reveal className="relative z-10 mx-auto max-w-3xl px-6 text-center">
         <p
           className="eyebrow mb-5"
-          style={{ color: "var(--color-ash)", fontFamily: "var(--font-sans)" }}
+          style={{ color: "var(--color-ivory-faint)", fontFamily: "var(--font-sans)" }}
         >
           Reserve Your Experience
         </p>
@@ -41,19 +49,20 @@ export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
             fontWeight: 400,
             lineHeight: 1.1,
             letterSpacing: "0.01em",
-            color: "var(--color-bone)",
+            color: "var(--color-ivory)",
           }}
         >
-          Book Your <span className="text-gold-gradient">Table Today</span>
+          Book Your <span className="text-gold-gradient">Table Tonight</span>
         </h2>
+
+        <div className="ornament mx-auto mb-7 h-px" aria-hidden />
 
         <p
           className="mb-10 text-sm tracking-wide"
           style={{
             fontFamily: "var(--font-sans)",
             fontWeight: 300,
-            color: "var(--color-ash)",
-            opacity: 0.8,
+            color: "var(--color-ivory-muted)",
           }}
         >
           Mon–Fri {hours.monday_friday} &nbsp;·&nbsp; Sat–Sun {hours.saturday_sunday}
@@ -63,8 +72,8 @@ export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
         <div className="relative inline-flex w-full justify-center sm:w-auto">
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-4 rounded-3xl blur-xl"
-            style={{ background: "rgba(212,175,55,0.08)" }}
+            className="pointer-events-none absolute -inset-6 rounded-full blur-2xl"
+            style={{ background: "rgba(212,175,55,0.14)" }}
           />
           <GoldButton
             href="/reservation"
@@ -80,7 +89,7 @@ export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
         {/* Phone escape hatch for guests who'd rather call */}
         <p
           className="mt-8 text-sm"
-          style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)", opacity: 0.7 }}
+          style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
         >
           Prefer to call?{" "}
           <a

@@ -1,4 +1,5 @@
 import { getHomepageData } from "@/lib/getHomepageData";
+import { SiteHeader } from "@/components/home/SiteHeader";
 import { HeroSection } from "@/components/home/HeroSection";
 import { TrustBar } from "@/components/home/TrustBar";
 import { FeaturedDishes } from "@/components/home/FeaturedDishes";
@@ -18,14 +19,20 @@ export default async function HomePage() {
 
   return (
     <>
-      <HeroSection
-        heroImageUrl={settings.hero_image_url}
-        title={content.hero_title}
-        subtitle={content.hero_subtitle}
-        isOpen={settings.restaurant_open}
-        headlineLead="Experience the Art"
-        headlineAccent="of Arabian Dining"
+      <SiteHeader
+        name={settings.name}
+        phone={settings.contact_info.phone}
+        reservationHref="/reservation"
       />
+
+      <main className="flex-1">
+        <HeroSection
+          title={content.hero_title}
+          subtitle={content.hero_subtitle}
+          isOpen={settings.restaurant_open}
+          headlineLead="Experience the Art"
+          headlineAccent="of Arabian Dining"
+        />
 
       <TrustBar priceMin={priceRange.min} priceMax={priceRange.max} />
 
@@ -46,6 +53,7 @@ export default async function HomePage() {
         hours={settings.reservation_hours}
         phone={settings.contact_info.phone}
       />
+      </main>
 
       <SiteFooter
         name={settings.name}

@@ -16,10 +16,7 @@ export function AboutSection({
   address,
 }: AboutSectionProps) {
   return (
-    <section
-      className="py-20 lg:py-28"
-      style={{ background: "var(--color-ink-raised)" }}
-    >
+    <section className="veil-maroon grain relative overflow-hidden py-20 lg:py-28">
       <div className="mx-auto max-w-6xl px-6 lg:px-12">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
           {/* Text — left on desktop, second on mobile */}
@@ -40,7 +37,7 @@ export function AboutSection({
                 fontFamily: "var(--font-sans)",
                 fontWeight: 300,
                 fontSize: "1.0625rem",
-                color: "var(--color-ash)",
+                color: "var(--color-ivory-muted)",
               }}
             >
               {storyText}
@@ -52,7 +49,7 @@ export function AboutSection({
                 fontFamily: "var(--font-sans)",
                 fontWeight: 300,
                 fontSize: "1.0625rem",
-                color: "var(--color-ash)",
+                color: "var(--color-ivory-muted)",
               }}
             >
               {aboutText}
@@ -64,8 +61,7 @@ export function AboutSection({
               className="text-sm tracking-wider"
               style={{
                 fontFamily: "var(--font-sans)",
-                color: "var(--color-ash)",
-                opacity: 0.65,
+                color: "var(--color-ivory-faint)",
               }}
             >
               {address}
@@ -91,7 +87,7 @@ export function AboutSection({
                   className="absolute inset-0"
                   style={{
                     background:
-                      "radial-gradient(120% 100% at 50% 0%, var(--color-emerald-core) 0%, var(--color-ink) 70%)",
+                      "radial-gradient(120% 100% at 50% 0%, var(--color-emerald-core) 0%, var(--color-night) 70%)",
                   }}
                 />
               )}

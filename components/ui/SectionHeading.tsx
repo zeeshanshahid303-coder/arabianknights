@@ -26,14 +26,14 @@ export function SectionHeading({
     <div ref={ref} className={`reveal-up mb-12 ${align} ${className}`}>
       <p
         className="eyebrow mb-4"
-        style={{ color: "var(--color-ash)", fontFamily: "var(--font-sans)" }}
+        style={{ color: "var(--color-ivory-faint)", fontFamily: "var(--font-sans)" }}
       >
         {eyebrow}
       </p>
       <h2
         style={{
           fontFamily: "var(--font-display)",
-          color: "var(--color-bone)",
+          color: "var(--color-ivory)",
           fontSize: "clamp(1.85rem, 4vw, 3rem)",
           fontWeight: 400,
           lineHeight: 1.1,

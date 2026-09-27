@@ -72,7 +72,11 @@ function ReviewCard({
     <Reveal
       delay={delay}
       className="edge-hair flex h-full flex-col rounded-[20px] p-7"
-      style={{ background: "rgba(255,255,255,0.04)" }}
+      style={{
+        background:
+          "linear-gradient(180deg, rgba(244,239,228,0.05) 0%, rgba(244,239,228,0.018) 100%)",
+        backdropFilter: "blur(12px)",
+      }}
     >
       <StarRow rating={rating} />
 
@@ -82,7 +86,7 @@ function ReviewCard({
           style={{
             fontFamily: "var(--font-sans)",
             fontWeight: 300,
-            color: "var(--color-ash)",
+            color: "var(--color-ivory-muted)",
           }}
         >
           &ldquo;{quote}&rdquo;
@@ -113,13 +117,13 @@ function ReviewCard({
             <div className="min-w-0">
               <p
                 className="truncate text-xs font-medium"
-                style={{ fontFamily: "var(--font-sans)", color: "var(--color-bone)" }}
+                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory)" }}
               >
                 {name}
               </p>
               <p
                 className="truncate text-xs"
-                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)", opacity: 0.65 }}
+                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
               >
                 {meta}
               </p>
@@ -128,7 +132,7 @@ function ReviewCard({
         ) : (
           <p
             className="truncate text-xs"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)", opacity: 0.65 }}
+            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
           >
             {meta}
           </p>
@@ -165,10 +169,7 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
       }));
 
   return (
-    <section
-      className="py-20 lg:py-28"
-      style={{ background: "var(--color-ink-raised)" }}
-    >
+    <section className="veil-maroon grain relative overflow-hidden py-20 lg:py-28">
       <div className="mx-auto max-w-6xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="What Our Guests Say"
@@ -186,8 +187,7 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
             className="-mt-6 mb-10 text-center text-xs"
             style={{
               fontFamily: "var(--font-sans)",
-              color: "var(--color-ash)",
-              opacity: 0.5,
+              color: "var(--color-ivory-faint)",
               letterSpacing: "0.04em",
             }}
           >
