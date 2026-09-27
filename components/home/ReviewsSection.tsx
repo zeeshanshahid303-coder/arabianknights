@@ -157,8 +157,17 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
       }));
 
   return (
-    <section className="veil-maroon grain relative overflow-hidden py-20 lg:py-28">
-      <div className="mx-auto max-w-6xl px-6 lg:px-12">
+    <section className="grain relative overflow-hidden py-24 lg:py-32">
+      {/* Background layer connecting from WhyChooseUs into this section */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(100% 100% at 50% 0%, rgba(77,17,24,0.15) 0%, transparent 80%)",
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="What Our Guests Say"
           heading={
@@ -183,7 +192,7 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
           </p>
         ) : null}
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-4 lg:gap-8">
           {cards.map((c, i) => (
             <ReviewCard
               key={c.key}

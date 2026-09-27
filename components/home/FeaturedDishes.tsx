@@ -21,7 +21,16 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
   const displayed = dishes.slice(0, DISPLAY_LIMIT);
 
   return (
-    <section className="veil-emerald grain relative overflow-hidden py-20 lg:py-28">
+    <section className="grain relative overflow-hidden py-24 lg:py-32">
+      {/* Background linking hero/trustbar to this section */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(120% 80% at 50% 10%, rgba(11,45,36,0.12) 0%, transparent 70%)",
+        }}
+        aria-hidden
+      />
+
       {/* The section itself is full-bleed so the background reaches the
           edges of the viewport; the content is centred inside it. */}
       <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
@@ -37,7 +46,7 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
         />
 
         {/* 1 / 2 / 3 columns; 6 dishes fill the last row exactly at 3-up */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
           {displayed.map((dish, i) => (
             <Reveal key={dish.id} variant="scale" delay={i * 90} as="article" className="h-full">
               <DishCard dish={dish} />

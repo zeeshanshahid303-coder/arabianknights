@@ -13,7 +13,13 @@ export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
   return (
     <section className="grain relative flex min-h-[80vh] items-center justify-center overflow-hidden py-24 lg:py-32">
       {/* Base ambience - deeper than the rest of the site to make the CTA glow */}
-      <div className="absolute inset-0 bg-[#040206]" aria-hidden />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(180deg, transparent 0%, #040206 15%, #040206 100%)"
+        }}
+        aria-hidden
+      />
 
       {/* Ambient background photo */}
       <div

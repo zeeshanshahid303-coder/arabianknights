@@ -26,40 +26,50 @@ const features = [
 
 export function WhyChooseUs() {
   return (
-    <section className="grain relative overflow-hidden py-20 lg:py-28">
-      <div className="mx-auto max-w-6xl px-6 lg:px-12">
+    <section className="grain relative overflow-hidden py-24 lg:py-32">
+      {/* Subtle emerald bloom anchoring the background */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(circle at 100% 50%, rgba(11,45,36,0.18) 0%, transparent 60%)",
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="The Arabian Knights Difference"
           heading="Why Guests Choose Us"
           center
         />
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div className="mt-16 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:gap-x-16 lg:gap-y-16">
           {features.map((f, i) => (
             <Reveal
               key={f.title}
               delay={i * 80}
-              className="edge-hair group cursor-default rounded-[20px] p-8 transition-[transform,border-color,box-shadow] duration-500 ease-out hover:-translate-y-1 hover:border-[var(--color-hairline-strong)]"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(244,239,228,0.05) 0%, rgba(244,239,228,0.018) 100%)",
-                backdropFilter: "blur(12px)",
-              }}
+              className="group relative flex flex-col items-center sm:items-start text-center sm:text-left"
             >
               <div
                 aria-hidden
-                className="mb-5 select-none text-3xl transition-transform duration-500 ease-out group-hover:scale-110"
-                style={{ color: "var(--color-gold)", lineHeight: 1 }}
+                className="mb-6 select-none opacity-40 transition-opacity duration-500 ease-out group-hover:opacity-100"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "3rem",
+                  color: "var(--color-gold)",
+                  lineHeight: 1,
+                  textShadow: "0 0 24px rgba(212,175,55,0.4)",
+                }}
               >
                 {f.glyph}
               </div>
 
               <h3
-                className="mb-3"
+                className="mb-4"
                 style={{
                   fontFamily: "var(--font-display)",
-                  fontSize: "1.375rem",
-                  fontWeight: 500,
+                  fontSize: "1.6rem",
+                  fontWeight: 400,
                   color: "var(--color-ivory)",
                 }}
               >
@@ -67,11 +77,12 @@ export function WhyChooseUs() {
               </h3>
 
               <p
-                className="text-sm leading-relaxed"
+                className="leading-[1.75]"
                 style={{
                   fontFamily: "var(--font-sans)",
                   fontWeight: 300,
-                  color: "var(--color-ivory-muted)",
+                  fontSize: "1.0625rem",
+                  color: "var(--color-ivory-faint)",
                 }}
               >
                 {f.body}

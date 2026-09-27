@@ -16,8 +16,17 @@ export function AboutSection({
   address,
 }: AboutSectionProps) {
   return (
-    <section className="veil-maroon grain relative overflow-hidden py-20 lg:py-28">
-      <div className="mx-auto max-w-6xl px-6 lg:px-12">
+    <section className="grain relative overflow-hidden py-24 lg:py-32">
+      {/* Soft gradient wash bridging sections */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse 80% 60% at 0% 50%, rgba(77,17,24,0.18) 0%, transparent 60%)",
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
           {/* Text — left on desktop, second on mobile */}
           <div className="order-2 lg:order-1">
@@ -71,8 +80,8 @@ export function AboutSection({
           {/* Image — first on mobile, right on desktop */}
           <Reveal variant="left" delay={200} className="order-1 lg:order-2">
             <div
-              className="relative overflow-hidden rounded-[20px]"
-              style={{ height: "clamp(320px, 45vw, 540px)" }}
+              className="relative overflow-hidden"
+              style={{ height: "clamp(400px, 50vw, 600px)" }}
             >
               {imageUrl ? (
                 <Image
@@ -91,10 +100,17 @@ export function AboutSection({
                   }}
                 />
               )}
-              {/* Subtle inner gold frame */}
+
+              {/* Cinematic overlay for depth */}
               <div
-                className="pointer-events-none absolute inset-5 rounded-2xl"
-                style={{ border: "1px solid rgba(212,175,55,0.18)" }}
+                className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply"
+                style={{ background: "linear-gradient(180deg, transparent 40%, #040206 100%)" }}
+              />
+
+              {/* Subtle inner gold frame - straight edged */}
+              <div
+                className="pointer-events-none absolute inset-3 sm:inset-5"
+                style={{ border: "1px solid rgba(212,175,55,0.15)" }}
               />
             </div>
           </Reveal>

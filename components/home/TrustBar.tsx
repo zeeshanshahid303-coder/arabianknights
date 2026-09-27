@@ -6,10 +6,9 @@ type TrustBarProps = {
 };
 
 /** Hairline rule before every cell but the first, via a pseudo-element so it
-    spans the cell without needing `position: relative` on a flex container.
-    `before:content-['']` is what actually materialises the pseudo-element. */
+    spans the cell without needing `position: relative` on a flex container. */
 const DIVIDER =
-  "relative before:absolute before:inset-y-0 before:left-0 before:w-px before:bg-[var(--color-hairline)] before:content-[''] first:before:hidden lg:before:left-[-1.5rem]";
+  "relative before:absolute before:hidden before:inset-y-0 before:left-0 before:w-px before:content-[''] lg:before:block first:before:hidden lg:before:left-[-1.5rem]";
 
 export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
   const items = [
@@ -19,18 +18,27 @@ export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
     { label: "Price Range", value: `₹${priceMin}–₹${priceMax}`, sub: "Per Person" },
   ];
 
+  // We add a custom class for the gradient divider
+  const gradientDividerClass = "[&>div:not(:first-child)]:before:bg-[linear-gradient(to_bottom,transparent,rgba(212,175,55,0.15)_20%,rgba(212,175,55,0.15)_80%,transparent)]";
+
   return (
     <section
-      className="py-9"
+      className="relative z-20 py-10"
       style={{
-        background: "rgba(244,239,228,0.018)",
-        borderTop: "1px solid var(--color-hairline)",
-        borderBottom: "1px solid var(--color-hairline)",
-        backdropFilter: "blur(6px)",
+        background: "radial-gradient(ellipse at top, rgba(11,45,36,0.15) 0%, rgba(4,2,6,0.4) 100%)",
+        borderTop: "1px solid rgba(212,175,55,0.08)",
+        borderBottom: "1px solid rgba(212,175,55,0.08)",
+        backdropFilter: "blur(12px)",
       }}
     >
-      <div className="mx-auto max-w-6xl px-6 lg:px-12">
-        <div className="grid grid-cols-2 gap-y-8 lg:grid-cols-4 lg:gap-y-0">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.03) 50%, transparent 100%)",
+        }}
+      />
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+        <div className={`grid grid-cols-2 gap-y-10 lg:grid-cols-4 lg:gap-y-0 ${gradientDividerClass}`}>
           {items.map((item, i) => (
             <Reveal
               key={item.label}
