@@ -11,7 +11,21 @@ type ReservationCTAProps = {
 
 export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
   return (
-    <section className="veil-night grain relative overflow-hidden py-20 lg:py-28">
+    <section className="veil-night grain relative overflow-hidden py-24 lg:py-32">
+      {/* Ambient background photo */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=2000&auto=format&fit=crop')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.15,
+          maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 80%)",
+        }}
+      />
+
       {/* Maroon pooling low, emerald at the shoulders — the room lit
           for a celebration rather than a transaction. */}
       <div

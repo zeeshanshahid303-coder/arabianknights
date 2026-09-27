@@ -34,25 +34,6 @@ const PLACEHOLDER_REVIEWS = [
   },
 ];
 
-function StarRow({ rating }: { rating: number }) {
-  return (
-    <div className="mb-3 flex gap-0.5" role="img" aria-label={`${rating} out of 5 stars`}>
-      {[1, 2, 3, 4, 5].map((s) => (
-        <span
-          key={s}
-          aria-hidden
-          style={{
-            color: s <= rating ? "var(--color-gold)" : "var(--color-hairline-strong)",
-            fontSize: "0.875rem",
-          }}
-        >
-          ★
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function ReviewCard({
   rating,
   quote,
@@ -71,22 +52,34 @@ function ReviewCard({
   return (
     <Reveal
       delay={delay}
-      className="edge-hair flex h-full flex-col rounded-[20px] p-7"
+      className="flex h-full flex-col px-6 py-8"
       style={{
-        background:
-          "linear-gradient(180deg, rgba(244,239,228,0.05) 0%, rgba(244,239,228,0.018) 100%)",
-        backdropFilter: "blur(12px)",
+        borderLeft: "1px solid rgba(212,175,55,0.15)",
       }}
     >
-      <StarRow rating={rating} />
+      <div className="mb-6 flex gap-1" role="img" aria-label={`${rating} out of 5 stars`}>
+        {[1, 2, 3, 4, 5].map((s) => (
+          <span
+            key={s}
+            aria-hidden
+            style={{
+              color: s <= rating ? "var(--color-gold)" : "rgba(244,239,228,0.1)",
+              fontSize: "0.875rem",
+            }}
+          >
+            ★
+          </span>
+        ))}
+      </div>
 
       {quote ? (
         <p
-          className="mb-6 flex-1 text-pretty text-sm italic leading-relaxed"
+          className="mb-8 flex-1 text-balance text-base italic leading-relaxed"
           style={{
-            fontFamily: "var(--font-sans)",
+            fontFamily: "var(--font-display)",
             fontWeight: 300,
-            color: "var(--color-ivory-muted)",
+            color: "var(--color-ivory)",
+            letterSpacing: "0.02em"
           }}
         >
           &ldquo;{quote}&rdquo;
@@ -95,43 +88,25 @@ function ReviewCard({
         <div className="flex-1" />
       )}
 
-      <div
-        className="mt-auto flex items-center gap-3 border-t pt-4"
-        style={{ borderColor: "var(--color-hairline)" }}
-      >
-        {initials && name ? (
+      <div className="mt-auto pt-4">
+        {name ? (
           <>
-            <div
-              className="flex size-8 flex-none items-center justify-center text-xs font-medium"
-              style={{
-                background: "rgba(212,175,55,0.15)",
-                border: "1px solid var(--color-hairline)",
-                borderRadius: "9999px",
-                color: "var(--color-gold)",
-                fontFamily: "var(--font-display)",
-                fontSize: "1rem",
-              }}
+            <p
+              className="text-sm tracking-widest uppercase"
+              style={{ fontFamily: "var(--font-sans)", color: "var(--color-gold)", opacity: 0.9 }}
             >
-              {initials}
-            </div>
-            <div className="min-w-0">
-              <p
-                className="truncate text-xs font-medium"
-                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory)" }}
-              >
-                {name}
-              </p>
-              <p
-                className="truncate text-xs"
-                style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
-              >
-                {meta}
-              </p>
-            </div>
+              — {name}
+            </p>
+            <p
+              className="mt-1 text-xs tracking-wider"
+              style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
+            >
+              {meta}
+            </p>
           </>
         ) : (
           <p
-            className="truncate text-xs"
+            className="text-xs tracking-wider"
             style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
           >
             {meta}

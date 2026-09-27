@@ -103,6 +103,20 @@ export function HeroSection({
       {/* 1 · Base atmosphere — maroon and emerald in the dark air. */}
       <div aria-hidden className="veil-night hero-lights absolute inset-0" />
 
+      {/* 1.5 · Photography backdrop. Deep luxurious ambient interior blended into the dark air. */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1542314831-c6a420b9df4b?q=80&w=2000&auto=format&fit=crop')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.25,
+          maskImage: "linear-gradient(to bottom, black 0%, transparent 60%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 0%, transparent 60%)"
+        }}
+      />
+
       {/* 2 · Back wall. The far side of the room: emerald, barely lit,
              with the coarsest lattice ghosted across it. */}
       <div

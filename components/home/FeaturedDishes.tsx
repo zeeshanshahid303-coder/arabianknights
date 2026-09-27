@@ -71,27 +71,20 @@ function DishCard({ dish }: { dish: MenuItem }) {
   const name = clean(dish.name);
 
   return (
-    <article
-      className="group edge-hair flex h-full flex-col overflow-hidden rounded-[20px] transition-[transform,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-[var(--color-hairline-strong)]"
-      style={{
-        background: "linear-gradient(180deg, rgba(244,239,228,0.055) 0%, rgba(244,239,228,0.02) 100%)",
-        backdropFilter: "blur(12px)",
-        boxShadow: "0 28px 64px -28px rgba(0,0,0,0.9)",
-      }}
-    >
-      {/* Image */}
-      <div className="relative h-52 shrink-0 overflow-hidden sm:h-56">
+    <article className="group relative flex h-[380px] w-full flex-col overflow-hidden sm:h-[460px]">
+      {/* Background Image full bleed */}
+      <div className="absolute inset-0 z-0 bg-[#07040a]">
         {dish.image_url ? (
           <Image
             src={dish.image_url}
             alt={name}
             fill
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+            className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.08]"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
           <div
-            className="absolute inset-0 grid place-items-center"
+            className="h-full w-full"
             style={{
               background:
                 "radial-gradient(120% 100% at 50% 0%, rgba(212,175,55,0.16) 0%, var(--color-night-raised) 70%)",
@@ -99,68 +92,85 @@ function DishCard({ dish }: { dish: MenuItem }) {
           >
             <span
               aria-hidden
-              className="text-4xl opacity-40"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl opacity-10"
               style={{ fontFamily: "var(--font-display)", color: "var(--color-gold)" }}
             >
               ✦
             </span>
           </div>
         )}
-        {/* Bottom gradient so the category label stays legible */}
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
-          style={{
-            background: "linear-gradient(to top, rgba(7,4,10,0.9) 0%, transparent 100%)",
-          }}
-        />
       </div>
 
+      {/* Cinematic Overlays */}
+      <div
+        className="absolute inset-0 z-10 opacity-80 mix-blend-multiply transition-opacity duration-700 group-hover:opacity-50"
+        style={{
+          background: "linear-gradient(180deg, rgba(11,45,36,0.3) 0%, rgba(77,17,24,0.6) 100%)",
+        }}
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 z-10 opacity-90 transition-opacity duration-700 group-hover:opacity-75"
+        style={{
+          background: "linear-gradient(to top, #040206 0%, rgba(4,2,6,0.4) 40%, transparent 100%)",
+        }}
+        aria-hidden
+      />
+
+      {/* Subtle Hairline Frame */}
+      <div className="absolute inset-3 z-20 pointer-events-none border border-[var(--color-gold)] opacity-10 transition-opacity duration-700 group-hover:opacity-30 sm:inset-4" />
+
       {/* Content */}
-      <div className="flex flex-1 flex-col p-6">
-        {dish.category ? (
-          <p
-            className="eyebrow mb-2"
-            style={{
-              color: "var(--color-gold)",
-              fontFamily: "var(--font-sans)",
-              opacity: 0.85,
-            }}
-          >
-            {dish.category}
-          </p>
-        ) : null}
+      <div className="relative z-30 flex mt-auto flex-col px-6 pb-6 pt-12 sm:px-8 sm:pb-8">
+        {dish.category && (
+          <div className="mb-3 flex items-center gap-3">
+            <div className="h-px w-6 bg-[var(--color-gold)] opacity-40" />
+            <p
+              className="text-[0.625rem] uppercase tracking-[0.25em]"
+              style={{
+                color: "var(--color-gold)",
+                fontFamily: "var(--font-sans)",
+                opacity: 0.9,
+              }}
+            >
+              {dish.category}
+            </p>
+          </div>
+        )}
         <h3
-          className="mb-2 text-balance"
+          className="mb-3 text-balance leading-[1.15]"
           style={{
             fontFamily: "var(--font-display)",
-            fontSize: "1.375rem",
-            fontWeight: 500,
+            fontSize: "1.6rem",
+            fontWeight: 400,
             color: "var(--color-ivory)",
-            lineHeight: 1.2,
+            textShadow: "0 2px 12px rgba(0,0,0,0.8)",
           }}
         >
           {name}
         </h3>
         {dish.description ? (
           <p
-            className="mb-4 flex-1 text-sm leading-relaxed"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-muted)" }}
+            className="mb-6 line-clamp-2 text-sm leading-relaxed"
+            style={{
+              fontFamily: "var(--font-sans)",
+              color: "var(--color-ivory-faint)",
+              textShadow: "0 1px 4px rgba(0,0,0,0.8)",
+            }}
           >
             {dish.description}
           </p>
         ) : (
-          <div className="flex-1" />
+          <div className="mb-6" />
         )}
-        <div
-          className="mt-auto flex items-center justify-between border-t pt-4"
-          style={{ borderColor: "var(--color-hairline)" }}
-        >
+
+        <div className="flex items-center justify-between border-t border-[rgba(244,239,228,0.1)] pt-4">
           <span
             style={{
               fontFamily: "var(--font-sans)",
-              fontWeight: 500,
-              fontSize: "1rem",
-              letterSpacing: "0.03em",
+              fontWeight: 300,
+              fontSize: "1.0625rem",
+              letterSpacing: "0.04em",
               color: "var(--color-gold)",
             }}
           >
@@ -168,10 +178,21 @@ function DishCard({ dish }: { dish: MenuItem }) {
           </span>
           <Link
             href="/menu"
-            className="text-xs transition-colors duration-200 hover:text-[var(--color-gold-soft)]"
-            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
+            className="group/btn relative flex items-center gap-2 overflow-hidden text-[0.6875rem] uppercase tracking-[0.2em] text-[var(--color-ivory)] transition-colors duration-300 hover:text-[var(--color-gold)]"
           >
-            Order Now →
+            Order
+            <svg
+              aria-hidden
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="transition-transform duration-300 group-hover/btn:translate-x-1"
+            >
+              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </Link>
         </div>
       </div>

@@ -21,11 +21,12 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(): React.RefOb
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        // console.log("Reveal element", el.className, "isIntersecting:", entry.isIntersecting, "intersectionRatio:", entry.intersectionRatio);
         if (!entry.isIntersecting) return;
         observer.disconnect();
         el.classList.add("is-visible");
       },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0, rootMargin: "0px 0px -8% 0px" },
     );
 
     observer.observe(el);
