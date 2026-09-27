@@ -110,12 +110,12 @@ export function HeroSection({
         className="absolute inset-0 overflow-hidden"
         style={{ transform: "translateY(calc(var(--drift-back, 0px) * -0.12))" }}
       >
-        <div className="mashrabiya-maroon absolute inset-0 h-full w-full opacity-[0.045]" />
+        <div className="mashrabiya-maroon absolute inset-0 h-full w-full opacity-10" />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(120% 90% at 50% 120%, rgba(11,45,36,0.55) 0%, transparent 62%)",
+              "radial-gradient(120% 90% at 50% 120%, rgba(11,45,36,0.65) 0%, transparent 70%)",
           }}
         />
       </div>
@@ -125,10 +125,10 @@ export function HeroSection({
              the lattice below appears to be lit by. */}
       <div
         aria-hidden
-        className="absolute inset-x-0 top-0 h-[70vh]"
+        className="absolute inset-x-0 top-0 h-[80vh]"
         style={{
           background:
-            "radial-gradient(46% 52% at 50% -6%, rgba(232,204,114,0.30) 0%, rgba(212,175,55,0.13) 38%, transparent 72%)",
+            "radial-gradient(55% 55% at 50% -5%, rgba(232,204,114,0.38) 0%, rgba(212,175,55,0.18) 40%, transparent 80%)",
         }}
       />
 
@@ -141,14 +141,14 @@ export function HeroSection({
         style={{ transform: "translateY(calc(var(--drift-front, 0px) * -0.1))" }}
       >
         <div
-          className="mashrabiya-gold absolute inset-0 h-full w-full opacity-[0.20]"
+          className="mashrabiya-gold absolute inset-0 h-full w-full opacity-30"
           style={{
             // Masked so the lattice is dense under the lamp and
             // dissolves toward the edges of the room.
             maskImage:
-              "radial-gradient(52% 46% at 50% 12%, #000 0%, rgba(0,0,0,0.35) 55%, transparent 85%)",
+              "radial-gradient(60% 50% at 50% 15%, #000 0%, rgba(0,0,0,0.4) 60%, transparent 90%)",
             WebkitMaskImage:
-              "radial-gradient(52% 46% at 50% 12%, #000 0%, rgba(0,0,0,0.35) 55%, transparent 85%)",
+              "radial-gradient(60% 50% at 50% 15%, #000 0%, rgba(0,0,0,0.4) 60%, transparent 90%)",
           }}
         />
       </div>
@@ -229,7 +229,27 @@ export function HeroSection({
       {/* ==========================================================
           Copy
           ========================================================== */}
-      <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-6 pt-28 text-center sm:pt-32">
+      <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-6 pt-24 text-center sm:pt-28">
+        {/* Placeholder for the main hero logo - empty box to hold space,
+            styled like a piece of glass so it looks deliberate. */}
+        <div
+          className="hero-logo-slot mb-10 flex h-20 w-40 shrink-0 items-center justify-center rounded-sm sm:h-24 sm:w-48"
+          style={{
+            background: "rgba(212,175,55,0.03)",
+            border: "1px solid rgba(212,175,55,0.12)",
+            boxShadow: "inset 0 0 20px rgba(212,175,55,0.05)",
+          }}
+          aria-hidden="true"
+        >
+          {/* Logo asset will drop in here */}
+          <span
+            className="text-[0.625rem] tracking-[0.3em] text-[var(--color-gold)] opacity-40 uppercase"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            Reserved
+          </span>
+        </div>
+
         {/* Status */}
         <div
           className="hero-status mb-7 inline-flex max-w-full flex-wrap items-center justify-center gap-x-2.5 gap-y-1 rounded-full px-4 py-1.5 text-[0.6875rem] uppercase tracking-[0.22em]"
@@ -261,19 +281,20 @@ export function HeroSection({
           className="hero-headline"
           style={{
             fontFamily: "var(--font-display)",
-            fontWeight: 300,
-            lineHeight: 0.98,
-            letterSpacing: "0.005em",
-            fontSize: "clamp(2.6rem, 8.5vw, 6rem)",
+            fontWeight: 400,
+            lineHeight: 1.05,
+            letterSpacing: "0.01em",
+            fontSize: "clamp(2.75rem, 8vw, 5.5rem)",
             color: "var(--color-ivory)",
-            textShadow: "0 0 70px rgba(212,175,55,0.20)",
+            textShadow: "0 0 60px rgba(212,175,55,0.15)",
           }}
         >
           {headlineLead}
-          <br />
+          <br className="mb-2 block sm:hidden" />
+          <span className="hidden sm:inline">{" "}</span>
           <span
-            className="text-gold-gradient"
-            style={{ textShadow: "0 0 46px rgba(212,175,55,0.35)" }}
+            className="text-gold-gradient block sm:inline"
+            style={{ textShadow: "0 2px 24px rgba(212,175,55,0.3)" }}
           >
             {headlineAccent}
           </span>
@@ -282,13 +303,16 @@ export function HeroSection({
         {/* Screen-reader-only full title, so the h1 still reads as one title */}
         <span className="sr-only">{title}</span>
 
-        <div className="ornament hero-rule my-7 h-px" aria-hidden />
+        <div className="ornament hero-rule mx-auto my-8 h-px w-24" aria-hidden />
 
         <p
-          className="hero-subtitle mb-11 max-w-lg text-pretty text-[0.9375rem] leading-[1.85] sm:text-base"
+          className="hero-subtitle mb-12 max-w-xl text-pretty text-[0.9375rem] leading-[1.8] sm:text-[1.0625rem]"
           style={{
-            color: "var(--color-ivory-muted)",
-            letterSpacing: "0.02em",
+            color: "var(--color-ivory)",
+            opacity: 0.8,
+            letterSpacing: "0.01em",
+            fontFamily: "var(--font-sans)",
+            fontWeight: 300,
           }}
         >
           {subtitle}

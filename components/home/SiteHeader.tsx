@@ -44,14 +44,28 @@ export function SiteHeader({ name, phone, reservationHref }: SiteHeaderProps) {
     >
       <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 lg:px-12">
         {/* ---------- Logo slot ----------
-            A fixed-size frame. Empty on purpose — no placeholder glyph,
-            no temporary text. Drop the artwork in here and it is done. */}
+            A fixed-size frame. Drop the artwork in here and it is done. */}
         <Link
           href="/"
           aria-label={name ? `${name} — home` : "Home"}
           className="logo-slot"
         >
-          <span className="logo-mark" aria-hidden />
+          <span
+            className="logo-mark flex items-center justify-center rounded-[2px]"
+            style={{
+              background: "rgba(212,175,55,0.03)",
+              border: "1px solid rgba(212,175,55,0.12)",
+              boxShadow: "inset 0 0 10px rgba(212,175,55,0.05)",
+            }}
+            aria-hidden
+          >
+            <span
+              className="text-[0.45rem] tracking-[0.2em] text-[var(--color-gold)] opacity-40 uppercase"
+              style={{ fontFamily: "var(--font-sans)" }}
+            >
+              Logo
+            </span>
+          </span>
           {name ? <span className="logo-wordmark">{name}</span> : null}
         </Link>
 

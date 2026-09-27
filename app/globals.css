@@ -78,21 +78,23 @@ body {
 .veil-night {
   background:
     radial-gradient(
-      80% 50% at 50% -10%,
-      rgba(212, 175, 55, 0.13) 0%,
-      transparent 60%
+      60% 60% at 50% 15%,
+      rgba(212, 175, 55, 0.18) 0%,
+      transparent 80%
     ),
     radial-gradient(
-      70% 55% at 8% 85%,
-      rgba(11, 45, 36, 0.75) 0%,
-      transparent 65%
+      85% 75% at 0% 100%,
+      var(--color-emerald-core) 0%,
+      rgba(11, 45, 36, 0.4) 40%,
+      transparent 80%
     ),
     radial-gradient(
-      65% 50% at 95% 30%,
-      rgba(77, 17, 24, 0.6) 0%,
-      transparent 65%
+      85% 75% at 100% 100%,
+      var(--color-maroon-core) 0%,
+      rgba(77, 17, 24, 0.4) 40%,
+      transparent 80%
     ),
-    linear-gradient(180deg, #0a0509 0%, #120709 45%, #07040a 100%);
+    linear-gradient(180deg, #150912 0%, #1a0b12 50%, #0e060a 100%);
 }
 
 /* Quieter variant for alternating content bands. */
