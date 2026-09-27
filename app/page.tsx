@@ -1,44 +1,60 @@
-export default function HomePage() {
+import { getHomepageData } from "@/lib/getHomepageData";
+import { HeroSection } from "@/components/home/HeroSection";
+import { TrustBar } from "@/components/home/TrustBar";
+import { FeaturedDishes } from "@/components/home/FeaturedDishes";
+import { AboutSection } from "@/components/home/AboutSection";
+import { WhyChooseUs } from "@/components/home/WhyChooseUs";
+import { ReviewsSection } from "@/components/home/ReviewsSection";
+import { ReservationCTA } from "@/components/home/ReservationCTA";
+import { SiteFooter } from "@/components/home/SiteFooter";
+
+// Re-fetch menu, settings and reviews hourly on the server rather than on
+// every request. `revalidate` must be a static, analysable value.
+export const revalidate = 3600;
+
+export default async function HomePage() {
+  const { settings, content, featuredDishes, reviews, priceRange } =
+    await getHomepageData();
+
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-      <h1 className="text-5xl font-bold mb-4">
-        Arabian Knights Restaurant
-      </h1>
+    <>
+      <HeroSection
+        heroImageUrl={settings.hero_image_url}
+        title={content.hero_title}
+        subtitle={content.hero_subtitle}
+        isOpen={settings.restaurant_open}
+        headlineLead="Experience the Art"
+        headlineAccent="of Arabian Dining"
+      />
 
-      <p className="text-gray-600 mb-10 text-center">
-        Captain Complex, College Road, Paschimpali, Kishanganj
-      </p>
+      <TrustBar priceMin={priceRange.min} priceMax={priceRange.max} />
 
-      <div className="grid gap-4 w-full max-w-md">
-     
- <a
-  href="/menu?mode=takeaway"
-  className="bg-black text-white text-center py-4 rounded-xl text-xl font-semibold"
->
-  🥡 Takeaway
-</a>
+      <FeaturedDishes dishes={featuredDishes} />
 
-<a
-  href="/menu?mode=delivery"
-  className="bg-black text-white text-center py-4 rounded-xl text-xl font-semibold"
->
-  🏠 Home Delivery
-</a>
+      <AboutSection
+        imageUrl={settings.hero_image_url}
+        storyText={content.story_section}
+        aboutText={content.about_section}
+        address={settings.contact_info.address}
+      />
 
-        <a
-          href="/reservation"
-          className="bg-black text-white text-center py-4 rounded-xl text-xl font-semibold"
-        >
-          📅 Table Booking
-        </a>
-      </div>
+      <WhyChooseUs />
 
-      <div className="mt-10 text-center">
-        <p>📞 +91-6456355448</p>
-        <p className="text-green-600 font-semibold">
-          ● Open Now
-        </p>
-      </div>
-    </main>
+      <ReviewsSection reviews={reviews} />
+
+      <ReservationCTA
+        hours={settings.reservation_hours}
+        phone={settings.contact_info.phone}
+      />
+
+      <SiteFooter
+        name={settings.name}
+        address={settings.contact_info.address}
+        phone={settings.contact_info.phone}
+        email={settings.contact_info.email}
+        socialLinks={settings.social_links}
+        text={content.footer_text}
+      />
+    </>
   );
 }

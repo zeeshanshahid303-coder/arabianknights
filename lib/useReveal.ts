@@ -5,11 +5,14 @@ import { useEffect, useRef } from "react";
 /**
  * Attaches an IntersectionObserver to the returned ref.
  * When the element enters the viewport, the class `is-visible` is added,
- * which triggers the CSS reveal transition defined in globals.css.
+ * which triggers the CSS reveal transition defined in globals.css. The
+ * observer disconnects on the first intersection, so each element reveals
+ * exactly once. Stagger a group by giving each element its own
+ * `transitionDelay` inline style rather than a per-element delay here.
  */
-export function useReveal<T extends HTMLElement = HTMLDivElement>(
-  delay = 0,
-): React.RefObject<T | null> {
+export function useReveal<T extends HTMLElement = HTMLDivElement>(): React.RefObject<
+  T | null
+> {
   const ref = useRef<T | null>(null);
 
   useEffect(() => {
@@ -18,20 +21,20 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>(
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          const timeout = setTimeout(() => {
-            el.classList.add("is-visible");
-          }, delay);
-          observer.disconnect();
-          return () => clearTimeout(timeout);
-        }
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        el.classList.add("is-visible");
       },
-      { threshold: 0.12 },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [delay]);
+
+    return () => {
+      observer.disconnect();
+      el.classList.remove("is-visible");
+    };
+  }, []);
 
   return ref;
 }

@@ -1,28 +1,29 @@
 import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/ui/Reveal";
 
 type AboutSectionProps = {
-  heroImageUrl: string | null;
+  imageUrl: string | null;
   storyText: string;
   aboutText: string;
   address: string;
 };
 
 export function AboutSection({
-  heroImageUrl,
+  imageUrl,
   storyText,
   aboutText,
   address,
 }: AboutSectionProps) {
   return (
     <section
+      className="py-20 lg:py-28"
       style={{ background: "var(--color-ink-raised)" }}
-      className="py-[120px]"
     >
-      <div className="max-w-6xl mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+      <div className="mx-auto max-w-6xl px-6 lg:px-12">
+        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
           {/* Text — left on desktop, second on mobile */}
-          <div className="order-2 lg:order-1 reveal-right">
+          <div className="order-2 lg:order-1">
             <SectionHeading
               eyebrow="Our Story"
               heading={
@@ -57,8 +58,7 @@ export function AboutSection({
               {aboutText}
             </p>
 
-            {/* Divider */}
-            <div className="rule-gold w-24 mb-6" />
+            <div className="rule-gold mb-6 w-24" />
 
             <p
               className="text-sm tracking-wider"
@@ -73,17 +73,15 @@ export function AboutSection({
           </div>
 
           {/* Image — first on mobile, right on desktop */}
-          <div className="order-1 lg:order-2 reveal-left" style={{ transitionDelay: "200ms" }}>
+          <Reveal variant="left" delay={200} className="order-1 lg:order-2">
             <div
-              className="relative rounded-[20px] overflow-hidden"
-              style={{
-                height: "clamp(320px, 45vw, 540px)",
-              }}
+              className="relative overflow-hidden rounded-[20px]"
+              style={{ height: "clamp(320px, 45vw, 540px)" }}
             >
-              {heroImageUrl ? (
+              {imageUrl ? (
                 <Image
-                  src={heroImageUrl}
-                  alt="Arabian Knights Restaurant exterior"
+                  src={imageUrl}
+                  alt="Arabian Knights Restaurant & Cafe"
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 100vw, 50vw"
@@ -91,16 +89,19 @@ export function AboutSection({
               ) : (
                 <div
                   className="absolute inset-0"
-                  style={{ background: "var(--color-ink)" }}
+                  style={{
+                    background:
+                      "radial-gradient(120% 100% at 50% 0%, var(--color-emerald-core) 0%, var(--color-ink) 70%)",
+                  }}
                 />
               )}
               {/* Subtle inner gold frame */}
               <div
-                className="absolute inset-5 rounded-2xl pointer-events-none"
+                className="pointer-events-none absolute inset-5 rounded-2xl"
                 style={{ border: "1px solid rgba(212,175,55,0.18)" }}
               />
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

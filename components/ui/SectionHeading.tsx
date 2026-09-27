@@ -1,4 +1,10 @@
-// Reusable section heading block: eyebrow label + large Cormorant heading
+"use client";
+
+import { useReveal } from "@/lib/useReveal";
+
+// Reusable section heading block: eyebrow label + large Cormorant heading.
+// A client component so it can observe its own entrance — it is only ever
+// rendered inside another client or server component, never on its own route.
 
 type SectionHeadingProps = {
   eyebrow: string;
@@ -13,9 +19,11 @@ export function SectionHeading({
   className = "",
   center = false,
 }: SectionHeadingProps) {
+  const ref = useReveal<HTMLDivElement>();
   const align = center ? "text-center" : "";
+
   return (
-    <div className={`mb-12 ${align} ${className}`}>
+    <div ref={ref} className={`reveal-up mb-12 ${align} ${className}`}>
       <p
         className="eyebrow mb-4"
         style={{ color: "var(--color-ash)", fontFamily: "var(--font-sans)" }}

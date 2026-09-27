@@ -2,96 +2,119 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { GoldButton } from "@/components/ui/GoldButton";
+import { GlowLink } from "@/components/ui/GlowLink";
 
 type HeroSectionProps = {
   heroImageUrl: string | null;
+  title: string;
   subtitle: string;
   isOpen: boolean;
+  /** Appended after the gold-gradient phrase in the headline. */
+  headlineLead: string;
+  headlineAccent: string;
 };
 
-export function HeroSection({ heroImageUrl, subtitle, isOpen }: HeroSectionProps) {
+export function HeroSection({
+  heroImageUrl,
+  title,
+  subtitle,
+  isOpen,
+  headlineLead,
+  headlineAccent,
+}: HeroSectionProps) {
   const bgRef = useRef<HTMLDivElement>(null);
 
-  // Subtle parallax — background moves at 35% of scroll speed
+  // Subtle parallax — the backdrop drifts at 35% of scroll speed. Skipped
+  // where the user has asked for reduced motion.
   useEffect(() => {
     const el = bgRef.current;
     if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
     const onScroll = () => {
-      const y = window.scrollY;
-      el.style.transform = `translateY(${y * 0.35}px)`;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        el.style.transform = `translateY(${window.scrollY * 0.35}px)`;
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   return (
     <section
-      className="relative flex items-center justify-center overflow-hidden"
+      className="relative flex items-center justify-center overflow-hidden grain"
       style={{ minHeight: "100dvh" }}
     >
-      {/* Background image layer */}
-      <div ref={bgRef} className="absolute inset-0 scale-110">
+      {/* Backdrop — scaled up so the parallax drift never exposes an edge */}
+      <div
+        ref={bgRef}
+        className="absolute inset-0"
+        style={{ inset: "-12% 0", willChange: "transform" }}
+      >
         {heroImageUrl ? (
           <Image
             src={heroImageUrl}
-            alt="Arabian Knights Restaurant"
+            alt=""
             fill
             priority
             className="object-cover"
             sizes="100vw"
           />
         ) : (
-          <div style={{ background: "var(--color-ink-raised)" }} className="absolute inset-0" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(120% 80% at 50% 0%, var(--color-emerald-core) 0%, var(--color-emerald-deep) 45%, var(--color-ink) 100%)",
+            }}
+          />
         )}
       </div>
 
-      {/* Gradient overlay */}
+      {/* Legibility overlay */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(5,7,6,0.52) 0%, rgba(5,7,6,0.88) 55%, #050706 100%)",
-        }}
-      />
-
-      {/* Grain texture */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          opacity: 0.35,
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E\")",
+            "linear-gradient(to bottom, rgba(5,7,6,0.55) 0%, rgba(5,7,6,0.88) 55%, #050706 100%)",
         }}
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 max-w-4xl mx-auto">
+      <div className="relative z-10 flex w-full max-w-4xl flex-col items-center px-6 text-center">
         {/* Status pill */}
         <div
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-8 text-xs tracking-widest uppercase"
+          className="mb-8 inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 rounded-full px-4 py-1.5 text-xs uppercase tracking-widest hero-status"
           style={{
-            background: "rgba(255,255,255,0.06)",
+            background: "rgba(255, 255, 255, 0.06)",
             border: "1px solid var(--color-hairline)",
             fontFamily: "var(--font-sans)",
             color: "var(--color-ash)",
-            animationName: "fadeUp",
           }}
         >
           <span
-            className="w-1.5 h-1.5 rounded-full"
+            className="size-1.5 flex-none rounded-full"
             style={{
               background: isOpen ? "#4ade80" : "#ef4444",
-              boxShadow: isOpen ? "0 0 6px 2px rgba(74,222,128,0.4)" : "none",
+              boxShadow: isOpen ? "0 0 6px 2px rgba(74, 222, 128, 0.4)" : "none",
             }}
           />
-          {isOpen ? "Open Now · Dine-in & Delivery" : "Currently Closed"}
-          <span style={{ color: "var(--color-hairline-strong)" }}>·</span>
-          Mughlai & Indian Cuisine
+          <span>{isOpen ? "Open Now · Dine-in & Delivery" : "Currently Closed"}</span>
+          <span aria-hidden style={{ color: "var(--color-hairline-strong)" }}>
+            ·
+          </span>
+          <span>Mughlai &amp; Indian Cuisine</span>
         </div>
 
         {/* Headline */}
         <h1
+          className="hero-headline"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 300,
@@ -100,17 +123,18 @@ export function HeroSection({ heroImageUrl, subtitle, isOpen }: HeroSectionProps
             fontSize: "clamp(2.4rem, 7.5vw, 5rem)",
             color: "var(--color-bone)",
           }}
-          className="mb-6 hero-headline"
         >
-          Experience the&nbsp;Art
+          {headlineLead}
           <br />
-          of{" "}
-          <span className="text-gold-gradient">Arabian Dining</span>
+          <span className="text-gold-gradient">{headlineAccent}</span>
         </h1>
+
+        {/* Screen-reader-only full title, so the h1 still reads as one title */}
+        <span className="sr-only">{title}</span>
 
         {/* Subtitle */}
         <p
-          className="mb-12 max-w-md hero-subtitle"
+          className="hero-subtitle mb-10 max-w-md text-pretty"
           style={{
             fontFamily: "var(--font-sans)",
             fontWeight: 300,
@@ -123,108 +147,39 @@ export function HeroSection({ heroImageUrl, subtitle, isOpen }: HeroSectionProps
           {subtitle}
         </p>
 
-        {/* CTA buttons */}
-        <div
-          className="flex flex-wrap items-center justify-center gap-4 hero-buttons"
-        >
-          <Link
-            href="/menu?mode=takeaway"
-            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl text-sm transition-all duration-300"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid var(--color-hairline)",
-              color: "var(--color-bone)",
-              backdropFilter: "blur(8px)",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(255,255,255,0.1)";
-              el.style.borderColor = "var(--color-hairline-strong)";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(255,255,255,0.05)";
-              el.style.borderColor = "var(--color-hairline)";
-            }}
-          >
-            <span>🥡</span> Takeaway
-          </Link>
-
-          <Link
-            href="/menu?mode=delivery"
-            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl text-sm transition-all duration-300"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid var(--color-hairline)",
-              color: "var(--color-bone)",
-              backdropFilter: "blur(8px)",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(255,255,255,0.1)";
-              el.style.borderColor = "var(--color-hairline-strong)";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(255,255,255,0.05)";
-              el.style.borderColor = "var(--color-hairline)";
-            }}
-          >
-            <span>🏠</span> Delivery
-          </Link>
-
-          <Link
+        {/* Primary actions — stack full-width on phones, inline from `sm` up */}
+        <div className="hero-buttons grid w-full max-w-lg grid-cols-1 gap-3 sm:flex sm:max-w-none sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+          <GlowLink href="/menu?mode=takeaway" icon="🥡" className="w-full sm:w-auto">
+            Takeaway
+          </GlowLink>
+          <GlowLink href="/menu?mode=delivery" icon="🏠" className="w-full sm:w-auto">
+            Delivery
+          </GlowLink>
+          <GoldButton
             href="/reservation"
-            className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-2xl text-sm transition-all duration-300 glow-gold"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontWeight: 500,
-              letterSpacing: "0.08em",
-              background: "rgba(212,175,55,0.1)",
-              border: "1px solid rgba(212,175,55,0.4)",
-              color: "var(--color-gold)",
-              backdropFilter: "blur(8px)",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(212,175,55,0.18)";
-              el.style.borderColor = "rgba(212,175,55,0.7)";
-              el.style.boxShadow =
-                "0 0 0 1px rgba(212,175,55,0.35), 0 0 48px -8px rgba(212,175,55,0.5)";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(212,175,55,0.1)";
-              el.style.borderColor = "rgba(212,175,55,0.4)";
-              el.style.boxShadow =
-                "0 0 0 1px rgba(212,175,55,0.22), 0 0 40px -12px rgba(212,175,55,0.35)";
-            }}
+            icon="📅"
+            variant="solid"
+            className="w-full sm:w-auto"
           >
-            📅 Reserve a Table
-          </Link>
+            Reserve a Table
+          </GoldButton>
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+      {/* Scroll cue */}
+      <div className="pointer-events-none absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 opacity-40">
         <span
-          className="text-[10px] tracking-[0.3em] uppercase"
+          className="text-[10px] uppercase tracking-[0.3em]"
           style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)" }}
         >
           Scroll
         </span>
         <div
-          className="w-px h-10 relative overflow-hidden"
+          className="relative h-10 w-px overflow-hidden"
           style={{ background: "var(--color-hairline)" }}
         >
           <div
-            className="absolute top-0 left-0 w-full"
+            className="absolute left-0 top-0 w-full"
             style={{
               height: "40%",
               background: "var(--color-gold)",
@@ -239,18 +194,14 @@ export function HeroSection({ heroImageUrl, subtitle, isOpen }: HeroSectionProps
           0%   { transform: translateY(-100%); }
           100% { transform: translateY(300%); }
         }
-        .hero-headline {
-          animation: heroFadeUp 900ms cubic-bezier(0.22,1,0.36,1) both;
-        }
-        .hero-subtitle {
-          animation: heroFadeUp 900ms 140ms cubic-bezier(0.22,1,0.36,1) both;
-        }
-        .hero-buttons {
-          animation: heroFadeUp 900ms 280ms cubic-bezier(0.22,1,0.36,1) both;
-        }
-        @keyframes heroFadeUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: none; }
+        .hero-status   { animation: fadeUp 900ms cubic-bezier(0.22,1,0.36,1) both; }
+        .hero-headline { animation: fadeUp 900ms 120ms cubic-bezier(0.22,1,0.36,1) both; }
+        .hero-subtitle { animation: fadeUp 900ms 240ms cubic-bezier(0.22,1,0.36,1) both; }
+        .hero-buttons  { animation: fadeUp 900ms 360ms cubic-bezier(0.22,1,0.36,1) both; }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-status, .hero-headline, .hero-subtitle, .hero-buttons {
+            animation: none;
+          }
         }
       `}</style>
     </section>

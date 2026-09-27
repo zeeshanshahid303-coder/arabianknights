@@ -1,28 +1,31 @@
-import Link from "next/link";
+import { GoldButton } from "@/components/ui/GoldButton";
+import { Reveal } from "@/components/ui/Reveal";
 
 type ReservationCTAProps = {
   hours: {
     monday_friday: string;
     saturday_sunday: string;
   };
+  phone: string;
 };
 
-export function ReservationCTA({ hours }: ReservationCTAProps) {
+export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
   return (
     <section
-      className="relative py-[120px] overflow-hidden"
+      className="relative overflow-hidden py-20 lg:py-28 grain"
       style={{ background: "var(--color-ink)" }}
     >
       {/* Gold radial glow behind the content */}
       <div
-        className="absolute inset-0 pointer-events-none"
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
             "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(212,175,55,0.07) 0%, transparent 70%)",
         }}
       />
 
-      <div className="relative z-10 max-w-3xl mx-auto px-6 text-center reveal-up">
+      <Reveal className="relative z-10 mx-auto max-w-3xl px-6 text-center">
         <p
           className="eyebrow mb-5"
           style={{ color: "var(--color-ash)", fontFamily: "var(--font-sans)" }}
@@ -31,7 +34,7 @@ export function ReservationCTA({ hours }: ReservationCTAProps) {
         </p>
 
         <h2
-          className="mb-5"
+          className="mb-5 text-balance"
           style={{
             fontFamily: "var(--font-display)",
             fontSize: "clamp(2rem, 5vw, 3.25rem)",
@@ -41,12 +44,11 @@ export function ReservationCTA({ hours }: ReservationCTAProps) {
             color: "var(--color-bone)",
           }}
         >
-          Book Your{" "}
-          <span className="text-gold-gradient">Table Today</span>
+          Book Your <span className="text-gold-gradient">Table Today</span>
         </h2>
 
         <p
-          className="mb-12 text-sm tracking-wide"
+          className="mb-10 text-sm tracking-wide"
           style={{
             fontFamily: "var(--font-sans)",
             fontWeight: 300,
@@ -54,47 +56,42 @@ export function ReservationCTA({ hours }: ReservationCTAProps) {
             opacity: 0.8,
           }}
         >
-          Mon–Fri {hours.monday_friday} &nbsp;·&nbsp; Sat–Sun{" "}
-          {hours.saturday_sunday}
+          Mon–Fri {hours.monday_friday} &nbsp;·&nbsp; Sat–Sun {hours.saturday_sunday}
         </p>
 
         {/* Button with glow halo */}
-        <div className="relative inline-flex">
+        <div className="relative inline-flex w-full justify-center sm:w-auto">
           <div
-            className="absolute -inset-4 rounded-3xl pointer-events-none blur-xl"
+            aria-hidden
+            className="pointer-events-none absolute -inset-4 rounded-3xl blur-xl"
             style={{ background: "rgba(212,175,55,0.08)" }}
           />
-          <Link
+          <GoldButton
             href="/reservation"
-            className="relative inline-flex items-center gap-3 px-14 py-5 rounded-[20px] transition-all duration-300 glow-gold"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "1.25rem",
-              fontWeight: 500,
-              letterSpacing: "0.04em",
-              background: "rgba(212,175,55,0.1)",
-              border: "1px solid rgba(212,175,55,0.45)",
-              color: "var(--color-gold)",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(212,175,55,0.18)";
-              el.style.borderColor = "rgba(212,175,55,0.75)";
-              el.style.boxShadow =
-                "0 0 0 1px rgba(212,175,55,0.4), 0 0 60px -8px rgba(212,175,55,0.55)";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget;
-              el.style.background = "rgba(212,175,55,0.1)";
-              el.style.borderColor = "rgba(212,175,55,0.45)";
-              el.style.boxShadow =
-                "0 0 0 1px rgba(212,175,55,0.22), 0 0 40px -12px rgba(212,175,55,0.35)";
-            }}
+            icon="📅"
+            variant="solid"
+            size="lg"
+            className="w-full sm:w-auto"
           >
-            📅 Reserve a Table
-          </Link>
+            Reserve a Table
+          </GoldButton>
         </div>
-      </div>
+
+        {/* Phone escape hatch for guests who'd rather call */}
+        <p
+          className="mt-8 text-sm"
+          style={{ fontFamily: "var(--font-sans)", color: "var(--color-ash)", opacity: 0.7 }}
+        >
+          Prefer to call?{" "}
+          <a
+            href={`tel:${phone.replace(/\s+/g, "")}`}
+            className="transition-colors duration-200 hover:text-[var(--color-gold)]"
+            style={{ color: "var(--color-gold-soft)" }}
+          >
+            {phone}
+          </a>
+        </p>
+      </Reveal>
     </section>
   );
 }

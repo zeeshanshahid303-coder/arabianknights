@@ -1,4 +1,5 @@
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { Reveal } from "@/components/ui/Reveal";
 
 const features = [
   {
@@ -25,41 +26,25 @@ const features = [
 
 export function WhyChooseUs() {
   return (
-    <section className="py-[120px]">
-      <div className="max-w-6xl mx-auto px-6 lg:px-12">
+    <section className="py-20 lg:py-28">
+      <div className="mx-auto max-w-6xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="The Arabian Knights Difference"
           heading="Why Guests Choose Us"
           center
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {features.map((f, i) => (
-            <div
+            <Reveal
               key={f.title}
-              className="rounded-[20px] edge-hair p-8 reveal-up"
-              style={{
-                background: "rgba(255,255,255,0.04)",
-                transitionDelay: `${i * 80}ms`,
-                transition: "transform 300ms cubic-bezier(0.22,1,0.36,1), border-color 300ms ease, box-shadow 300ms ease",
-                cursor: "default",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget;
-                el.style.transform = "translateY(-4px)";
-                el.style.borderColor = "var(--color-hairline-strong)";
-                el.style.boxShadow = "0 16px 48px -16px rgba(0,0,0,0.5)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget;
-                el.style.transform = "";
-                el.style.borderColor = "";
-                el.style.boxShadow = "";
-              }}
+              delay={i * 80}
+              className="edge-hair cursor-default rounded-[20px] p-8 transition-[transform,border-color,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:border-[var(--color-hairline-strong)] hover:shadow-[0_16px_48px_-16px_rgba(0,0,0,0.5)]"
+              style={{ background: "rgba(255,255,255,0.04)" }}
             >
-              {/* Glyph icon */}
               <div
-                className="mb-5 text-3xl select-none"
+                aria-hidden
+                className="mb-5 select-none text-3xl"
                 style={{ color: "var(--color-gold)", lineHeight: 1 }}
               >
                 {f.glyph}
@@ -87,7 +72,7 @@ export function WhyChooseUs() {
               >
                 {f.body}
               </p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
