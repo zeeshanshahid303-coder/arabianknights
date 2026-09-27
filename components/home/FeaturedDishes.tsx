@@ -21,43 +21,47 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
   const displayed = dishes.slice(0, DISPLAY_LIMIT);
 
   return (
-    <section className="veil-emerald grain relative max-w-6xl overflow-hidden px-6 py-20 lg:px-12 lg:py-28">
-      <SectionHeading
-        eyebrow="Our Signature Dishes"
-        heading={
-          <>
-            Crafted for the{" "}
-            <span className="text-gold-gradient">Discerning Palate</span>
-          </>
-        }
-        center
-      />
+    <section className="veil-emerald grain relative overflow-hidden py-20 lg:py-28">
+      {/* The section itself is full-bleed so the background reaches the
+          edges of the viewport; the content is centred inside it. */}
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+        <SectionHeading
+          eyebrow="Our Signature Dishes"
+          heading={
+            <>
+              Crafted for the{" "}
+              <span className="text-gold-gradient">Discerning Palate</span>
+            </>
+          }
+          center
+        />
 
-      {/* 1 / 2 / 3 columns; 6 dishes fill the last row exactly at 3-up */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {displayed.map((dish, i) => (
-          <Reveal key={dish.id} variant="scale" delay={i * 90} as="article" className="h-full">
-            <DishCard dish={dish} />
-          </Reveal>
-        ))}
-      </div>
+        {/* 1 / 2 / 3 columns; 6 dishes fill the last row exactly at 3-up */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {displayed.map((dish, i) => (
+            <Reveal key={dish.id} variant="scale" delay={i * 90} as="article" className="h-full">
+              <DishCard dish={dish} />
+            </Reveal>
+          ))}
+        </div>
 
-      <div className="mt-14 flex justify-center">
-        <GoldButton href="/menu" className="w-full sm:w-auto">
-          View Full Menu
-          <svg
-            aria-hidden
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            className="shrink-0"
-          >
-            <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </GoldButton>
+        <div className="mt-14 flex justify-center">
+          <GoldButton href="/menu" className="w-full sm:w-auto">
+            View Full Menu
+            <svg
+              aria-hidden
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="shrink-0"
+            >
+              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </GoldButton>
+        </div>
       </div>
     </section>
   );
