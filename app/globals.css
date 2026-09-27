@@ -5,7 +5,6 @@
   --color-ink-raised: #0a0d0b;
   --color-emerald-deep: #04160f;
   --color-emerald-core: #0a3b28;
-  --color-emerald-lit: #10percent;
   --color-gold: #d4af37;
   --color-gold-soft: #e8cc72;
   --color-gold-dim: #8a7222;
@@ -111,8 +110,53 @@ body {
   font-weight: 500;
 }
 
+/* ---------- Scroll reveal animations ---------- */
+
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-scale {
+  opacity: 0;
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-up {
+  transform: translateY(28px);
+}
+
+.reveal-left {
+  transform: translateX(-28px);
+}
+
+.reveal-right {
+  transform: translateX(28px);
+}
+
+.reveal-scale {
+  transform: scale(0.96);
+}
+
+.reveal-up.is-visible,
+.reveal-left.is-visible,
+.reveal-right.is-visible,
+.reveal-scale.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .reveal-up,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
