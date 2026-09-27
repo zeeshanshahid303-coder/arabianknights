@@ -410,20 +410,20 @@ body {
 }
 
 .logo-mark {
-  height: 2.75rem;
+  height: 52px;
   width: auto;
   flex: none;
 }
 
 /* The same artwork, given the room the hero can afford. */
 .hero-logo-mark {
-  height: 6.5rem;
+  height: 90px;
   width: auto;
 }
 
 @media (min-width: 640px) {
   .hero-logo-mark {
-    height: 8rem;
+    height: 120px;
   }
 }
 
