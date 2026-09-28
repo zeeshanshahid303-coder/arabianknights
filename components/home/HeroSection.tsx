@@ -328,54 +328,8 @@ export function HeroSection({
             counterparts. */}
         <div className="hero-buttons flex w-full max-w-2xl flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:gap-4">
           <a
-            href="/menu?mode=takeaway"
-            className="btn-glass inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium tracking-[0.1em]"
-          >
-            <span className="btn-icon">
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.3"
-              >
-                <path
-                  d="M4 7.5h12l-1.1 8.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L4 7.5Z"
-                  strokeLinejoin="round"
-                />
-                <path d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5" strokeLinecap="round" />
-              </svg>
-            </span>
-            <span className="btn-label">Takeaway</span>
-          </a>
-
-          <a
-            href="/menu?mode=delivery"
-            className="btn-glass inline-flex items-center justify-center gap-3 rounded-full px-8 py-4 text-sm font-medium tracking-[0.1em]"
-          >
-            <span className="btn-icon">
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.3"
-              >
-                <path
-                  d="M2.5 6.5 10 2.8l7.5 3.7v7L10 17.2 2.5 13.5v-7Z"
-                  strokeLinejoin="round"
-                />
-                <path d="M2.5 6.5 10 10.2l7.5-3.7M10 10.2v7" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <span className="btn-label">Delivery</span>
-          </a>
-
-          <a
             href="/reservation"
-            className="btn-gold inline-flex items-center justify-center gap-3 rounded-full px-9 py-4 text-sm font-semibold tracking-[0.1em]"
+            className="btn-gold inline-flex items-center justify-center gap-3 rounded-full px-10 py-4 sm:py-5 text-[0.9375rem] font-semibold tracking-[0.12em] shadow-[0_0_30px_rgba(212,175,55,0.2)]"
           >
             <span className="btn-icon">
               <svg
@@ -395,6 +349,52 @@ export function HeroSection({
               </svg>
             </span>
             <span className="btn-label">Reserve a Table</span>
+          </a>
+
+          <a
+            href="/menu?mode=takeaway"
+            className="btn-glass inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[0.8125rem] font-medium tracking-[0.1em]"
+          >
+            <span className="btn-icon">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+              >
+                <path
+                  d="M4 7.5h12l-1.1 8.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L4 7.5Z"
+                  strokeLinejoin="round"
+                />
+                <path d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span className="btn-label">Takeaway</span>
+          </a>
+
+          <a
+            href="/menu?mode=delivery"
+            className="btn-glass inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[0.8125rem] font-medium tracking-[0.1em]"
+          >
+            <span className="btn-icon">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+              >
+                <path
+                  d="M2.5 6.5 10 2.8l7.5 3.7v7L10 17.2 2.5 13.5v-7Z"
+                  strokeLinejoin="round"
+                />
+                <path d="M2.5 6.5 10 10.2l7.5-3.7M10 10.2v7" strokeLinejoin="round" />
+              </svg>
+            </span>
+            <span className="btn-label">Delivery</span>
           </a>
         </div>
       </div>
