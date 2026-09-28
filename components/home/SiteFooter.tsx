@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
+import Image from "next/image";
 
 type SiteFooterProps = {
   name: string;
@@ -54,19 +55,14 @@ export function SiteFooter({
         <Reveal variant="up" className="flex flex-col items-center text-center">
 
           <div className="mb-10 flex flex-col items-center">
-            {/* Monogram/Crest stand-in */}
-            <div
-              aria-hidden
-              className="mb-8 flex size-12 items-center justify-center rounded-full border border-[var(--color-gold)] opacity-50"
-              style={{
-                background: "rgba(212,175,55,0.03)",
-                color: "var(--color-gold)",
-                fontFamily: "var(--font-display)",
-                fontSize: "1.25rem"
-              }}
-            >
-              A
-            </div>
+            {/* Logo */}
+            <Image
+              src="/logo.png"
+              alt="Arabian Knights Logo"
+              className="logo-mark mb-8 opacity-80"
+              width={160}
+              height={160}
+            />
 
             <p
               className="text-balance"
