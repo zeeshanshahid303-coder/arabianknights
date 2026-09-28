@@ -36,59 +36,73 @@ export function WhyChooseUs() {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
-        <SectionHeading
-          eyebrow="The Arabian Knights Difference"
-          heading="Why Guests Choose Us"
-          center
-        />
+      <div className="relative mx-auto max-w-4xl px-6 lg:px-12">
+        <Reveal variant="up">
+          <SectionHeading
+            eyebrow="The Arabian Knights Difference"
+            heading={
+              <>
+                Our Promise to <span className="text-gold-gradient">Every Guest</span>
+              </>
+            }
+            center
+          />
+        </Reveal>
 
-        <div className="mt-12 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:gap-x-16 lg:gap-y-16">
+        <div className="mt-14 flex flex-col">
           {features.map((f, i) => (
             <Reveal
               key={f.title}
-              delay={i * 80}
-              className="group relative flex flex-col items-center sm:items-start text-center sm:text-left"
+              delay={i * 100}
+              variant="up"
+              className="group flex flex-col border-t border-[rgba(212,175,55,0.15)] py-8 md:flex-row md:items-start md:gap-12 md:py-10"
             >
-              <div
-                aria-hidden
-                className="mb-6 select-none opacity-40 transition-opacity duration-500 ease-out group-hover:opacity-100"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "3rem",
-                  color: "var(--color-gold)",
-                  lineHeight: 1,
-                  textShadow: "0 0 24px rgba(212,175,55,0.4)",
-                }}
-              >
-                {f.glyph}
+              {/* Glyph & Title Side */}
+              <div className="mb-4 flex items-center gap-5 md:mb-0 md:w-5/12 md:shrink-0 md:items-start">
+                <span
+                  aria-hidden
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[rgba(212,175,55,0.15)] bg-[rgba(212,175,55,0.02)] text-[1.125rem] transition-all duration-700 ease-out group-hover:border-[rgba(212,175,55,0.4)] group-hover:bg-[rgba(212,175,55,0.06)] group-hover:shadow-[0_0_16px_rgba(212,175,55,0.15)]"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    color: "var(--color-gold)",
+                  }}
+                >
+                  {f.glyph}
+                </span>
+                <h3
+                  className="pt-1.5"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.5rem",
+                    fontWeight: 400,
+                    color: "var(--color-ivory)",
+                    letterSpacing: "0.02em"
+                  }}
+                >
+                  {f.title}
+                </h3>
               </div>
 
-              <h3
-                className="mb-4"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "1.6rem",
-                  fontWeight: 400,
-                  color: "var(--color-ivory)",
-                }}
-              >
-                {f.title}
-              </h3>
-
-              <p
-                className="leading-[1.75]"
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontWeight: 300,
-                  fontSize: "1.0625rem",
-                  color: "var(--color-ivory-faint)",
-                }}
-              >
-                {f.body}
-              </p>
+              {/* Body Text Side */}
+              <div className="md:pt-2 text-balance md:text-pretty">
+                <p
+                  className="leading-[1.8]"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 300,
+                    fontSize: "1rem",
+                    color: "var(--color-ivory-faint)",
+                  }}
+                >
+                  {f.body}
+                </p>
+              </div>
             </Reveal>
           ))}
+          {/* Closing rule to anchor the index list */}
+          <Reveal variant="up" delay={features.length * 100}>
+            <div className="border-t border-[rgba(212,175,55,0.15)]" aria-hidden />
+          </Reveal>
         </div>
       </div>
     </section>
