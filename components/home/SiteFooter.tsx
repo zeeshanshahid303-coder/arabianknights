@@ -59,7 +59,7 @@ export function SiteFooter({
             <Image
               src="/logo.png"
               alt="Arabian Knights Logo"
-              className="logo-mark mb-8 opacity-80"
+              className="logo-mark mb-8"
               width={160}
               height={160}
             />
