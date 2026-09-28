@@ -348,7 +348,202 @@ function orderRoundLabel(
   return `Order ${index + 1}`;
 }
 
+/* ------------------------------------------------------------------
+   What the guest is shown once the floor takes the table back.
+
+   Captured while the session is still readable, because the moment
+   `current_session_id` goes null this client has no session to ask
+   about any more: every read here is scoped to the CURRENT one, and
+   there is no longer one. So the figures are taken as they stand on
+   the last read that still had a session, and latched — the
+   completion screen is a receipt of the meal that just happened, not
+   a query run afterwards. */
+type Farewell = {
+  sessionId: string;
+  total: number;
+  orders: number;
+};
+
+/* How long to wait between looks, and how long to keep looking, while
+   the floor's close is still in flight. The cash counter ends the
+   session and frees the table as two separate writes, the session
+   first, so a guest can be told about the first a moment before the
+   second has happened. */
+const FAREWELL_SETTLE_MS = 400;
+const FAREWELL_GIVE_UP_MS = 5000;
+
+/* A pause, awaited. */
+function wait(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 const [runningTotal, setRunningTotal] = useState(0);
+
+/* The meal, once it is over. Held in state rather than derived,
+   because it has to outlive the clearing of everything above it: when
+   the session closes, the service bar, the service line and the
+   active orders all go, and this is what stands in their place. Null
+   until a session that was genuinely open has actually been closed,
+   so a table nobody has sat at is never congratulated for anything. */
+const [farewell, setFarewell] = useState<Farewell | null>(null);
+
+/* The last session this guest was shown an open table for, and the
+   receipt taken from it. A ref because nothing renders it: its only
+   job is to answer, synchronously, whether there was a meal to close
+   out at all. */
+const lastKnownSessionRef = useRef<Farewell | null>(null);
+
+/* Records a session as one this guest dined under, and the figures it
+   had at that moment.
+
+   A session already latched is left exactly as it was: an order
+   changing must not rewrite the receipt of a meal that has since been
+   closed and paid for, so the figures are only taken the first time
+   this session is seen. That also bounds the work — the receipt is
+   not recomputed on every keystroke of the kitchen. */
+const latchSession = (sessionId: string, orders: OrderRow[]) => {
+  if (lastKnownSessionRef.current?.sessionId === sessionId) return;
+
+  lastKnownSessionRef.current = {
+    sessionId,
+    total: sumSessionTotal(orders),
+    orders: orders.length,
+  };
+};
+
+/* The receipt as it actually stood when the floor closed the session.
+
+   The session's orders stay where they are under their session id, so
+   they are read one last time rather than the figure being estimated
+   from what was last latched. Best-effort by design: if that read
+   does not arrive, the latched figures stand — a real total from a
+   real read, which is better than a blank, and only ever a little
+   short, because a latched figure is itself only written once the
+   kitchen's newest change to this session has already been seen. */
+const readFinalFarewell = async (latched: Farewell): Promise<Farewell> => {
+  const { data } = await supabase
+    .from("orders")
+    .select("id, subtotal, gst, discount, total")
+    .eq("session_id", latched.sessionId)
+    .neq("status", "CANCELLED");
+
+  const orders = (data ?? []) as unknown as OrderRow[];
+
+  if (orders.length === 0) return latched;
+
+  return {
+    sessionId: latched.sessionId,
+    total: sumSessionTotal(orders),
+    orders: orders.length,
+  };
+};
+
+/* Whether the close has actually landed, looked for rather than
+   assumed. The two errors are not symmetric: deciding "closed" on a
+   single look that is simply early would retire the receipt of a meal
+   still being served, so a look is repeated until it says yes or the
+   wait runs out. */
+const waitForSessionEnd = async (sessionId: string): Promise<boolean> => {
+  const deadline = Date.now() + FAREWELL_GIVE_UP_MS;
+
+  for (;;) {
+    const { data } = await supabase
+      .from("table_sessions")
+      .select("status, ended_at")
+      .eq("id", sessionId)
+      .maybeSingle();
+
+    if (data?.status === "completed" || data?.ended_at) return true;
+
+    if (Date.now() >= deadline) return false;
+
+    await wait(FAREWELL_SETTLE_MS);
+  }
+};
+
+/* The table has no session on it. Either the meal that was open here
+   has just been closed and paid for, or there was never one — and the
+   latch is the only thing that tells those two apart, which is what
+   keeps a guest who sat down to an empty table from being thanked
+   for a meal they never had.
+
+   Both marks of a close are followed rather than one. The session
+   being written as completed is the floor's own act and always comes
+   first; the table being freed is the other half, and can be the only
+   mark a quieter close leaves. So neither decides it alone. */
+const handleSessionClosed = async (tableRow: {
+  current_session_id: string | null;
+} | null) => {
+  if (tableRow?.current_session_id) {
+    // Closed at the session, not yet freed at the table — the gap
+    // between the cashier's two writes. Latching here is what covers
+    // a guest whose notification lands in exactly that moment.
+    const { data } = await supabase
+      .from("orders")
+      .select("id, subtotal, gst, discount, total")
+      .eq("session_id", tableRow.current_session_id)
+      .neq("status", "CANCELLED");
+
+    latchSession(
+      tableRow.current_session_id,
+      (data ?? []) as unknown as OrderRow[]
+    );
+
+    const { data: latestSession } = await supabase
+      .from("table_sessions")
+      .select("status, ended_at")
+      .eq("id", tableRow.current_session_id)
+      .maybeSingle();
+
+    if (latestSession?.status === "completed" || latestSession?.ended_at) {
+      // The session is closed. Blank the UI and draw the receipt now,
+      // without waiting for the table to be freed — the guest should not
+      // read the blank gap.
+      setBillRequested(false);
+      setSessionComplete(false);
+      setOrderStatus("idle");
+      setActiveOrders([]);
+      setRunningTotal(0);
+
+      const closed = await readFinalFarewell(lastKnownSessionRef.current!);
+      lastKnownSessionRef.current = null;
+      setFarewell(closed);
+    }
+    return;
+  }
+
+  setBillRequested(false);
+  setSessionComplete(false);
+  setOrderStatus("idle");
+  setActiveOrders([]);
+  setRunningTotal(0);
+
+  const latched = lastKnownSessionRef.current;
+
+  if (!latched) return;
+
+  const { data: sessionRow } = await supabase
+    .from("table_sessions")
+    .select("status, ended_at")
+    .eq("id", latched.sessionId)
+    .maybeSingle();
+
+  if (sessionRow?.status !== "completed" && !sessionRow?.ended_at) {
+    // Neither mark has landed. The UI above has already been cleared,
+    // which is the existing behaviour and the honest one — the session
+    // really is gone from the table. What can still be salvaged is
+    // the receipt, and it is worth the wait.
+    if (!(await waitForSessionEnd(latched.sessionId))) return;
+  }
+
+  const closed = await readFinalFarewell(latched);
+
+  // Cleared as the receipt is taken, so that a fresh dining party
+  // seating at this same table latches afresh and is thanked for
+  // their own meal rather than shown this one.
+  lastKnownSessionRef.current = null;
+  setFarewell(closed);
+};
 
 // Refreshes bill/session state for the table's CURRENT session:
 // - billRequested comes straight from table_sessions.bill_requested
@@ -357,14 +552,11 @@ const [runningTotal, setRunningTotal] = useState(0);
 // - orderStatus is where the session has got to on the service line
 // - activeOrders and runningTotal are that same result read out in full
 const loadSessionState = async () => {
+  console.log("loadSessionState called!");
   const tableRow = await getTableRow();
 
   if (!tableRow?.current_session_id) {
-    setBillRequested(false);
-    setSessionComplete(false);
-    setOrderStatus("idle");
-    setActiveOrders([]);
-    setRunningTotal(0);
+    await handleSessionClosed(tableRow);
     return;
   }
 
@@ -373,7 +565,7 @@ const loadSessionState = async () => {
   const [{ data: sessionRow }, { data: sessionOrders }] = await Promise.all([
     supabase
       .from("table_sessions")
-      .select("bill_requested")
+      .select("status, bill_requested, ended_at")
       .eq("id", sessionId)
       .single(),
     supabase
@@ -396,6 +588,16 @@ const loadSessionState = async () => {
      where PostgREST sends an object — the details are asserted on at the
      one place that reads them instead. */
   const orders = (sessionOrders ?? []) as unknown as OrderRow[];
+
+  // This session is open and active, so we are dining under it. Latch it
+  // and its figures now so we know, when current_session_id goes null,
+  // that there was actually a meal here.
+  latchSession(sessionId, orders);
+
+  if (sessionRow?.status === "completed" || sessionRow?.ended_at) {
+    await handleSessionClosed(tableRow);
+    return;
+  }
 
   setBillRequested(Boolean(sessionRow?.bill_requested));
   setOrderStatus(deriveOrderStatus(orders));
@@ -641,7 +843,7 @@ const requestBill = async () => {
           dine-in session — the two requests below are meaningless
           everywhere else.
           ========================================================== */}
-      {dineInSession && (
+      {dineInSession && !farewell && (
         <div className="relative mx-auto mb-16 flex max-w-7xl flex-col gap-3 px-6 sm:flex-row lg:px-12">
           <button
             onClick={callWaiter}
@@ -785,7 +987,7 @@ const requestBill = async () => {
           floor write to orders.status — the guest watches the
           same row the staff are working from.
           ========================================================== */}
-      {dineInSession && orderStatus !== "idle" && (
+      {dineInSession && orderStatus !== "idle" && !farewell && (
         <div className="relative mx-auto mb-16 max-w-3xl px-6 lg:px-12">
           <div className="cart-panel cart-panel-pad relative overflow-hidden">
             <div
@@ -871,7 +1073,7 @@ const requestBill = async () => {
           the pan rather than being told, as a single thread can only
           tell them, that the table as a whole has moved.
           ========================================================== */}
-      {dineInSession && activeOrders.length > 0 && (
+      {dineInSession && activeOrders.length > 0 && !farewell && (
         <div className="relative mx-auto mb-16 max-w-3xl px-6 lg:px-12">
           <div className="cart-panel cart-panel-pad relative overflow-hidden">
             <div
@@ -1011,6 +1213,136 @@ const requestBill = async () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ==========================================================
+          Session Completion. The floor has closed and paid the
+          table. The active service UI is replaced with a receipt
+          of the meal and a clean exit.
+          ========================================================== */}
+      {farewell && (
+        <section className="relative mx-auto mb-16 max-w-3xl px-6 lg:px-12">
+          <div className="cart-panel cart-panel-pad relative overflow-hidden text-center">
+            <div
+              className="mashrabiya-gold absolute inset-0 h-full w-full opacity-[0.03] pointer-events-none"
+              aria-hidden
+              style={{
+                maskImage:
+                  "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+              }}
+            />
+
+            <div className="relative">
+              <div className="mx-auto mb-6 flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.05)] shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+                {/* An elegant completion mark: a star in a laurel, drawn
+                    in the same stroke weight and hand as the system's
+                    other icons. */}
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--color-gold)"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+
+              <p className="eyebrow mb-4 text-gold-gradient">
+                Service Complete
+              </p>
+
+              <h2
+                className="mb-6 text-balance text-gold-gradient"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "clamp(2rem, 5vw, 2.75rem)",
+                  lineHeight: 1.1,
+                  textShadow: "0 0 60px rgba(212,175,55,0.15)",
+                }}
+              >
+                Thank You For Dining With Us
+              </h2>
+
+              <p
+                className="mx-auto max-w-md text-pretty text-[0.9375rem] leading-[1.8] text-white/80"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                }}
+              >
+                We hope your evening was nothing short of extraordinary. The
+                cashier has closed your table and settled the bill.
+              </p>
+
+              <div
+                className="mx-auto mt-10 max-w-md rounded border border-[rgba(212,175,55,0.2)] bg-[rgba(0,0,0,0.2)] px-6 py-5 text-left"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-[var(--color-ivory-faint)]">
+                      Final Total
+                    </p>
+                    <p className="mt-1 font-sans text-xl font-medium tabular-nums text-[var(--color-gold)]">
+                      {currency(farewell.total)}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[0.625rem] font-medium uppercase tracking-[0.2em] text-[var(--color-ivory-faint)]">
+                      Orders
+                    </p>
+                    <p className="mt-1 font-sans text-xl font-medium tabular-nums text-[var(--color-gold)]">
+                      {farewell.orders}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                {/* The "Start New Order" exit action. Pointing the same table
+                    number at /cart builds a new session and writes it back to
+                    the table, making it occupied again, exactly like a new
+                    customer's first scan. */}
+                <a
+                  href={`/cart?mode=dine_in&table=${dineInSession?.tableNumber}&token=${dineInSession?.tableToken}`}
+                  className="btn-gold inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-3.5 sm:w-auto"
+                >
+                  <span className="btn-icon" aria-hidden>
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    >
+                      <path d="M10 6v8M6 10h8" />
+                    </svg>
+                  </span>
+                  <span className="btn-label font-sans text-[0.8125rem] font-semibold tracking-[0.1em] uppercase">
+                    Start New Order
+                  </span>
+                </a>
+
+                {/* The "Return to Menu" exit action. Clears the latched
+                    receipt and drops back to the default unoccupied menu. */}
+                <button
+                  onClick={() => setFarewell(null)}
+                  className="btn-glass inline-flex w-full items-center justify-center gap-3 rounded-full px-8 py-3.5 sm:w-auto"
+                >
+                  <span className="btn-label font-sans text-[0.8125rem] font-medium tracking-[0.1em] uppercase">
+                    Return to Menu
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
       {/* ==========================================================
