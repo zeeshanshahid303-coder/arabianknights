@@ -1,130 +1,135 @@
 const fs = require('fs');
-const file = 'components/home/FeaturedDishes.tsx';
+const file = 'components/home/AboutSection.tsx';
 let code = fs.readFileSync(file, 'utf8');
 
-const newCard = `function DishCard({ dish }: { dish: MenuItem }) {
-  const name = clean(dish.name);
+const newContent = `    <section className="grain relative overflow-hidden py-10 lg:py-12">
+      {/* Soft gradient wash bridging sections */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse 80% 60% at 0% 50%, rgba(77,17,24,0.18) 0%, transparent 60%)",
+        }}
+        aria-hidden
+      />
 
-  return (
-    <article className="group relative flex h-full w-full flex-col">
-      {/* Editorial Image Framing - Portrait crop, clean, no darkening overlays */}
-      <div className="relative aspect-[4/5] w-full overflow-hidden mb-6">
-        {dish.image_url ? (
-          <Image
-            src={dish.image_url}
-            alt={name}
-            fill
-            className="object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-[1.05]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
-        ) : (
-          <div
-            className="h-full w-full flex items-center justify-center"
-            style={{
-              background:
-                "radial-gradient(120% 100% at 50% 0%, rgba(212,175,55,0.08) 0%, rgba(4,2,6,0.5) 100%)",
-            }}
-          >
-            <span
-              aria-hidden
-              className="text-4xl opacity-10"
-              style={{ fontFamily: "var(--font-display)", color: "var(--color-gold)" }}
-            >
-              ✦
-            </span>
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
+        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12 lg:gap-16">
+          
+          {/* Text — left on desktop, second on mobile */}
+          <div className="order-2 lg:order-1 lg:col-span-6 lg:py-10">
+            <Reveal variant="up" delay={0}>
+              <SectionHeading
+                eyebrow="Our Heritage"
+                heading={
+                  <>
+                    A Legacy of{" "}
+                    <span className="text-gold-gradient">Arabian Hospitality</span>
+                  </>
+                }
+              />
+            </Reveal>
+
+            <Reveal variant="up" delay={100}>
+              <div className="mt-8 relative">
+                <span
+                  className="absolute -left-5 -top-4 text-5xl opacity-20 sm:-left-7 sm:-top-5 sm:text-6xl"
+                  style={{ fontFamily: "var(--font-display)", color: "var(--color-gold)" }}
+                  aria-hidden
+                >
+                  &ldquo;
+                </span>
+                <p
+                  className="mb-8 text-balance leading-relaxed"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.375rem",
+                    fontWeight: 300,
+                    color: "var(--color-ivory)",
+                    letterSpacing: "0.02em"
+                  }}
+                >
+                  {storyText}
+                </p>
+              </div>
+            </Reveal>
+
+            <Reveal variant="up" delay={200}>
+              <p
+                className="mb-12 leading-[1.8]"
+                style={{
+                  fontFamily: "var(--font-sans)",
+                  fontWeight: 300,
+                  fontSize: "1rem",
+                  color: "var(--color-ivory-muted)",
+                }}
+              >
+                {aboutText}
+              </p>
+            </Reveal>
+
+            <Reveal variant="up" delay={300}>
+              <div className="flex flex-col items-start gap-3 border-t border-[rgba(212,175,55,0.15)] pt-8">
+                <span className="uppercase tracking-[0.25em] text-[0.625rem] text-[var(--color-gold)] font-medium">
+                  The Destination
+                </span>
+                <p
+                  className="text-[0.75rem] tracking-[0.15em] uppercase leading-[1.8] text-balance"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    color: "var(--color-ivory-faint)",
+                  }}
+                >
+                  {address}
+                </p>
+              </div>
+            </Reveal>
           </div>
-        )}
-        
-        {/* Subtle inner matting line to crisp the image edge without heavy borders */}
-        <div className="absolute inset-0 z-10 pointer-events-none ring-1 ring-inset ring-[rgba(244,239,228,0.06)]" />
-      </div>
 
-      {/* Typography & Data - Spacious, unboxed layout */}
-      <div className="flex flex-col flex-1">
-        {dish.category && (
-          <p
-            className="mb-2.5 text-[0.625rem] uppercase tracking-[0.25em]"
-            style={{
-              color: "var(--color-gold)",
-              fontFamily: "var(--font-sans)",
-              opacity: 0.8,
-            }}
-          >
-            {dish.category}
-          </p>
-        )}
-        
-        <div className="mb-3 flex items-start justify-between gap-4">
-          <h3
-            className="text-balance leading-snug"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "1.375rem",
-              fontWeight: 400,
-              color: "var(--color-ivory)",
-            }}
-          >
-            {name}
-          </h3>
-          <span
-            className="shrink-0 pt-1"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontWeight: 300,
-              fontSize: "1rem",
-              letterSpacing: "0.04em",
-              color: "var(--color-gold)",
-            }}
-          >
-            ₹{dish.price}
-          </span>
-        </div>
+          {/* Image — first on mobile, right on desktop */}
+          <Reveal variant="left" delay={200} className="order-1 lg:order-2 lg:col-span-5 lg:col-start-8">
+            <div className="relative mx-auto aspect-[3/4] w-full max-w-[500px] overflow-hidden">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt="Arabian Knights Restaurant & Cafe"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{
+                    background:
+                      "radial-gradient(120% 100% at 50% 0%, var(--color-emerald-core) 0%, var(--color-night) 70%)",
+                  }}
+                >
+                  <span
+                    className="text-6xl opacity-10"
+                    style={{ fontFamily: "var(--font-display)", color: "var(--color-gold)" }}
+                    aria-hidden
+                  >
+                    ✦
+                  </span>
+                </div>
+              )}
 
-        {dish.description && (
-          <p
-            className="mb-7 line-clamp-2 text-sm leading-relaxed"
-            style={{
-              fontFamily: "var(--font-sans)",
-              color: "var(--color-ivory-faint)",
-            }}
-          >
-            {dish.description}
-          </p>
-        )}
-
-        <div className="mt-auto">
-          <Link
-            href="/menu"
-            className="group/btn inline-flex items-center gap-2 overflow-hidden text-[0.6875rem] uppercase tracking-[0.15em] transition-colors duration-300 text-[var(--color-ivory-faint)] hover:text-[var(--color-gold)]"
-          >
-            <span className="relative">
-              Order
-              <span className="absolute -bottom-1 left-0 h-px w-0 bg-[var(--color-gold)] transition-all duration-300 group-hover/btn:w-full" />
-            </span>
-            <svg
-              aria-hidden
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              className="transition-transform duration-300 group-hover/btn:translate-x-1"
-            >
-              <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
+              {/* Architectural framing overlay */}
+              <div className="absolute inset-0 z-10 pointer-events-none ring-1 ring-inset ring-[rgba(255,255,255,0.06)]" />
+              <div className="absolute inset-3 z-10 pointer-events-none border border-[rgba(212,175,55,0.2)] sm:inset-4" />
+            </div>
+          </Reveal>
         </div>
       </div>
-    </article>
-  );
-}`;
+    </section>`;
 
-let start = code.indexOf('function DishCard(');
-if (start > -1) {
-  code = code.substring(0, start) + newCard + '\n';
+let start = code.indexOf('<section');
+let end = code.lastIndexOf('</section>') + 10;
+
+if (start > -1 && end > start) {
+  code = code.substring(0, start) + newContent + code.substring(end);
   fs.writeFileSync(file, code);
-  console.log('Patched DishCard');
+  console.log('Patched AboutSection');
 } else {
   console.log('Failed to find bounds');
 }
