@@ -692,6 +692,367 @@ body {
 }
 
 /* =====================================================================
+   Cart — the last room before the kitchen
+   ===================================================================== */
+
+/* A dish on its way to the table. Reuses the menu's glass face, hairline
+   and two-pixel lift verbatim; the only new thing is the emerald pool it
+   sits in, which separates the order in progress from the browsing it
+   came from. */
+.cart-line {
+  position: relative;
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    160deg,
+    rgba(244, 239, 228, 0.055) 0%,
+    rgba(244, 239, 228, 0.012) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  backdrop-filter: blur(14px) saturate(115%);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 239, 228, 0.07),
+    0 24px 48px -30px rgba(0, 0, 0, 0.95);
+  transition:
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cart-line:hover,
+.cart-line:focus-within {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 239, 228, 0.12),
+    0 34px 64px -30px rgba(0, 0, 0, 0.95),
+    0 0 54px -20px rgba(18, 70, 58, 0.75);
+}
+
+/* The photograph. Square rather than the menu's 4:5 — a cart line is
+   read in a column, and a portrait crop would make the rows taller than
+   the food in them is worth. Reuses the same plate, the same opacity
+   hold and the same slow settle. */
+.cart-line-media {
+  position: relative;
+  width: 6.5rem;
+  height: 6.5rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background: radial-gradient(
+    120% 100% at 50% 0%,
+    rgba(212, 175, 55, 0.08) 0%,
+    rgba(4, 2, 6, 0.6) 100%
+  );
+}
+
+.cart-line-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  box-shadow: inset 0 0 32px -14px rgba(0, 0, 0, 0.9);
+}
+
+.cart-line-name {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-display);
+  font-size: 1.3125rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-ivory);
+}
+
+.cart-line-note {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-ivory-muted);
+}
+
+/* The ledger column. On the menu the price sits opposite the title on
+   one baseline; here it is given its own column so the amount, the
+   stepper and the line total stack without competing for width. */
+.cart-line-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  align-self: stretch;
+  gap: 1rem;
+  text-align: right;
+}
+
+.cart-line-unit {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ivory-muted);
+  white-space: nowrap;
+}
+
+.cart-line-total {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+/* Undo, stated as quietly as the house allows. Maroon rather than gold:
+   this is the one control on the card that takes something away. */
+.cart-remove {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-ivory-faint);
+  transition: color 300ms ease;
+}
+
+.cart-remove:hover,
+.cart-remove:focus-visible {
+  color: #d98a86;
+}
+
+.cart-remove:focus-visible {
+  outline: 1px solid var(--color-gold-soft);
+  outline-offset: 3px;
+}
+
+@media (min-width: 640px) {
+  .cart-line {
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+  }
+}
+
+@media (max-width: 639px) {
+  /* One column: the photograph rides above the name, and the ledger
+     tucks under it with the stepper and the total on one line. */
+  .cart-line {
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .cart-line-media {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .cart-line-name {
+    font-size: 1.125rem;
+  }
+
+  .cart-line-side {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--color-hairline);
+  }
+}
+
+/* ---- A panel ----
+
+   The bound surface every block on this page is set into: dark glass, a
+   hairline of gold at its edge, and an optional heading. */
+.cart-panel {
+  position: relative;
+  border-radius: 0.875rem;
+  background: linear-gradient(
+    160deg,
+    rgba(244, 239, 228, 0.05) 0%,
+    rgba(244, 239, 228, 0.012) 100%
+  );
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  backdrop-filter: blur(14px) saturate(115%);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 239, 228, 0.07),
+    0 24px 48px -30px rgba(0, 0, 0, 0.95);
+}
+
+.cart-panel-pad {
+  padding: 1.75rem;
+}
+
+@media (max-width: 639px) {
+  .cart-panel-pad {
+    padding: 1.25rem;
+  }
+}
+
+.cart-panel-title {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: var(--color-ivory);
+}
+
+/* ---- A field ----
+
+   Dark glass with a gold hairline, warming and blooming on focus. The
+   placeholder is the label: at two fields there is no room for both,
+   and an empty labelled box reads as a form rather than an invitation. */
+.cart-field {
+  width: 100%;
+  padding: 0.95rem 1.15rem;
+  border-radius: 0.625rem;
+  background: rgba(4, 2, 6, 0.5);
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  color: var(--color-ivory);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.4;
+  backdrop-filter: blur(8px);
+  transition:
+    border-color 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 400ms ease;
+}
+
+.cart-field::placeholder {
+  color: var(--color-ivory-faint);
+}
+
+.cart-field:hover {
+  border-color: rgba(212, 175, 55, 0.34);
+}
+
+.cart-field:focus,
+.cart-field:focus-visible {
+  outline: none;
+  background: rgba(4, 2, 6, 0.66);
+  border-color: rgba(212, 175, 55, 0.6);
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.28), 0 0 26px -8px rgba(212, 175, 55, 0.4);
+}
+
+/* The number spinner is a browser control the house does not use. */
+.cart-field[type="number"]::-webkit-outer-spin-button,
+.cart-field[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cart-field[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.cart-field-label {
+  display: block;
+  margin-bottom: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ivory-muted);
+}
+
+/* ---- The ledger ----
+
+   A named row is set in the sans face with tabular figures, because it
+   is a figure and not a headline. */
+.cart-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ivory);
+}
+
+.cart-summary-row dt {
+  color: var(--color-ivory-muted);
+}
+
+.cart-summary-row dd {
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* The Grand Total is the one number on the page the customer came for,
+   so it is set in the display face at display size, in gold, and given
+   the whole width of the panel rather than a column. */
+.cart-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--color-gold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cart-total dt {
+  color: var(--color-ivory-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .cart-total {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+}
+
+/* A notice the guest should read but not act on — the order is in, and
+   the kitchen has it. */
+.cart-notice {
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(
+    160deg,
+    rgba(18, 70, 58, 0.24) 0%,
+    rgba(18, 70, 58, 0.06) 100%
+  );
+  border: 1px solid rgba(18, 70, 58, 0.9);
+  box-shadow: 0 0 54px -24px rgba(18, 70, 58, 0.9);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--color-ivory);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-line {
+    transition: none;
+  }
+}
+
+/* =====================================================================
    The basket, always in reach
    ===================================================================== */
 
