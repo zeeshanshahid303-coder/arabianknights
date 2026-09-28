@@ -16,7 +16,7 @@ export function AboutSection({
   address,
 }: AboutSectionProps) {
   return (
-    <section className="grain relative overflow-hidden py-24 lg:py-32">
+    <section className="grain relative overflow-hidden py-10 lg:py-12">
       {/* Soft gradient wash bridging sections */}
       <div
         className="pointer-events-none absolute inset-0"

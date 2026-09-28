@@ -21,7 +21,7 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
   const displayed = dishes.slice(0, DISPLAY_LIMIT);
 
   return (
-    <section className="grain relative overflow-hidden py-24 lg:py-32">
+    <section className="grain relative overflow-hidden py-10 lg:py-12">
       {/* Background linking hero/trustbar to this section */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -46,7 +46,7 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
         />
 
         {/* 1 / 2 / 3 columns; 6 dishes fill the last row exactly at 3-up */}
-        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
+        <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 lg:gap-10">
           {displayed.map((dish, i) => (
             <Reveal key={dish.id} variant="scale" delay={i * 90} as="article" className="h-full">
               <DishCard dish={dish} />
@@ -54,7 +54,7 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
           ))}
         </div>
 
-        <div className="mt-14 flex justify-center">
+        <div className="mt-10 flex justify-center">
           <GoldButton href="/menu" className="w-full sm:w-auto">
             View Full Menu
             <svg

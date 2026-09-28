@@ -26,7 +26,7 @@ const features = [
 
 export function WhyChooseUs() {
   return (
-    <section className="grain relative overflow-hidden py-24 lg:py-32">
+    <section className="grain relative overflow-hidden py-10 lg:py-12">
       {/* Subtle emerald bloom anchoring the background */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -43,7 +43,7 @@ export function WhyChooseUs() {
           center
         />
 
-        <div className="mt-16 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:gap-x-16 lg:gap-y-16">
+        <div className="mt-12 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:gap-x-16 lg:gap-y-16">
           {features.map((f, i) => (
             <Reveal
               key={f.title}

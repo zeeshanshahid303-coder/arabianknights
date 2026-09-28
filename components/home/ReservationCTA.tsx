@@ -11,7 +11,7 @@ type ReservationCTAProps = {
 
 export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
   return (
-    <section className="grain relative flex min-h-[80vh] items-center justify-center overflow-hidden py-24 lg:py-32">
+    <section className="grain relative flex items-center justify-center overflow-hidden py-16 lg:py-20">
       {/* Base ambience - deeper than the rest of the site to make the CTA glow */}
       <div
         className="absolute inset-0"

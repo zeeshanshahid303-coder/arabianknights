@@ -21,7 +21,7 @@ export function SiteFooter({
   text,
 }: SiteFooterProps) {
   return (
-    <footer className="veil-night grain relative overflow-hidden py-24 lg:py-32">
+    <footer className="veil-night grain relative overflow-hidden py-10 lg:py-12">
       {/* Top graceful separator rule instead of a hard border */}
       <div
         aria-hidden

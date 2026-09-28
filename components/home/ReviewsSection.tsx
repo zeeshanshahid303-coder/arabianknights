@@ -157,7 +157,7 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
       }));
 
   return (
-    <section className="grain relative overflow-hidden py-24 lg:py-32">
+    <section className="grain relative overflow-hidden py-10 lg:py-12">
       {/* Background layer connecting from WhyChooseUs into this section */}
       <div
         className="pointer-events-none absolute inset-0"
@@ -192,7 +192,7 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
           </p>
         ) : null}
 
-        <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-4 lg:gap-8">
+        <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3 md:gap-4 lg:gap-8">
           {cards.map((c, i) => (
             <ReviewCard
               key={c.key}
