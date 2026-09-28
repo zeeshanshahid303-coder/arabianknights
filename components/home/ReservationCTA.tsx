@@ -55,7 +55,7 @@ export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
         }}
       />
 
-      <Reveal className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-6 text-center">
+      <Reveal className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-6 text-center">
         {/* Invitation Eyebrow */}
         <div className="mb-6 flex items-center justify-center gap-4">
           <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--color-gold)] opacity-50" aria-hidden />

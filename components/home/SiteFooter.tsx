@@ -50,7 +50,7 @@ export function SiteFooter({
         }}
       />
 
-      <div className="relative mx-auto max-w-5xl px-6 lg:px-12">
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <Reveal variant="up" className="flex flex-col items-center text-center">
 
           <div className="mb-10 flex flex-col items-center">
@@ -83,7 +83,7 @@ export function SiteFooter({
             </p>
           </div>
 
-          <div className="grid w-full max-w-4xl grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-6 border-y border-[rgba(244,239,228,0.08)] py-12">
+          <div className="grid w-full grid-cols-1 gap-12 sm:grid-cols-3 sm:gap-6 border-y border-[rgba(244,239,228,0.08)] py-12">
             {/* Address */}
             <div className="flex flex-col items-center">
               <span className="eyebrow mb-4" style={{ color: "var(--color-gold)" }}>Location</span>

@@ -175,7 +175,7 @@ export function ReviewsSection({ reviews }: ReviewsSectionProps) {
         aria-hidden
       />
 
-      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="What Our Guests Say"
           heading={

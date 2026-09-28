@@ -33,7 +33,7 @@ export function FeaturedDishes({ dishes }: FeaturedDishesProps) {
 
       {/* The section itself is full-bleed so the background reaches the
           edges of the viewport; the content is centred inside it. */}
-      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <SectionHeading
           eyebrow="Our Signature Dishes"
           heading={

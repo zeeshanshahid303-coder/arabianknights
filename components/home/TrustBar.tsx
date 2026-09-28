@@ -37,7 +37,7 @@ export function TrustBar({ priceMin, priceMax }: TrustBarProps) {
           background: "linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.03) 50%, transparent 100%)",
         }}
       />
-      <div className="relative mx-auto max-w-6xl px-6 lg:px-12">
+      <div className="relative mx-auto max-w-7xl px-6 lg:px-12">
         <div className={`grid grid-cols-2 gap-y-10 lg:grid-cols-4 lg:gap-y-0 ${gradientDividerClass}`}>
           {items.map((item, i) => (
             <Reveal
