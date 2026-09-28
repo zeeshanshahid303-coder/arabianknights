@@ -32,6 +32,15 @@
 
   --font-display: var(--font-cormorant), "Times New Roman", serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* The two lattice cells, as raw URLs. Declared here rather than
+     duplicated per-rule because the same screen is used at two scales —
+     a surface may want one cell, and the menu plate wants the other,
+     and neither should be able to drift from the original. Anything
+     that needs a pattern here should use these, not re-inline the
+     data-URI. */
+  --lattice-gold: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1'%3E%3Cpolygon points='32,16.5 35.25,24.15 42.96,21.04 39.85,28.75 47.5,32 39.85,35.25 42.96,42.96 35.25,39.85 32,47.5 28.75,39.85 21.04,42.96 24.15,35.25 16.5,32 24.15,28.75 21.04,21.04 28.75,24.15'/%3E%3Cpolygon points='32,16.5 42.96,21.04 47.5,32 42.96,42.96 32,47.5 21.04,42.96 16.5,32 21.04,21.04'/%3E%3Cpolygon points='32,8 56,32 32,56 8,32'/%3E%3C/g%3E%3C/svg%3E");
+  --lattice-maroon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23a8464f' stroke-width='0.75'%3E%3Cpolygon points='48,26 52.5,39.5 66,34.5 61,46 70.5,48 61,50 66,61.5 52.5,56.5 48,70 43.5,56.5 30,61.5 35,50 25.5,48 35,46 30,34.5 43.5,39.5'/%3E%3Cpolygon points='48,12 84,48 48,84 12,48'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 html {
@@ -57,7 +66,7 @@ body {
 /* 64px khatam cell — eight-point star interlaced with its octagon,
    inside the 45° diamond that links it to its neighbours. */
 .mashrabiya-gold {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1'%3E%3Cpolygon points='32,16.5 35.25,24.15 42.96,21.04 39.85,28.75 47.5,32 39.85,35.25 42.96,42.96 35.25,39.85 32,47.5 28.75,39.85 21.04,42.96 24.15,35.25 16.5,32 24.15,28.75 21.04,21.04 28.75,24.15'/%3E%3Cpolygon points='32,16.5 42.96,21.04 47.5,32 42.96,42.96 32,47.5 21.04,42.96 16.5,32 21.04,21.04'/%3E%3Cpolygon points='32,8 56,32 32,56 8,32'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: var(--lattice-gold);
   background-size: 64px 64px;
 }
 
@@ -65,7 +74,7 @@ body {
    same lattice at different opacities is what gives the night air its
    depth — the second is far enough away to be barely legible. */
 .mashrabiya-maroon {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23a8464f' stroke-width='0.75'%3E%3Cpolygon points='48,26 52.5,39.5 66,34.5 61,46 70.5,48 61,50 66,61.5 52.5,56.5 48,70 43.5,56.5 30,61.5 35,50 25.5,48 35,46 30,34.5 43.5,39.5'/%3E%3Cpolygon points='48,12 84,48 48,84 12,48'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: var(--lattice-maroon);
   background-size: 96px 96px;
 }
 
@@ -386,7 +395,14 @@ body {
 .menu-card {
   position: relative;
   display: flex;
-  height: 100%;
+  /* No fixed height. Equality comes from the pieces, not from a magic
+     number: every column in a row is the same width, so the 4:5 frame
+     resolves to one height for the whole row; the body below it is a
+     fixed block (two-line title, two-line note, one-line action); and
+     grid stretch covers anything that still differs. A pixel height
+     here would have to fight the aspect ratio — at three columns the
+     photograph alone is taller than any body worth having. */
+  height: auto;
   flex-direction: column;
   overflow: hidden;
   border-radius: 0.75rem;
@@ -406,9 +422,12 @@ body {
     box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* Two pixels, not six. A menu card is read, not shopped — the lift is
+   there to acknowledge the pointer, not to snatch the eye off the dish.
+   The hairline warms and a bloom spreads; nothing else moves. */
 .menu-card:hover,
 .menu-card:focus-within {
-  transform: translateY(-6px);
+  transform: translateY(-2px);
   border-color: rgba(212, 175, 55, 0.42);
   box-shadow:
     inset 0 1px 0 rgba(244, 239, 228, 0.12),
@@ -420,6 +439,9 @@ body {
    with a thin gold frame set just inside the edge of the plate. */
 .menu-card-media {
   position: relative;
+  /* Pinned, not flexible: the 4:5 crop is the one dimension of the card
+     that must read identically on every dish, at every breakpoint. */
+  flex: none;
   aspect-ratio: 4 / 5;
   width: 100%;
   overflow: hidden;
@@ -430,16 +452,34 @@ body {
   );
 }
 
-.menu-card-media img {
+/* The photograph is a layer over the plate, absolutely positioned, so
+   the plate shows through before the bytes arrive and after they fail
+   to. Absolute — the plate is what holds the frame, and an <img> in
+   flow would decide the frame's height for itself. */
+.menu-card-photo {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
-  transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+  /* Hidden until onLoad says there is something to see. Otherwise a
+     half-decoded frame flashes its top half over the plate. */
+  opacity: 0;
+  transition:
+    transform 1500ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 400ms ease;
 }
 
-.menu-card:hover .menu-card-media img {
-  transform: scale(1.05);
+.menu-card-photo.is-ready {
+  opacity: 1;
+}
+
+/* Three percent, over a second and a half. Enough that the photograph
+   seems to settle closer as the card is read; not enough to notice as
+   an effect at all. */
+.menu-card:hover .menu-card-photo {
+  transform: scale(1.03);
 }
 
 .menu-card-media::after {
@@ -449,6 +489,150 @@ body {
   pointer-events: none;
   border: 1px solid rgba(212, 175, 55, 0.22);
   box-shadow: inset 0 0 44px -18px rgba(0, 0, 0, 0.9);
+}
+
+/* ---- No photograph ----
+
+   The house mark a dish wears until it has been photographed. This is
+   always in the frame, under the photograph rather than swapped in for
+   it: a missing image_url, a wrong one and a host that is down all
+   arrive at the same painted plate, and nothing in between shows a
+   bare frame or the browser's broken-image glyph.
+
+   The lattice is the house's own, the roundel is the one from the
+   masthead — nothing generic stands in for a dish the kitchen has not
+   photographed. */
+.menu-card-plate {
+  position: absolute;
+  inset: 0;
+  background-image:
+    /* the lamp directly over the monogram */
+    radial-gradient(
+      circle at 50% 46%,
+      rgba(212, 175, 55, 0.12) 0%,
+      transparent 58%
+    ),
+    /* the pierced screen, at the maroon scale used across the house */
+    var(--lattice-maroon);
+  background-size:
+    cover,
+    96px 96px;
+}
+
+/* The monogram. A crossed-blade roundel, drawn rather than fetched, so
+   it costs no request and stays crisp at any density. */
+.menu-card-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none' stroke='%23d4af37' stroke-width='1.1'%3E%3Ccircle cx='32' cy='32' r='21' stroke-opacity='0.5'/%3E%3Ccircle cx='32' cy='32' r='27' stroke-opacity='0.16'/%3E%3Cpath d='M24 41c3.2-1 5-3.2 5.6-6.4M24 41c-1-3.2-.6-5.9 1.4-8.1 2.6 1.6 3.9 4.3 3.8 8.1' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.85'/%3E%3Cpath d='M40 41c-3.2-1-5-3.2-5.6-6.4M40 41c1-3.2.6-5.9-1.4-8.1-2.6 1.6-3.9 4.3-3.8 8.1' stroke-linecap='round' stroke-linejoin='round' stroke-opacity='0.85'/%3E%3Cpath d='M28 43h8' stroke-linecap='round' stroke-opacity='0.7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 64px 64px;
+  opacity: 0.55;
+}
+
+/* ---- The body ----
+
+   Three fixed blocks and one free one. The title, the note and the
+   action each hold a height reserved for the worst case, so a dish with
+   no note and a dish with a long one leave their price and their button
+   on exactly the same line as every other card in the row. */
+.menu-card-body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  padding: 1.5rem;
+}
+
+.menu-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.menu-card-title {
+  margin: 0;
+  /* Two lines at the title's size and leading. A third line is cut with
+     an ellipsis rather than allowed to steal height from the price. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.6em;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: var(--color-ivory);
+}
+
+.menu-card-price {
+  flex: none;
+  align-self: baseline;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+/* The note. Capped at two lines so the card has a floor, and given a
+   floor of its own — a dish described in a single word still leaves the
+   same gap its neighbour with a full sentence does. */
+.menu-card-description {
+  margin: 0 0 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--color-ivory-muted);
+}
+
+/* The invitation. Pinned to the foot of the card by the body's free
+   space above it, so it lands on the same line in every card of a row
+   whether the dish is sold out, mid-order, or ready to be added. */
+.menu-card-actions {
+  /* The three invitation states are not the same height — the stepper
+     ring is 40px, the gold button and the unavailable plate ~46px. A
+     reserved block plus bottom alignment makes all three land on one
+     line, so adding a dish never nudges the cards beside it. */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-top: auto;
+  min-height: 3rem;
+}
+
+@media (max-width: 639px) {
+  /* One dish to a row on a phone, where a 4:5 frame would be taller than
+     the screen. The frame widens to 16:10 and the body trims its padding,
+     so the card is still identical to its neighbours — just a landscape
+     block rather than a portrait one. */
+  .menu-card-media {
+    aspect-ratio: 16 / 10;
+  }
+
+  .menu-card-body {
+    padding: 1.25rem;
+  }
+
+  .menu-card-title {
+    font-size: 1.25rem;
+  }
 }
 
 /* Quantity stepper. A gold hairline ring around warm ink — the same
