@@ -1109,6 +1109,179 @@ body {
 }
 
 /* =====================================================================
+   The service line — an order's progress through the house
+   ===================================================================== */
+
+/* Four stops on one gold thread: received, prepared, ready, served.
+   Drawn in the markup rather than here, because the thread has to run
+   between marks that are themselves SVG, and a background gradient cannot
+   know where they landed.
+
+   Vertical below the sm breakpoint, horizontal above: a four-across
+   thread at 390px leaves a mark every 90px, which is not enough room for
+   a label, and a label that does not fit is worse than no label. */
+.service-line {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .service-line {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+/* The thread itself. Behind the marks, never over them. */
+.service-line::before {
+  content: "";
+  position: absolute;
+  left: 0.6875rem;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(212, 175, 55, 0.05) 0%,
+    rgba(212, 175, 55, 0.16) 50%,
+    rgba(212, 175, 55, 0.05) 100%
+  );
+}
+
+@media (min-width: 640px) {
+  .service-line::before {
+    left: 0.6875rem;
+    right: 0.6875rem;
+    top: 0.6875rem;
+    bottom: auto;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(212, 175, 55, 0.05) 0%,
+      rgba(212, 175, 55, 0.16) 50%,
+      rgba(212, 175, 55, 0.05) 100%
+    );
+  }
+}
+
+/* One stop. The mark sits on the thread; the label hangs off it. */
+.service-step {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  text-align: left;
+}
+
+.service-step:last-child {
+  padding-bottom: 0;
+}
+
+@media (min-width: 640px) {
+  .service-step {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+    padding-bottom: 0;
+    padding-right: 0.5rem;
+    text-align: center;
+  }
+
+  .service-step:last-child {
+    padding-right: 0;
+  }
+}
+
+/* The mark's own frame. Held at one size in both directions so the
+   thread runs through a constant coordinate. */
+.service-mark {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  display: inline-flex;
+  width: 1.375rem;
+  height: 1.375rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 175, 55, 0.22);
+  background: rgba(6, 4, 8, 0.9);
+  color: var(--color-ivory-faint);
+  transition:
+    border-color 500ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 500ms ease,
+    color 500ms ease,
+    box-shadow 500ms ease;
+}
+
+@media (min-width: 640px) {
+  .service-mark {
+    margin-bottom: 0.125rem;
+  }
+}
+
+/* Reached. The mark takes gold and blooms, so the eye is drawn along the
+   thread to wherever the order actually is. */
+.service-step[data-state="done"] .service-mark,
+.service-step[data-state="active"] .service-mark {
+  border-color: rgba(212, 175, 55, 0.55);
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--color-gold);
+}
+
+.service-step[data-state="done"] .service-mark {
+  box-shadow: 0 0 14px -4px rgba(212, 175, 55, 0.5);
+}
+
+.service-step[data-state="active"] .service-mark {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 22px -4px rgba(212, 175, 55, 0.75);
+}
+
+/* The stop the order is at right now. Its label takes the full ivory;
+   a reached-but-passed label is dimmed so the two never read alike. */
+.service-label {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ivory-faint);
+  transition: color 500ms ease;
+}
+
+.service-step[data-state="done"] .service-label {
+  color: var(--color-ivory-muted);
+}
+
+.service-step[data-state="active"] .service-label {
+  color: var(--color-ivory);
+}
+
+/* A quiet note under the whole thread, so the order's state is also
+   available as a single sentence rather than only as a picture. */
+.service-summary {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--color-ivory-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-mark,
+  .service-label {
+    transition: none;
+  }
+}
+
+/* =====================================================================
    Masthead
    ===================================================================== */
 

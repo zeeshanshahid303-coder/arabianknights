@@ -1,7 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase, uniqueChannelTopic } from "../lib/supabase";
 import { DishPhoto } from "./DishPhoto";
 
@@ -27,8 +27,33 @@ const [waiterCallStatus, setWaiterCallStatus] = useState<
   "idle" | "loading" | "sent" | "error"
 >("idle");
 
+/* The id of the table_requests row this guest's own call created, kept so
+   the button can follow THAT call rather than any call made at this table
+   by anyone else — a second diner ringing their own bell must not appear
+   to have answered this one's.
+
+   A ref rather than state: the only reader is the realtime handler below,
+   which is bound once at subscribe time. State would close over the value
+   that was null on the first render and never see the call that comes
+   seconds later. Nothing renders it, so it earns no re-render. */
+const myWaiterCallIdRef = useRef<string | null>(null);
+
+/* Whether that call has been answered at the table. Read from the row's
+   own status field, which the service staff dashboard flips to RESOLVED —
+   not from a timer, so the button reopens the moment a human actually
+   reaches the table and not before. */
+const [waiterReached, setWaiterReached] = useState(false);
+
 const [billRequestStatus, setBillRequestStatus] = useState<
   "idle" | "loading" | "sent" | "error"
+>("idle");
+
+/* How far this session's orders have got through the house. Re-derived
+   from the same orders the kitchen and the floor are writing to, on every
+   realtime change, so the guest is told the truth at the moment it
+   becomes true. */
+const [orderStatus, setOrderStatus] = useState<
+  "idle" | "received" | "preparing" | "ready" | "served"
 >("idle");
 
 // Session-scoped bill state. `table_sessions.bill_requested` is the
@@ -104,32 +129,82 @@ const getTableRow = async () => {
   return data;
 };
 
+/* The four stops a guest is shown, against the order_status enum the
+   kitchen and the floor actually write. NEW -> PREPARING -> READY is
+   driven by the kitchen; the floor marks an order SERVED when it leaves
+   the pass.
+
+   Service staff mark "Served" by writing COMPLETED — that is their
+   existing action and it is not changed here. So a dish counts as served
+   on either value, which is what lets this read as the four-step thread
+   the guest expects without anyone having to adopt a new status. */
+const SERVED_STATUSES = ["SERVED", "COMPLETED"];
+
+const ORDER_STAGES = [
+  { key: "received", label: "Order Received", match: (s: string) => s === "NEW" },
+  { key: "preparing", label: "Being Prepared", match: (s: string) => s === "PREPARING" },
+  { key: "ready", label: "Ready", match: (s: string) => s === "READY" },
+  { key: "served", label: "Served", match: (s: string) => SERVED_STATUSES.includes(s) },
+] as const;
+
+/* How far along the session is, as a single stop.
+
+   The session's orders are ranked rather than counted, because a table
+   that has ordered twice should not look finished when the first order
+   has been served and the second is still in the pan. A stop is only
+   reached once EVERY live order has reached it, so the guest is never
+   told a dish is ready while another is still raw. */
+function deriveOrderStatus(
+  orders: { status: string }[]
+): "idle" | "received" | "preparing" | "ready" | "served" {
+  const live = (orders ?? []).filter(
+    (order) => order.status !== "CANCELLED"
+  );
+
+  if (live.length === 0) return "idle";
+
+  const reached = (stage: (typeof ORDER_STAGES)[number]) =>
+    live.every((order) => stage.match(order.status));
+
+  for (let i = ORDER_STAGES.length - 1; i >= 0; i -= 1) {
+    if (reached(ORDER_STAGES[i])) return ORDER_STAGES[i].key;
+  }
+
+  return "received";
+}
+
 // Refreshes bill/session state for the table's CURRENT session:
 // - billRequested comes straight from table_sessions.bill_requested
 // - sessionComplete is true only once every non-cancelled order in this
 //   session is COMPLETED (orders table only ever has NEW/COMPLETED)
+// - orderStatus is where the session has got to on the service line
 const loadSessionState = async () => {
   const tableRow = await getTableRow();
 
   if (!tableRow?.current_session_id) {
     setBillRequested(false);
     setSessionComplete(false);
+    setOrderStatus("idle");
     return;
   }
 
-  const { data: sessionRow } = await supabase
-    .from("table_sessions")
-    .select("bill_requested")
-    .eq("id", tableRow.current_session_id)
-    .single();
+  const sessionId = tableRow.current_session_id;
+
+  const [{ data: sessionRow }, { data: sessionOrders }] = await Promise.all([
+    supabase
+      .from("table_sessions")
+      .select("bill_requested")
+      .eq("id", sessionId)
+      .single(),
+    supabase
+      .from("orders")
+      .select("id, status")
+      .eq("session_id", sessionId)
+      .neq("status", "CANCELLED"),
+  ]);
 
   setBillRequested(Boolean(sessionRow?.bill_requested));
-
-  const { data: sessionOrders } = await supabase
-    .from("orders")
-    .select("id, status")
-    .eq("session_id", tableRow.current_session_id)
-    .neq("status", "CANCELLED");
+  setOrderStatus(deriveOrderStatus(sessionOrders ?? []));
 
   setSessionComplete(
     Boolean(sessionOrders?.length) &&
@@ -152,6 +227,26 @@ useEffect(() => {
   // changes fire this listener, current_session_id points at the new
   // (bill_requested = false) row, and billRequested/sessionComplete
   // reset accordingly.
+  //
+  // table_requests rides the same channel rather than opening a second
+  // one: it is the table the guest rang for, and the row that changes is
+  // their own. Only the call this guest made is acted on — a bell rung
+  // by anyone else at this table leaves this button alone.
+  const onRequestChange = (payload: { eventType: string; new: Record<string, unknown>; old: Record<string, unknown> }) => {
+    // A DELETE carries its row in `old` and leaves `new` empty, so both
+    // halves of the row have to be read from whichever one holds it.
+    const row = (payload.eventType === "DELETE" ? payload.old : payload.new) as
+      | { id?: string; status?: string }
+      | undefined;
+    const mine = myWaiterCallIdRef.current;
+
+    // Delivered without a filter, this is every request at every table,
+    // so keep only the one this guest is actually waiting on.
+    if (mine && row && row.id === mine) {
+      setWaiterReached(row.status === "RESOLVED");
+    }
+  };
+
   const channel = supabase
     .channel(uniqueChannelTopic(`menu-session-${dineInSession.tableNumber}`))
     .on(
@@ -163,6 +258,11 @@ useEffect(() => {
       "postgres_changes",
       { event: "*", schema: "public", table: "table_sessions" },
       loadSessionState
+    )
+    .on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "table_requests" },
+      onRequestChange
     )
     .subscribe();
 
@@ -217,23 +317,31 @@ const callWaiter = async () => {
     return;
   }
 
-  const { error } = await supabase
+  const { data: inserted, error } = await supabase
     .from("table_requests")
     .insert({
       table_id: tableData.id,
       type: "CALL_WAITER",
       status: "PENDING",
-    });
+    })
+    .select("id, status")
+    .single();
 
   if (error) {
     console.error(error);
+    setWaiterCallStatus("error");
+    return;
   }
 
+  /* The call is now a row in the house, and the button follows that row.
+     Previously it waited sixty seconds and then quietly forgot the call
+     existed, which meant a guest who rang once and was slow to be served
+     was invited to ring again and pile a second bell on the floor. The
+     button reopens when staff resolve this request — the UPDATE above
+     says RESOLVED — and not one moment sooner. */
+  myWaiterCallIdRef.current = inserted?.id ?? null;
+  setWaiterReached((inserted?.status ?? "PENDING") === "RESOLVED");
   setWaiterCallStatus("sent");
-
-  setTimeout(() => {
-    setWaiterCallStatus("idle");
-  }, 60000);
 };
 
 const requestBill = async () => {
@@ -314,7 +422,8 @@ const requestBill = async () => {
             onClick={callWaiter}
             disabled={
               waiterCallStatus === "loading" ||
-              waiterCallStatus === "sent"
+              waiterCallStatus === "error" ||
+              waiterReached
             }
             className="btn-glass inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[0.8125rem] font-medium tracking-[0.1em] disabled:opacity-60"
           >
@@ -339,11 +448,27 @@ const requestBill = async () => {
             </span>
 
             <span className="btn-label">
-              {waiterCallStatus === "sent"
+              {waiterReached
+                ? "Waiter Attended"
+                : waiterCallStatus === "sent"
                 ? "Waiter Notified"
+                : waiterCallStatus === "loading"
+                ? "Calling..."
+                : waiterCallStatus === "error"
+                ? "Couldn't Reach — Tap to Retry"
                 : "Call Waiter"}
             </span>
           </button>
+
+          {/* The one moment a diner is actually waiting on, said out loud
+              when it happens rather than left to be noticed. */}
+          <span aria-live="polite" className="sr-only">
+            {waiterReached
+              ? "A waiter has reached your table."
+              : waiterCallStatus === "sent"
+              ? "A waiter has been notified and is on the way."
+              : ""}
+          </span>
 
           {/* Only appears once every order in this session is COMPLETED.
               Once requested, stays "Bill Requested" — backed by
@@ -385,6 +510,91 @@ const requestBill = async () => {
               </span>
             </button>
           )}
+        </div>
+      )}
+
+      {/* ==========================================================
+          The service line. Shown only once this session has an
+          order, and driven entirely by what the kitchen and the
+          floor write to orders.status — the guest watches the
+          same row the staff are working from.
+          ========================================================== */}
+      {dineInSession && orderStatus !== "idle" && (
+        <div className="relative mx-auto mb-16 max-w-3xl px-6 lg:px-12">
+          <div className="cart-panel cart-panel-pad relative overflow-hidden">
+            <div
+              className="mashrabiya-gold absolute inset-0 h-full w-full opacity-[0.03] pointer-events-none"
+              aria-hidden
+              style={{
+                maskImage:
+                  "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+              }}
+            />
+
+            <div className="relative">
+              <p
+                className="eyebrow mb-5 text-center"
+                style={{ color: "var(--color-gold)" }}
+              >
+                Your Order
+              </p>
+
+              <ol className="service-line">
+                {ORDER_STAGES.map((stage, index) => {
+                  const at =
+                    ORDER_STAGES.findIndex((s) => s.key === orderStatus);
+
+                  const state =
+                    index < at ? "done" : index === at ? "active" : "pending";
+
+                  return (
+                    <li
+                      key={stage.key}
+                      className="service-step"
+                      data-state={state}
+                    >
+                      <span className="service-mark" aria-hidden>
+                        {state === "done" ? (
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M16 10H4M8 6l-4 4 4 4" />
+                          </svg>
+                        ) : (
+                          /* Each stop carries its own mark, so the thread
+                             reads as four services rather than four
+                             identical dots. */
+                          <ServiceMark stage={stage.key} />
+                        )}
+                      </span>
+
+                      <span className="service-label">{stage.label}</span>
+                    </li>
+                  );
+                })}
+              </ol>
+
+              <p className="service-summary mt-7 text-center">
+                {orderStatus === "received" &&
+                  "Your order is with the kitchen."}
+                {orderStatus === "preparing" &&
+                  "The kitchen is on it. Your waiter will bring it over."}
+                {orderStatus === "ready" &&
+                  "Your order is ready and on its way to the table."}
+                {orderStatus === "served" &&
+                  "Served. Enjoy your meal."}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
@@ -519,6 +729,65 @@ const requestBill = async () => {
           document.body
         )}
     </>
+  );
+}
+
+/* ------------------------------------------------------------------
+   The mark on each stop of the service line. Four line marks rather
+   than four identical dots: what is being done, in the same hand as
+   the bell and the bill beside it. Drawn in the same 1.4 weight at
+   12px so a reached and an unreached stop differ in colour alone.
+   ------------------------------------------------------------------ */
+function ServiceMark({ stage }: { stage: string }) {
+  const common = {
+    width: 12,
+    height: 12,
+    viewBox: "0 0 20 20",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.4,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+  };
+
+  if (stage === "received") {
+    // The order, taken down and on the rail.
+    return (
+      <svg {...common}>
+        <path d="M4.5 3.4h8l3 3v10.2h-11V3.4Z" />
+        <path d="M12.5 3.4v3h3M7.5 11h5" />
+      </svg>
+    );
+  }
+
+  if (stage === "preparing") {
+    // A pan over its flame.
+    return (
+      <svg {...common}>
+        <path d="M3 9.5h11.5a4.75 4.75 0 0 1-4.75 4.75H7.75A4.75 4.75 0 0 1 3 9.5Z" />
+        <path d="M14.5 9.5h1.9a1.9 1.9 0 0 1 0 3.8h-.6" />
+        <path d="M8 7.2c0-1 .9-1.2.9-2.1M11 7.2c0-1 .9-1.2.9-2.1" />
+      </svg>
+    );
+  }
+
+  if (stage === "ready") {
+    // A domed cover, off the dish.
+    return (
+      <svg {...common}>
+        <path d="M3 12.6h14" />
+        <path d="M4.4 12.6a5.6 5.6 0 0 1 11.2 0" />
+        <path d="M9.2 4.6h1.6" />
+      </svg>
+    );
+  }
+
+  // Served — the dish on its table.
+  return (
+    <svg {...common}>
+      <path d="M10 3.2a4.4 4.4 0 0 1 4.4 4.4c0 2.6.5 3.9 1.2 4.8H4.4c.7-.9 1.2-2.2 1.2-4.8A4.4 4.4 0 0 1 10 3.2Z" />
+      <path d="M8.2 14.6a1.9 1.9 0 0 0 3.6 0" />
+    </svg>
   );
 }
 
