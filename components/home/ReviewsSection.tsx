@@ -53,31 +53,33 @@ function ReviewCard({
     <Reveal
       delay={delay}
       variant="up"
-      className="group relative flex h-full flex-col px-6 py-10 sm:px-8"
+      className="group relative flex h-full flex-col px-6 py-10 sm:px-8 sm:py-12 rounded-[2px] transition-all duration-700 hover:-translate-y-1"
+      style={{
+        background: "linear-gradient(135deg, rgba(244,239,228,0.035) 0%, rgba(244,239,228,0.005) 100%)",
+        border: "1px solid rgba(212,175,55,0.08)",
+        backdropFilter: "blur(12px)",
+        boxShadow: "inset 0 1px 0 rgba(244,239,228,0.04), 0 20px 40px -10px rgba(0,0,0,0.5)",
+      }}
     >
-      {/* Subtle top rule that blooms on hover */}
-      <div
-        className="absolute inset-x-0 top-0 h-px transition-colors duration-500 group-hover:bg-[var(--color-gold)]"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent)" }}
-      />
-
       {/* Decorative quote mark */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-4 -translate-x-1/2 text-5xl opacity-10 transition-opacity duration-500 group-hover:opacity-20"
-        style={{ fontFamily: "var(--font-display)", color: "var(--color-gold)" }}
+        className="mb-5 flex justify-center text-4xl leading-none transition-transform duration-700 group-hover:scale-110"
+        style={{ fontFamily: "var(--font-display)", color: "rgba(212,175,55,0.4)" }}
       >
         &ldquo;
       </div>
 
-      <div className="relative mb-8 flex justify-center gap-1.5" role="img" aria-label={`${rating} out of 5 stars`}>
+      <div className="relative mb-6 flex justify-center gap-1.5" role="img" aria-label={`${rating} out of 5 stars`}>
         {[1, 2, 3, 4, 5].map((s) => (
           <span
             key={s}
             aria-hidden
+            className="transition-colors duration-500"
             style={{
               color: s <= rating ? "var(--color-gold)" : "rgba(244,239,228,0.06)",
-              fontSize: "0.75rem",
+              fontSize: "0.8125rem",
+              textShadow: s <= rating ? "0 0 8px rgba(212,175,55,0.2)" : "none",
             }}
           >
             ★
@@ -87,12 +89,11 @@ function ReviewCard({
 
       {quote ? (
         <p
-          className="relative mb-10 flex-1 text-balance text-center text-[1.0625rem] italic leading-relaxed"
+          className="relative mb-10 flex-1 text-balance text-center text-[1.125rem] italic leading-[1.8] sm:text-[1.1875rem]"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 300,
             color: "var(--color-ivory)",
-            textShadow: "0 1px 2px rgba(0,0,0,0.4)"
           }}
         >
           {quote}
@@ -101,17 +102,24 @@ function ReviewCard({
         <div className="flex-1" />
       )}
 
+      {/* Elegant separator */}
+      <div className="mx-auto mb-7 flex items-center justify-center gap-3 opacity-60">
+        <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--color-gold)]" />
+        <span className="shrink-0 text-[0.45rem] text-[var(--color-gold)]">❖</span>
+        <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--color-gold)]" />
+      </div>
+
       <div className="mt-auto text-center">
         {name ? (
           <>
             <p
-              className="text-[0.6875rem] tracking-[0.2em] uppercase"
-              style={{ fontFamily: "var(--font-sans)", color: "var(--color-gold)", opacity: 0.9, letterSpacing: "0.15em" }}
+              className="text-xs font-semibold tracking-[0.2em] uppercase transition-colors duration-500 group-hover:text-[var(--color-gold)]"
+              style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory)" }}
             >
               {name}
             </p>
             <p
-              className="mt-2 text-xs tracking-wider"
+              className="mt-2.5 text-[0.625rem] tracking-[0.15em] uppercase"
               style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
             >
               {meta}
@@ -119,7 +127,7 @@ function ReviewCard({
           </>
         ) : (
           <p
-            className="text-xs tracking-wider"
+            className="text-[0.625rem] tracking-[0.15em] uppercase"
             style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
           >
             {meta}
