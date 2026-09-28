@@ -11,12 +11,12 @@ type ReservationCTAProps = {
 
 export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
   return (
-    <section className="grain relative flex items-center justify-center overflow-hidden py-16 lg:py-20">
+    <section className="grain relative flex items-center justify-center overflow-hidden py-20 lg:py-28">
       {/* Base ambience - deeper than the rest of the site to make the CTA glow */}
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(180deg, transparent 0%, #040206 15%, #040206 100%)"
+          background: "radial-gradient(ellipse 100% 100% at 50% 0%, #060309 0%, #020104 100%)"
         }}
         aria-hidden
       />
@@ -29,116 +29,127 @@ export function ReservationCTA({ hours, phone }: ReservationCTAProps) {
           backgroundImage: "url('https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=2000&auto=format&fit=crop')",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          opacity: 0.25,
-          maskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 80%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 80%)",
+          opacity: 0.15,
+          maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 0%, transparent 100%)",
         }}
       />
 
-      {/* Rich overlay - maroon pooling low, emerald at the shoulders */}
+      {/* Rich overlay emphasizing the center focal point */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(212,175,55,0.12) 0%, transparent 70%), \
-             radial-gradient(ellipse 80% 60% at 90% 90%, rgba(77,17,24,0.4) 0%, transparent 60%), \
-             radial-gradient(ellipse 80% 60% at 10% 90%, rgba(18,70,58,0.4) 0%, transparent 60%)",
+            "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(212,175,55,0.08) 0%, transparent 100%),              radial-gradient(ellipse 60% 60% at 50% 100%, rgba(77,17,24,0.2) 0%, transparent 100%)",
         }}
       />
 
+      {/* Subtle texture */}
       <div
         aria-hidden
-        className="mashrabiya-gold pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]"
+        className="mashrabiya-gold pointer-events-none absolute inset-0 h-full w-full opacity-[0.04]"
         style={{
-          maskImage:
-            "radial-gradient(60% 60% at 50% 50%, #000 0%, transparent 78%)",
-          WebkitMaskImage:
-            "radial-gradient(60% 60% at 50% 50%, #000 0%, transparent 78%)",
+          maskImage: "radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%)",
+          WebkitMaskImage: "radial-gradient(50% 50% at 50% 50%, #000 0%, transparent 100%)",
         }}
       />
 
-      {/* Frame / Mihrab lines conveying a doorway/invitation */}
-      <div className="absolute inset-6 pointer-events-none border border-[var(--color-gold)] opacity-10 sm:inset-10" />
-
-      <Reveal className="relative z-10 mx-auto max-w-3xl px-6 text-center">
-        <p
-          className="mb-8 tracking-[0.3em] uppercase text-[0.6875rem]"
-          style={{ color: "var(--color-gold)", fontFamily: "var(--font-sans)", opacity: 0.9 }}
-        >
-          Reserve Your Experience
-        </p>
-
-        <h2
-          className="mb-8 text-balance"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.5rem, 6vw, 4rem)",
-            fontWeight: 400,
-            lineHeight: 1.05,
-            letterSpacing: "0.02em",
-            color: "var(--color-ivory)",
-            textShadow: "0 4px 24px rgba(0,0,0,0.8)"
-          }}
-        >
-          A Table <span className="text-gold-gradient font-medium italic pr-2">Awaits</span>
-        </h2>
-
-        <div className="mx-auto mb-10 w-px h-16 bg-[var(--color-gold)] opacity-30" aria-hidden />
-
-        <div className="mb-12 space-y-2">
-          <p
-            className="text-[0.8125rem] tracking-[0.15em] uppercase"
-            style={{
-              fontFamily: "var(--font-sans)",
-              color: "var(--color-ivory-faint)",
-            }}
+      <Reveal className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center px-6 text-center">
+        {/* Invitation Eyebrow */}
+        <div className="mb-6 flex items-center justify-center gap-4">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--color-gold)] opacity-50" aria-hidden />
+          <span
+            className="tracking-[0.25em] uppercase text-[0.625rem] font-medium"
+            style={{ color: "var(--color-gold)", fontFamily: "var(--font-sans)" }}
           >
-            Opening Hours
-          </p>
-          <p
-            className="text-[0.9375rem] tracking-wide"
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontWeight: 300,
-              color: "var(--color-ivory-muted)",
-            }}
-          >
-            Mon–Fri <span className="text-[var(--color-ivory)]">{hours.monday_friday}</span> &nbsp;<span className="text-[var(--color-gold)] opacity-40">|</span>&nbsp; Sat–Sun <span className="text-[var(--color-ivory)]">{hours.saturday_sunday}</span>
-          </p>
+            An Invitation
+          </span>
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--color-gold)] opacity-50" aria-hidden />
         </div>
 
-        {/* Button with glow halo */}
-        <div className="relative inline-flex w-full justify-center sm:w-auto">
+        {/* Climax Title */}
+        <h2
+          className="mb-6 text-balance"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(3rem, 7vw, 5.5rem)",
+            fontWeight: 400,
+            lineHeight: 1.05,
+            color: "var(--color-ivory)",
+            textShadow: "0 4px 32px rgba(0,0,0,0.6)"
+          }}
+        >
+          A Table <span className="text-gold-gradient italic pr-2">Awaits</span>
+        </h2>
+
+        {/* Emotional Subtitle */}
+        <p
+          className="mx-auto mb-12 max-w-xl text-balance leading-relaxed"
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontWeight: 300,
+            fontSize: "1.125rem",
+            color: "var(--color-ivory-faint)",
+          }}
+        >
+          Join us for an unforgettable evening of culinary excellence, steeped in royal Mughlai heritage and Arabian warmth.
+        </p>
+
+        {/* Focal point CTA */}
+        <div className="relative mb-16 inline-flex w-full justify-center sm:w-auto">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 -mx-6 -my-4 rounded-full blur-2xl transition-opacity duration-500"
-            style={{ background: "rgba(212,175,55,0.25)" }}
+            className="pointer-events-none absolute inset-0 -mx-4 -my-4 rounded-full blur-2xl transition-opacity duration-700"
+            style={{ background: "rgba(212,175,55,0.15)" }}
           />
           <GoldButton
             href="/reservation"
             variant="solid"
             size="lg"
-            className="w-full sm:w-auto !px-12 !py-5 !text-[0.8125rem]"
+            className="w-full sm:w-auto hover:scale-[1.02] transition-transform duration-500 !px-14 !py-5 !text-[0.875rem] !tracking-[0.2em]"
           >
-            Reserve a Table
+            Reserve Your Experience
           </GoldButton>
         </div>
 
-        {/* Phone escape hatch for guests who'd rather call */}
-        <p
-          className="mt-12 text-sm"
-          style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
-        >
-          Prefer to call?{" "}
-          <a
-            href={`tel:${phone.replace(/\s+/g, "")}`}
-            className="transition-colors duration-200 hover:text-[var(--color-gold)]"
-            style={{ color: "var(--color-gold-soft)" }}
+        {/* Utility / Footer of the CTA */}
+        <div className="flex w-full flex-col items-center pt-10 border-t border-[rgba(212,175,55,0.1)] gap-6">
+          <div className="flex flex-col items-center gap-2">
+            <span
+              className="uppercase tracking-[0.2em] text-[0.625rem]"
+              style={{ color: "var(--color-gold)", fontFamily: "var(--font-sans)" }}
+            >
+              Service Hours
+            </span>
+            <p
+              className="text-[0.75rem] tracking-widest uppercase"
+              style={{
+                fontFamily: "var(--font-sans)",
+                fontWeight: 300,
+                color: "var(--color-ivory-muted)",
+              }}
+            >
+              Mon–Fri <span className="text-[var(--color-ivory)]">{hours.monday_friday}</span>
+              <span className="mx-3 opacity-30 text-[var(--color-gold)]">❖</span>
+              Sat–Sun <span className="text-[var(--color-ivory)]">{hours.saturday_sunday}</span>
+            </p>
+          </div>
+
+          <p
+            className="text-[0.6875rem] tracking-widest uppercase"
+            style={{ fontFamily: "var(--font-sans)", color: "var(--color-ivory-faint)" }}
           >
-            {phone}
-          </a>
-        </p>
+            Personal Assistance:{" "}
+            <a
+              href={`tel:${phone.replace(/\s+/g, "")}`}
+              className="transition-colors duration-300 hover:text-[var(--color-gold)]"
+              style={{ color: "var(--color-gold-soft)" }}
+            >
+              {phone}
+            </a>
+          </p>
+        </div>
       </Reveal>
     </section>
   );
