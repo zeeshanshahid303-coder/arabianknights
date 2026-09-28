@@ -318,8 +318,24 @@ const requestBill = async () => {
             }
             className="btn-glass inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[0.8125rem] font-medium tracking-[0.1em] disabled:opacity-60"
           >
-            <span className="btn-icon" aria-hidden>
-              🔔
+            <span className="btn-icon" aria-hidden style={{ display: "inline-flex" }}>
+              {/* A hand-bell rung on a cord — the house's own symbol for
+                  service, drawn rather than borrowed from an OS, so the
+                  mark sits on the gold face the way the rest of the
+                  system's marks do. */}
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M10 3.2a4.4 4.4 0 0 1 4.4 4.4c0 2.6.5 3.9 1.2 4.8H4.4c.7-.9 1.2-2.2 1.2-4.8A4.4 4.4 0 0 1 10 3.2Z" />
+                <path d="M8.2 14.6a1.9 1.9 0 0 0 3.6 0" />
+              </svg>
             </span>
 
             <span className="btn-label">
@@ -341,13 +357,28 @@ const requestBill = async () => {
               disabled={billRequestStatus === "loading" || billRequested}
               className="btn-gold inline-flex items-center justify-center gap-2.5 rounded-full px-6 py-3.5 text-[0.8125rem] font-semibold tracking-[0.1em] disabled:opacity-60"
             >
-              <span className="btn-icon" aria-hidden>
-                🧾
+              <span className="btn-icon" aria-hidden style={{ display: "inline-flex" }}>
+                {/* A bill folded at the top, the way one is handed across
+                    a tablecloth — a line mark rather than a pictogram, to
+                    sit on the gold face the way the bell beside it does. */}
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 2.8h10v14.4l-2.5-1.7-2.5 1.7-2.5-1.7L5 17.2V2.8Z" />
+                  <path d="M7.8 7.2h4.4M7.8 10.2h4.4" />
+                </svg>
               </span>
 
               <span className="btn-label">
                 {billRequested
-                  ? "Bill Requested ✅"
+                  ? "Bill Requested"
                   : billRequestStatus === "loading"
                   ? "Requesting..."
                   : "Request Bill"}

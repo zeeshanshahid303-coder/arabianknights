@@ -75,6 +75,9 @@ const [tableToken, setTableToken] = useState<string | null>(null);
 const [orderPlaced, setOrderPlaced] = useState(false);
 const [placedOrderDetails, setPlacedOrderDetails] = useState<{ id: string, total: number, tableNumber?: string, status: string } | null>(null);
 const [errorMsg, setErrorMsg] = useState<string | null>(null);
+/* Seconds left on the seated guest's return to the menu. Null for
+   takeaway and delivery, who stay on this page. */
+const [returnIn, setReturnIn] = useState<number | null>(null);
 /* False until localStorage has been read. The cart is written back on
    every change, so without this the first render — which has not yet
    loaded the saved basket — would write an empty one over the top and
@@ -117,6 +120,21 @@ setCartLoaded(true);
 
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart, cartLoaded]);
+
+  /* Counts the seated guest's return to the menu down to the moment it
+     happens. Presentation only — the redirect itself is scheduled once,
+     in placeOrder; this only keeps the number on screen honest. */
+  useEffect(() => {
+    if (returnIn == null) return;
+
+    if (returnIn <= 0) return;
+
+    const tick = window.setTimeout(() => {
+      setReturnIn((n) => (n == null ? n : n - 1));
+    }, 1000);
+
+    return () => window.clearTimeout(tick);
+  }, [returnIn]);
 
   const increase = (id: string) => {
     setCart((prev) => ({
@@ -291,12 +309,18 @@ if (itemsError) {
   localStorage.removeItem("cart");
 
 setCart({});
-if (orderMode === "dine_in" && tableNumber && tableToken) {
-  window.location.href = `/menu?table=${tableNumber}&token=${tableToken}`;
-} else if (orderMode === "dine_in") {
-  window.location.href = "/menu";
-} else {
-  setOrderPlaced(true);
+
+setOrderPlaced(true);
+
+if (orderMode === "dine_in") {
+  setReturnIn(3);
+  setTimeout(() => {
+    if (tableNumber && tableToken) {
+      window.location.href = `/menu?table=${tableNumber}&token=${tableToken}`;
+    } else {
+      window.location.href = "/menu";
+    }
+  }, 3000);
 }
     } catch (error) {
       console.error(error);
@@ -430,7 +454,11 @@ if (orderMode === "dine_in" && tableNumber && tableToken) {
               </svg>
             </span>
             <span className="btn-label">
-              {orderPlaced ? "Back to Home" : "Back to Menu"}
+              {orderPlaced
+                ? orderMode === "dine_in"
+                  ? "Back to Menu"
+                  : "Back to Home"
+                : "Back to Menu"}
             </span>
           </a>
         </div>
@@ -490,24 +518,30 @@ if (orderMode === "dine_in" && tableNumber && tableToken) {
                     fontFamily: "var(--font-sans)",
                   }}
                 >
-                  Thank you for choosing Arabian Knights. We have reserved your selections and are preparing your {orderMode === "delivery" ? "delivery" : "takeaway"} with the utmost care.
+                  Thank you for choosing Arabian Knights. We have reserved your selections and are preparing your {orderMode === "delivery" ? "delivery" : orderMode === "dine_in" ? "order" : "takeaway"} with the utmost care.
                 </p>
 
                 {placedOrderDetails && (
                   <div className="mt-10 border-t border-[rgba(212,175,55,0.15)] pt-8 text-left">
                     <h3 className="mb-6 font-medium text-[var(--color-gold)] text-[0.8125rem] tracking-[0.14em] uppercase">Order Details</h3>
-                    <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 px-2">
+                    <div className="grid grid-cols-2 gap-y-6 px-2 sm:grid-cols-3">
                       <div>
                         <div className="mb-1 text-[0.8125rem] text-[var(--color-ivory-faint)]">Order No.</div>
                         <div className="font-mono text-[var(--color-ivory)]">#{placedOrderDetails.id.slice(0, 8)}</div>
                       </div>
-                      <div className="col-span-2 sm:col-span-2">
+                      {placedOrderDetails.tableNumber && (
+                        <div>
+                          <div className="mb-1 text-[0.8125rem] text-[var(--color-ivory-faint)]">Table</div>
+                          <div className="text-[var(--color-ivory)]">{placedOrderDetails.tableNumber}</div>
+                        </div>
+                      )}
+                      <div className="col-span-2 sm:col-span-1">
                         <div className="mb-2 text-[0.8125rem] text-[var(--color-ivory-faint)]">Status</div>
                         <div>
                            <span className="inline-flex items-center gap-2.5 rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] px-3.5 py-1.5 text-xs shadow-[0_0_15px_rgba(212,175,55,0.1)]">
                              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-gold)] shadow-[0_0_5px_var(--color-gold)]" aria-hidden />
                              <span style={{ color: "var(--color-ivory)", fontWeight: 500 }}>
-                               {placedOrderDetails.status === 'PENDING_APPROVAL' ? 'Being Prepared' : placedOrderDetails.status}
+                               {placedOrderDetails.status === 'PENDING_APPROVAL' ? 'Being Prepared' : placedOrderDetails.status === 'NEW' ? 'Sent to Kitchen' : placedOrderDetails.status}
                              </span>
                            </span>
                         </div>
@@ -518,6 +552,21 @@ if (orderMode === "dine_in" && tableNumber && tableToken) {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* A seated guest is returned to the menu on a short
+                    timer, so say so rather than leaving them to wonder
+                    whether the page has frozen. */}
+                {orderMode === "dine_in" && (
+                  <p
+                    className="mt-8 text-[0.8125rem] tracking-[0.1em] uppercase"
+                    style={{ color: "var(--color-ivory-faint)" }}
+                  >
+                    Returning to the menu
+                    {returnIn != null && (
+                      <span className="tabular-nums"> in {returnIn}s</span>
+                    )}
+                  </p>
                 )}
               </div>
             </div>
