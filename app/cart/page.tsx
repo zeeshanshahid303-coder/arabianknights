@@ -73,6 +73,8 @@ const [orderMode, setOrderMode] = useState("dine_in");
 const [tableNumber, setTableNumber] = useState<string | null>(null);
 const [tableToken, setTableToken] = useState<string | null>(null);
 const [orderPlaced, setOrderPlaced] = useState(false);
+const [placedOrderDetails, setPlacedOrderDetails] = useState<{ id: string, total: number, tableNumber?: string, status: string } | null>(null);
+const [errorMsg, setErrorMsg] = useState<string | null>(null);
 /* False until localStorage has been read. The cart is written back on
    every change, so without this the first render — which has not yet
    loaded the saved basket — would write an empty one over the top and
@@ -162,7 +164,7 @@ const placeOrder = async () => {
     orderMode !== "dine_in" &&
     (!customerName.trim() || !phoneNumber.trim())
   ) {
-    alert("Please enter name and phone number");
+    setErrorMsg("Please enter name and phone number");
     return;
   }
 
@@ -170,7 +172,7 @@ const placeOrder = async () => {
     orderMode === "delivery" &&
     !deliveryAddress.trim()
   ) {
-    alert("Please enter delivery address");
+    setErrorMsg("Please enter delivery address");
     return;
   }
 
@@ -189,7 +191,7 @@ if (tableNumber && tableToken) {
     .single();
 
   if (tableError || !tableData) {
-    alert("Could not verify your table. Please rescan the QR code and try again.");
+    setErrorMsg("Could not verify your table. Please rescan the QR code and try again.");
     return;
   }
 
@@ -197,7 +199,7 @@ if (tableNumber && tableToken) {
   sessionId = await resolveSessionId(tableId, tableData);
 
   if (!sessionId) {
-    alert("Could not start your table session. Please try again.");
+    setErrorMsg("Could not start your table session. Please try again.");
     return;
   }
 }
@@ -211,7 +213,7 @@ const { data: dbItems, error: priceError } = await supabase
   .in("id", cartItems.map((i) => i.id));
 
 if (priceError || !dbItems) {
-  alert("Could not verify prices. Please try again.");
+  setErrorMsg("Could not verify prices. Please try again.");
   return;
 }
 
@@ -250,7 +252,7 @@ total: verifiedSubtotal,
         .single();
 if (orderError) {
   console.error("Order insert failed:", orderError);
-  alert("Failed to place order. Please try again.");
+  setErrorMsg("Failed to place order. Please try again.");
   return;
 }
 const orderItems = cartItems.map((item) => {
@@ -276,10 +278,17 @@ if (itemsError) {
     .delete()
     .eq("id", order.id);
 
-  alert("Failed to place order. Please try again.");
+  setErrorMsg("Failed to place order. Please try again.");
   return;
 }
-localStorage.removeItem("cart");
+
+  setPlacedOrderDetails({
+    id: order.id,
+    total: verifiedSubtotal,
+    tableNumber: tableNumber || undefined,
+    status: orderMode === "dine_in" ? "NEW" : "PENDING_APPROVAL"
+  });
+  localStorage.removeItem("cart");
 
 setCart({});
 if (orderMode === "dine_in" && tableNumber && tableToken) {
@@ -291,7 +300,7 @@ if (orderMode === "dine_in" && tableNumber && tableToken) {
 }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong.");
+      setErrorMsg("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -432,25 +441,176 @@ if (orderMode === "dine_in" && tableNumber && tableToken) {
           ========================================================== */}
       <section className="relative mx-auto max-w-7xl px-6 pb-32 lg:px-12">
         {orderPlaced ? (
-          <div className="mx-auto max-w-2xl">
-            <p className="cart-notice text-center">
-              Order requested successfully. We will start processing your{" "}
-              {orderMode === "delivery" ? "delivery" : "takeaway"} order
-              shortly.
-            </p>
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="cart-panel cart-panel-pad relative overflow-hidden">
+              <div
+                className="mashrabiya-gold absolute inset-0 h-full w-full opacity-[0.03] pointer-events-none"
+                aria-hidden
+                style={{
+                  maskImage: "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+                  WebkitMaskImage: "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+                }}
+              />
+              <div className="relative">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.05)] shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--color-gold)"
+                    strokeWidth="1.5"
+                  >
+                    <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <p
+                  className="eyebrow mb-4"
+                  style={{ color: "var(--color-gold)", textShadow: "0 0 10px rgba(212,175,55,0.2)" }}
+                >
+                  Order Confirmed
+                </p>
+                <h2
+                  className="mb-6 text-balance"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "clamp(2rem, 5vw, 2.75rem)",
+                    color: "var(--color-ivory)",
+                    lineHeight: 1.1,
+                    textShadow: "0 0 60px rgba(212,175,55,0.15)",
+                  }}
+                >
+                  Your Order Has Been <span className="text-gold-gradient">Received</span>
+                </h2>
+                <p
+                  className="mx-auto max-w-md text-pretty text-[0.9375rem] leading-[1.8]"
+                  style={{
+                    color: "var(--color-ivory)",
+                    opacity: 0.8,
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  Thank you for choosing Arabian Knights. We have reserved your selections and are preparing your {orderMode === "delivery" ? "delivery" : "takeaway"} with the utmost care.
+                </p>
+
+                {placedOrderDetails && (
+                  <div className="mt-10 border-t border-[rgba(212,175,55,0.15)] pt-8 text-left">
+                    <h3 className="mb-6 font-medium text-[var(--color-gold)] text-[0.8125rem] tracking-[0.14em] uppercase">Order Details</h3>
+                    <div className="grid grid-cols-2 gap-y-6 sm:grid-cols-4 px-2">
+                      <div>
+                        <div className="mb-1 text-[0.8125rem] text-[var(--color-ivory-faint)]">Order No.</div>
+                        <div className="font-mono text-[var(--color-ivory)]">#{placedOrderDetails.id.slice(0, 8)}</div>
+                      </div>
+                      <div className="col-span-2 sm:col-span-2">
+                        <div className="mb-2 text-[0.8125rem] text-[var(--color-ivory-faint)]">Status</div>
+                        <div>
+                           <span className="inline-flex items-center gap-2.5 rounded-full border border-[rgba(212,175,55,0.3)] bg-[rgba(212,175,55,0.08)] px-3.5 py-1.5 text-xs shadow-[0_0_15px_rgba(212,175,55,0.1)]">
+                             <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-gold)] shadow-[0_0_5px_var(--color-gold)]" aria-hidden />
+                             <span style={{ color: "var(--color-ivory)", fontWeight: 500 }}>
+                               {placedOrderDetails.status === 'PENDING_APPROVAL' ? 'Being Prepared' : placedOrderDetails.status}
+                             </span>
+                           </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="mb-1 text-[0.8125rem] text-[var(--color-ivory-faint)]">Total</div>
+                        <div className="text-[var(--color-ivory)] font-medium text-[1.125rem]">₹{placedOrderDetails.total}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         ) : cartItems.length === 0 ? (
-          <div className="mx-auto max-w-2xl">
-            <div className="cart-panel cart-panel-pad text-center">
-              <p
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="cart-panel cart-panel-pad relative overflow-hidden">
+              <div
+                className="mashrabiya-gold absolute inset-0 h-full w-full opacity-[0.03] pointer-events-none"
+                aria-hidden
                 style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "1.5rem",
-                  color: "var(--color-ivory)",
+                  maskImage: "radial-gradient(ellipse at center, #000 0%, transparent 60%)",
+                  WebkitMaskImage: "radial-gradient(ellipse at center, #000 0%, transparent 60%)",
                 }}
-              >
-                Your cart is empty.
-              </p>
+              />
+              <div className="relative">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)]">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--color-ivory-faint)"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <h2
+                  className="mb-4"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "clamp(1.75rem, 4vw, 2.25rem)",
+                    color: "var(--color-ivory)",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  Your Cart is Empty
+                </h2>
+                <p
+                  className="mx-auto mb-8 max-w-sm text-pretty text-[0.9375rem] leading-[1.8]"
+                  style={{
+                    color: "var(--color-ivory)",
+                    opacity: 0.7,
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  Return to the menu to explore our culinary offerings and begin preparing your order.
+                </p>
+                <a
+                  href={
+                    orderMode === "dine_in" && tableNumber && tableToken
+                      ? `/menu?table=${tableNumber}&token=${tableToken}`
+                      : "/menu"
+                  }
+                  className="btn-glass inline-flex items-center justify-center gap-3 rounded-full px-8 py-[0.9rem]"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "0.8125rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="btn-icon"
+                    style={{ display: "inline-flex" }}
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
+                      <path
+                        d="M16 10H4M8 6l-4 4 4 4"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </span>
+                  <span className="btn-label">
+                    Back to Menu
+                  </span>
+                </a>
+              </div>
             </div>
           </div>
         ) : (
@@ -630,9 +790,17 @@ if (orderMode === "dine_in" && tableNumber && tableToken) {
                   <dd className="text-gold-gradient">₹{subtotal}</dd>
                 </dl>
 
+                {errorMsg && (
+                  <div className="mb-6 rounded-lg border border-[#a84444] bg-[#2a0808]/80 p-4 text-center">
+                    <p className="text-[0.875rem] text-[#e0a6a6]">{errorMsg}</p>
+                  </div>
+                )}
                 <button
                   type="button"
-                  onClick={placeOrder}
+                  onClick={() => {
+                    setErrorMsg(null);
+                    placeOrder();
+                  }}
                   disabled={loading}
                   className="btn-gold mt-7 w-full rounded-full px-8 py-4"
                   style={{
