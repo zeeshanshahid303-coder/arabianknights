@@ -508,6 +508,48 @@ body {
 }
 
 /* =====================================================================
+   The basket, always in reach
+   ===================================================================== */
+
+/* Anchored to the viewport, never the document. Above every layer of the
+   menu — the chapter veils, the grain, the footer band all paint within
+   the page's own stacking contexts, so a bare z-50 on the link would lose
+   to them once the page scrolled. Lift it into its own layer instead, and
+   keep it clear of the notch on phones. */
+.cart-fab {
+  z-index: 60;
+  isolation: isolate;
+}
+
+.cart-fab:focus-visible {
+  outline: 1px solid var(--color-gold-soft);
+  outline-offset: 3px;
+}
+
+/* The count. A dark chip on the gold face — the face is light and the
+   hairline of the pill already carries the edge, so the badge reads as
+   struck metal rather than as a second floating pill. */
+.cart-fab-count {
+  background: rgba(26, 10, 12, 0.88);
+  color: #f7ecc4;
+  box-shadow: inset 0 0 0 1px rgba(247, 236, 196, 0.28);
+  font-family: var(--font-sans);
+}
+
+@media (max-width: 639px) {
+  .cart-fab {
+    bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+    right: max(1.25rem, env(safe-area-inset-right, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-fab {
+    transition: none;
+  }
+}
+
+/* =====================================================================
    Masthead
    ===================================================================== */
 

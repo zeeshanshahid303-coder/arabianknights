@@ -416,32 +416,48 @@ const requestBill = async () => {
         </section>
       ))}
 
-      {/* The basket, always within reach once there is something in it. */}
-      {cartCount > 0 && (
-        <a
-          href="/cart"
-          className="btn-gold fixed bottom-6 right-6 z-50 inline-flex items-center gap-3 rounded-full px-7 py-4 text-[0.8125rem] font-semibold tracking-[0.1em]"
-        >
-          <span className="btn-icon" aria-hidden>
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-            >
-              <path
-                d="M4 7.5h12l-1.1 8.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L4 7.5Z"
-                strokeLinejoin="round"
-              />
-              <path d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5" strokeLinecap="round" />
-            </svg>
-          </span>
+      {/* The basket. Pinned to the viewport rather than the document, so
+          it is the same height above the fold at the top of the menu and
+          at the bottom of it — a customer who has scrolled to the last
+          chapter is as far from a cart link as one who has not moved. */}
+      <a
+        href="/cart"
+        aria-label={`View your order${cartCount > 0 ? ` — ${cartCount} item${cartCount === 1 ? "" : "s"}` : ""}`}
+        className="btn-gold cart-fab fixed bottom-6 right-6 z-50 inline-flex items-center gap-3 rounded-full py-4 pl-5 pr-6 text-[0.8125rem] font-semibold tracking-[0.1em] transition-[padding] duration-400"
+      >
+        <span className="btn-icon" aria-hidden>
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+          >
+            <path
+              d="M4 7.5h12l-1.1 8.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L4 7.5Z"
+              strokeLinejoin="round"
+            />
+            <path d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5" strokeLinecap="round" />
+          </svg>
+        </span>
 
-          <span className="btn-label">Cart ({cartCount})</span>
-        </a>
-      )}
+        {/* The count is the badge. It sits on the gold face rather than
+            floating above it — against a light gradient, an inverted dot
+            would read as a smudge at small sizes, and the Request Bill
+            button above needs the inverted treatment far more than the
+            cart does. */}
+        <span className="btn-label hidden sm:inline">View Cart</span>
+
+        {cartCount > 0 && (
+          <span
+            aria-hidden
+            className="cart-fab-count inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.75rem] font-semibold tabular-nums"
+          >
+            {cartCount}
+          </span>
+        )}
+      </a>
     </div>
   );
 }
