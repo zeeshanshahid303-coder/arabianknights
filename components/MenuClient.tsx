@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useEffect, useState } from "react";
 import { supabase, uniqueChannelTopic } from "../lib/supabase";
 export default function MenuClient({
@@ -289,8 +290,9 @@ const requestBill = async () => {
   );
 
   return (
-    <div className="relative">
-      {/* ==========================================================
+    <>
+      <div className="relative">
+        {/* ==========================================================
           Service bar. Only present at a table that has a live
           dine-in session — the two requests below are meaningless
           everywhere else.
@@ -415,50 +417,66 @@ const requestBill = async () => {
           </div>
         </section>
       ))}
+      </div>
 
-      {/* The basket. Pinned to the viewport rather than the document, so
-          it is the same height above the fold at the top of the menu and
-          at the bottom of it — a customer who has scrolled to the last
-          chapter is as far from a cart link as one who has not moved. */}
-      <a
-        href="/cart"
-        aria-label={`View your order${cartCount > 0 ? ` — ${cartCount} item${cartCount === 1 ? "" : "s"}` : ""}`}
-        className="btn-gold cart-fab fixed bottom-6 right-6 z-50 inline-flex items-center gap-3 rounded-full py-4 pl-5 pr-6 text-[0.8125rem] font-semibold tracking-[0.1em] transition-[padding] duration-400"
-      >
-        <span className="btn-icon" aria-hidden>
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.4"
+      {/* --------------------------------------------------------
+          The basket. Portalled to <body> and shown only once there
+          is something in it, so it is a true floating action button:
+          anchored to the viewport rather than sitting in the page
+          flow, unaffected by anything the menu's own containers
+          might do to their children's positioning, and out of the
+          way of a customer who has not ordered yet.
+
+          Safe to portal without a mounted guard — the cart starts
+          empty on the server and is only ever filled from
+          localStorage inside an effect, so this branch is
+          unreachable during SSR and never mismatches.
+          -------------------------------------------------------- */}
+      {cartCount > 0 &&
+        createPortal(
+          <a
+            href="/cart"
+            aria-label={`View your order — ${cartCount} item${
+              cartCount === 1 ? "" : "s"
+            }`}
+            className="btn-gold cart-fab"
           >
-            <path
-              d="M4 7.5h12l-1.1 8.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L4 7.5Z"
-              strokeLinejoin="round"
-            />
-            <path d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5" strokeLinecap="round" />
-          </svg>
-        </span>
+            <span className="btn-icon" aria-hidden>
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+              >
+                <path
+                  d="M4 7.5h12l-1.1 8.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L4 7.5Z"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M7.5 7.5V6a2.5 2.5 0 0 1 5 0v1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
 
-        {/* The count is the badge. It sits on the gold face rather than
-            floating above it — against a light gradient, an inverted dot
-            would read as a smudge at small sizes, and the Request Bill
-            button above needs the inverted treatment far more than the
-            cart does. */}
-        <span className="btn-label hidden sm:inline">View Cart</span>
+            <span className="btn-label hidden sm:inline">View Cart</span>
 
-        {cartCount > 0 && (
-          <span
-            aria-hidden
-            className="cart-fab-count inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.75rem] font-semibold tabular-nums"
-          >
-            {cartCount}
-          </span>
+            {/* The count rides on the gold face rather than floating
+                above it — against a light gradient an inverted dot
+                reads as a smudge at this size, and the Request Bill
+                button needs the inverted treatment far more. */}
+            <span
+              aria-hidden
+              className="cart-fab-count inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-[0.75rem] font-semibold tabular-nums"
+            >
+              {cartCount}
+            </span>
+          </a>,
+          document.body
         )}
-      </a>
-    </div>
+    </>
   );
 }
 

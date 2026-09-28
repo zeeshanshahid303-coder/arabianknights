@@ -511,14 +511,28 @@ body {
    The basket, always in reach
    ===================================================================== */
 
-/* Anchored to the viewport, never the document. Above every layer of the
-   menu — the chapter veils, the grain, the footer band all paint within
-   the page's own stacking contexts, so a bare z-50 on the link would lose
-   to them once the page scrolled. Lift it into its own layer instead, and
-   keep it clear of the notch on phones. */
+/* Pinned to the viewport, not the document.
+
+   Portalled to <body> and given the positioning outright rather than
+   through utilities, so it is anchored to the viewport no matter what a
+   future layout wrapper does to the tree. The insets stay clear of the
+   home indicator on phones. */
 .cart-fab {
-  z-index: 60;
-  isolation: isolate;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483000;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1rem 1.25rem;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .cart-fab:focus-visible {
@@ -538,8 +552,8 @@ body {
 
 @media (max-width: 639px) {
   .cart-fab {
-    bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
-    right: max(1.25rem, env(safe-area-inset-right, 0px));
+    bottom: max(24px, env(safe-area-inset-bottom, 0px));
+    right: max(24px, env(safe-area-inset-right, 0px));
   }
 }
 
