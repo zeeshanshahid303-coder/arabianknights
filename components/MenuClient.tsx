@@ -56,6 +56,16 @@ const [orderStatus, setOrderStatus] = useState<
   "idle" | "received" | "preparing" | "ready" | "served"
 >("idle");
 
+/* Every order on this table, with its lines and its own place on the
+   service line. The shape here is what loadSessionState hands over —
+   `lines` is built client-side, because an order can carry the same dish
+   more than once and the guest should read one row per dish, not two.
+   Deliberately only a session, not the whole table, so the badge on a
+   still-pending approval cannot stand in for a real dish — the hero
+   timeline below is the session's floor, and the panel is where a single
+   round can be inspected in full. */
+const [activeOrders, setActiveOrders] = useState<ActiveOrder[]>([]);
+
 // Session-scoped bill state. `table_sessions.bill_requested` is the
 // source of truth (not localStorage), so this always reflects the
 // CURRENT session for this table — a new customer at the same table
@@ -141,11 +151,99 @@ const getTableRow = async () => {
 const SERVED_STATUSES = ["SERVED", "COMPLETED"];
 
 const ORDER_STAGES = [
-  { key: "received", label: "Order Received", match: (s: string) => s === "NEW" },
-  { key: "preparing", label: "Being Prepared", match: (s: string) => s === "PREPARING" },
-  { key: "ready", label: "Ready", match: (s: string) => s === "READY" },
-  { key: "served", label: "Served", match: (s: string) => SERVED_STATUSES.includes(s) },
+  { key: "received", label: "Order Received", match: (s: string | null | undefined) => s === "NEW" },
+  { key: "preparing", label: "Being Prepared", match: (s: string | null | undefined) => s === "PREPARING" },
+  { key: "ready", label: "Ready", match: (s: string | null | undefined) => s === "READY" },
+  { key: "served", label: "Served", match: (s: string | null | undefined) => (s !== null && s !== undefined && SERVED_STATUSES.includes(s)) },
 ] as const;
+
+type StageKey = (typeof ORDER_STAGES)[number]["key"];
+
+/* Which of the four stops one status is at.
+
+   The same table the session-level thread is drawn from, read per order so
+   a second round sitting in the pan while the first is already at the
+   table still shows where it actually is. Null only for the two statuses
+   outside the thread: a cancelled order, and one still waiting on the
+   cashier to approve it — neither is a stop the guest has reached, and
+   neither is dressed up as one here. */
+function stageForStatus(status: string | null | undefined): StageKey | null {
+  if (!status) return null;
+
+  return ORDER_STAGES.find((stage) => stage.match(status))?.key ?? null;
+}
+
+/* A money figure as the house writes it.
+
+   Postgres numeric and Supabase's JS client both hand numbers back as
+   strings, and an unformatted one is where a leading zero goes missing
+   ("₹.00" reads as a bug) and trailing zeros trail out of a sum. So the
+   figure is parsed, and anything that does not parse is treated as zero
+   rather than rendered as NaN — a total is never better shown wrong. */
+function toAmount(value: number | string | null | undefined): number {
+  const amount = typeof value === "string" ? Number(value) : value;
+
+  return typeof amount === "number" && Number.isFinite(amount) ? amount : 0;
+}
+
+function formatAmount(value: number | string | null | undefined): string {
+  return toAmount(value).toFixed(2);
+}
+
+const currency = (value: number | string | null | undefined) => `₹${formatAmount(value)}`;
+
+/* ------------------------------------------------------------------
+   One round of an order, as the active-orders panel reads it. `lines`
+   are already grouped — the panel never has to fold the same dish
+   together itself.
+   ------------------------------------------------------------------ */
+type ActiveOrderLine = {
+  key: string;
+  name: string;
+  quantity: number;
+  amount: number;
+};
+
+type ActiveOrder = {
+  id: string;
+  label: string;
+  stage: StageKey | null;
+  stageLabel: string;
+  lines: ActiveOrderLine[];
+  total: number;
+};
+
+/* ------------------------------------------------------------------
+   Folds a round's lines into one row per dish. sum()/add() in the cart
+   write each add as its own order_items row, so three taps on the same
+   dish are three rows pointing at the same menu item — a guest reading
+   that as three dishes has been told the wrong thing.
+   ------------------------------------------------------------------ */
+function groupOrderLines(
+  raw: OrderItemRow[] | null | undefined
+): ActiveOrderLine[] {
+  const byMenuItem = new Map<string, ActiveOrderLine>();
+
+  (raw ?? []).forEach((line, index) => {
+    const key = line.menu_item_id || `row-${index}`;
+    const existing = byMenuItem.get(key);
+
+    if (existing) {
+      existing.quantity += toAmount(line.quantity);
+      existing.amount += toAmount(line.total_price);
+      return;
+    }
+
+    byMenuItem.set(key, {
+      key,
+      name: line.menu_items?.name?.trim() || "Dish",
+      quantity: toAmount(line.quantity),
+      amount: toAmount(line.total_price),
+    });
+  });
+
+  return [...byMenuItem.values()];
+}
 
 /* How far along the session is, as a single stop.
 
@@ -155,7 +253,7 @@ const ORDER_STAGES = [
    reached once EVERY live order has reached it, so the guest is never
    told a dish is ready while another is still raw. */
 function deriveOrderStatus(
-  orders: { status: string }[]
+  orders: { status: string | null | undefined }[]
 ): "idle" | "received" | "preparing" | "ready" | "served" {
   const live = (orders ?? []).filter(
     (order) => order.status !== "CANCELLED"
@@ -173,11 +271,91 @@ function deriveOrderStatus(
   return "received";
 }
 
+// A row as loadSessionState reads it: the order's own money and status,
+// with its lines nested under it. `order_items` carries a foreign key to
+// `orders`, so this is the one query that can return a whole round
+// grouped the way it was placed — no second request, no second source of
+// truth that could disagree with the first.
+type OrderRow = {
+  id: string;
+  status: string | null;
+  created_at: string | null;
+  subtotal: number | string | null;
+  gst: number | string | null;
+  discount: number | string | null;
+  total: number | string | null;
+  order_items?: OrderItemRow[] | null;
+};
+
+type OrderItemRow = {
+  id: string;
+  order_id: string | null;
+  menu_item_id: string | null;
+  quantity: number;
+  unit_price: number | string;
+  total_price: number | string;
+  menu_items?: { name: string | null } | null;
+};
+
+/* The two knobs of orders.total. Read from the order rather than summed
+   from its lines, because the cashier's approved discount lands on the
+   order (app/cash-counter allocates it per order and rewrites total);
+   recomputing the figure here from subtotal alone would quietly bill the
+   guest the pre-discount amount. GST is added because it is not folded
+   into subtotal at insert — app/cart writes the two separately.
+
+   With a null total on any order, the sum of the others is used instead:
+   one order that has not been through pricing yet should hold up the
+   figure, not blank the tab. */
+function sumSessionTotal(orders: OrderRow[]): number {
+  let sum = 0;
+
+  for (const order of orders) {
+    const total = order.total === null || order.total === undefined
+      ? null
+      : toAmount(order.total);
+
+    sum +=
+      total === null
+        ? Math.max(
+            0,
+            toAmount(order.subtotal) + toAmount(order.gst) - toAmount(order.discount)
+          )
+        : total;
+  }
+
+  return sum;
+}
+
+/* Short rounds get named by the minute they were placed. Two rounds
+   inside the same minute, or a clock this app's timezone cannot render,
+   would otherwise be called the same thing — so the two claims are never
+   both made: the number is used whenever it is needed to tell the rounds
+   apart, and the time only when it is not. */
+function orderRoundLabel(
+  order: OrderRow,
+  index: number,
+  sameMinute: boolean
+): string {
+  const placed = order.created_at ? new Date(order.created_at) : null;
+
+  const time = placed && !Number.isNaN(placed.getTime())
+    ? placed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : null;
+
+  if (time && !sameMinute) return `Order ${index + 1} · ${time}`;
+
+  return `Order ${index + 1}`;
+}
+
+const [runningTotal, setRunningTotal] = useState(0);
+
 // Refreshes bill/session state for the table's CURRENT session:
 // - billRequested comes straight from table_sessions.bill_requested
 // - sessionComplete is true only once every non-cancelled order in this
 //   session is COMPLETED (orders table only ever has NEW/COMPLETED)
 // - orderStatus is where the session has got to on the service line
+// - activeOrders and runningTotal are that same result read out in full
 const loadSessionState = async () => {
   const tableRow = await getTableRow();
 
@@ -185,6 +363,8 @@ const loadSessionState = async () => {
     setBillRequested(false);
     setSessionComplete(false);
     setOrderStatus("idle");
+    setActiveOrders([]);
+    setRunningTotal(0);
     return;
   }
 
@@ -198,19 +378,64 @@ const loadSessionState = async () => {
       .single(),
     supabase
       .from("orders")
-      .select("id, status")
+      .select(`
+        id, status, created_at, subtotal, gst, discount, total,
+        order_items (
+          id, order_id, menu_item_id, quantity, unit_price, total_price,
+          menu_items ( name )
+        )
+      `)
       .eq("session_id", sessionId)
-      .neq("status", "CANCELLED"),
+      .neq("status", "CANCELLED")
+      .order("created_at", { ascending: true }),
   ]);
 
+  /* The row types above exist to give the three derivations below a
+     typed argument. supabase-js untyped hands back `any`, and its own
+     nested-relation inference types `menu_items` as a one-element ARRAY
+     where PostgREST sends an object — the details are asserted on at the
+     one place that reads them instead. */
+  const orders = (sessionOrders ?? []) as unknown as OrderRow[];
+
   setBillRequested(Boolean(sessionRow?.bill_requested));
-  setOrderStatus(deriveOrderStatus(sessionOrders ?? []));
+  setOrderStatus(deriveOrderStatus(orders));
 
   setSessionComplete(
-    Boolean(sessionOrders?.length) &&
-   (sessionOrders ?? []).every(
+    Boolean(orders.length) &&
+   orders.every(
   (order) => order.status === "COMPLETED"
 )
+  );
+
+  // What the running tab shows — this session's whole spend, which is
+  // the one number a diner wants while the food is still arriving.
+  setRunningTotal(sumSessionTotal(orders));
+
+  const minuteOf = (order: OrderRow) =>
+    order.created_at ? new Date(order.created_at).getTime() : 0;
+
+  setActiveOrders(
+    orders.map((order, index) => {
+      const stage = stageForStatus(order.status);
+      const sameMinute = orders.some(
+        (other, otherIndex) =>
+          otherIndex !== index && minuteOf(other) === minuteOf(order)
+      );
+
+      return {
+        id: order.id,
+        label: orderRoundLabel(order, index, sameMinute),
+        stage,
+        stageLabel:
+          stage === null
+            ? order.status === "PENDING_APPROVAL"
+              ? "Awaiting Approval"
+              : "Not In Service"
+            : (ORDER_STAGES.find((s) => s.key === stage)?.label ?? ""),
+        lines: groupOrderLines(order.order_items),
+        total: sumSessionTotal([order]),
+      };
+    })
   );
 };
 
@@ -470,6 +695,47 @@ const requestBill = async () => {
               : ""}
           </span>
 
+          {/* The running tab. What the table has spent so far, read
+              from the same orders the kitchen is working — so it moves
+              the moment a round is added, amended or cancelled, without
+              the guest having to pull. A figure, not a control: it is
+              kept out of the tab order for that reason. */}
+          {activeOrders.length > 0 && (
+            <div
+              className="running-tab ml-auto flex items-center gap-3 self-start sm:self-auto"
+              aria-label={`Running total ${currency(runningTotal)}`}
+            >
+              <span className="running-tab-mark" aria-hidden>
+                {/* The house's ledger rule — three lines under a head,
+                    the same hand as the marks on the service line. */}
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4.5 4.2h11" />
+                  <path d="M4.5 8.1h7" />
+                  <path d="M4.5 12h9" />
+                  <path d="M4.5 15.9h5" />
+                </svg>
+              </span>
+
+              <span className="running-tab-text">
+                <span className="running-tab-label">
+                  Running Total
+                </span>
+                <span className="running-tab-figure tabular-nums">
+                  {currency(runningTotal)}
+                </span>
+              </span>
+            </div>
+          )}
+
           {/* Only appears once every order in this session is COMPLETED.
               Once requested, stays "Bill Requested" — backed by
               table_sessions.bill_requested, so it survives a refresh and
@@ -593,6 +859,155 @@ const requestBill = async () => {
                 {orderStatus === "served" &&
                   "Served. Enjoy your meal."}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ==========================================================
+          The active orders. Every round this table has placed, newest
+          last, each with its own line on the service line above — so a
+          table that has ordered twice can see which round is still in
+          the pan rather than being told, as a single thread can only
+          tell them, that the table as a whole has moved.
+          ========================================================== */}
+      {dineInSession && activeOrders.length > 0 && (
+        <div className="relative mx-auto mb-16 max-w-3xl px-6 lg:px-12">
+          <div className="cart-panel cart-panel-pad relative overflow-hidden">
+            <div
+              className="mashrabiya-gold absolute inset-0 h-full w-full opacity-[0.03] pointer-events-none"
+              aria-hidden
+              style={{
+                maskImage:
+                  "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse at top, #000 0%, transparent 70%)",
+              }}
+            />
+
+            <div className="relative">
+              <p
+                className="eyebrow mb-2 text-center"
+                style={{ color: "var(--color-gold)" }}
+              >
+                Active Orders
+              </p>
+
+              <h2
+                className="mb-8 text-center"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "1.5rem",
+                  fontWeight: 400,
+                  lineHeight: 1.2,
+                  letterSpacing: "0.01em",
+                  color: "var(--color-ivory)",
+                }}
+              >
+                {activeOrders.length === 1
+                  ? "One Round on the Table"
+                  : `${activeOrders.length} Rounds on the Table`}
+              </h2>
+
+              <ol className="order-stack">
+                {activeOrders.map((order) => (
+                  <li key={order.id} className="order-round">
+                    <div className="order-round-head">
+                      <div className="order-round-heading">
+                        <p className="order-round-name">{order.label}</p>
+
+                        <p
+                          className="order-round-state"
+                          data-stage={order.stage ?? "none"}
+                        >
+                          {order.stageLabel}
+                        </p>
+                      </div>
+
+                      <p className="order-round-total tabular-nums">
+                        {currency(order.total)}
+                      </p>
+                    </div>
+
+                    {order.lines.length > 0 ? (
+                      <ul className="order-lines">
+                        {order.lines.map((line) => (
+                          <li key={line.key} className="order-line">
+                            <span className="order-line-qty tabular-nums">
+                              {line.quantity}&times;
+                            </span>
+
+                            <span className="order-line-name">
+                              {line.name}
+                            </span>
+
+                            <span className="order-line-amount tabular-nums">
+                              {currency(line.amount)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      /* A round whose lines are still being written. Said
+                         rather than left as a blank block, so a guest is
+                         never left reading an order that appears empty. */
+                      <p className="order-round-empty">
+                        Being written to the order.
+                      </p>
+                    )}
+
+                    {/* The session thread again, at this round's own
+                        depth. Same marks, same order, read off this
+                        order's status — a compact thread of its own so
+                        it does not have to borrow the panel's. */}
+                    <ol className="service-line service-line-compact">
+                      {ORDER_STAGES.map((stage, index) => {
+                        const at = ORDER_STAGES.findIndex(
+                          (s) => s.key === order.stage
+                        );
+
+                        const state =
+                          index < at
+                            ? "done"
+                            : index === at
+                            ? "active"
+                            : "pending";
+
+                        return (
+                          <li
+                            key={stage.key}
+                            className="service-step"
+                            data-state={state}
+                          >
+                            <span className="service-mark" aria-hidden>
+                              {state === "done" ? (
+                                <svg
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 20 20"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M16 10H4M8 6l-4 4 4 4" />
+                                </svg>
+                              ) : (
+                                <ServiceMark stage={stage.key} />
+                              )}
+                            </span>
+
+                            <span className="service-label">
+                              {stage.label}
+                            </span>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </div>

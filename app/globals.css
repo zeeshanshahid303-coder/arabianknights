@@ -1281,6 +1281,243 @@ body {
   }
 }
 
+/* ---- The running tab ----
+
+   The table's spend so far, riding the service bar. Glass like the bell
+   beside it rather than gold: it is a figure the guest reads, not an
+   invitation to press, and it must not look like the Request Bill
+   button that sits one place along. */
+.running-tab {
+  padding: 0.625rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  background: linear-gradient(
+    160deg,
+    rgba(244, 239, 228, 0.05) 0%,
+    rgba(244, 239, 228, 0.012) 100%
+  );
+  backdrop-filter: blur(14px) saturate(115%);
+  min-width: 0;
+}
+
+.running-tab-mark {
+  flex: none;
+  display: inline-flex;
+  color: var(--color-gold);
+}
+
+.running-tab-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.running-tab-label {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ivory-faint);
+  white-space: nowrap;
+}
+
+/* The figure, in the display face at a size a diner can read across a
+   tablecloth but no larger — the running total is one line of the panel
+   below, not the panel's headline. */
+.running-tab-figure {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-gold);
+  white-space: nowrap;
+}
+
+/* Above the sm breakpoint the two sit side by side rather than stacked;
+   the figure is the larger half either way. */
+@media (min-width: 640px) {
+  .running-tab {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .running-tab-figure {
+    font-size: 1.25rem;
+  }
+}
+
+/* ---- The active orders ----
+
+   Rounds of the same meal, set one under another the way a book sets its
+   courses. Separated by a hairline rather than a gap so a long table of
+   them reads as one ledger instead of a stack of cards. */
+.order-stack {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-round {
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(212, 175, 55, 0.14);
+}
+
+.order-round:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.order-round:last-child {
+  padding-bottom: 0;
+}
+
+/* ---- A round's head: what it is, where it is, and what it has come
+   to. The three sit on one line where they can and stack where they
+   cannot, so a long dish name wraps under the pair rather than pushing
+   the total off the edge. */
+.order-round-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.375rem 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.order-round-heading {
+  min-width: 0;
+}
+
+.order-round-name {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-ivory);
+}
+
+.order-round-state {
+  margin-top: 0.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-ivory-faint);
+}
+
+/* Where it actually is. A round off the thread — cancelled, or waiting
+   on the cashier — stays faint rather than borrowing the gold of a
+   stage it has not reached. */
+.order-round-state[data-stage="received"],
+.order-round-state[data-stage="preparing"],
+.order-round-state[data-stage="ready"],
+.order-round-state[data-stage="served"] {
+  color: var(--color-gold);
+}
+
+.order-round-total {
+  flex: none;
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-ivory);
+  white-space: nowrap;
+}
+
+/* ---- The lines of a round. Quantity, dish, then what that dish came
+   to — the same three facts a diner would say aloud. */
+.order-lines {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.order-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.4375rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-ivory-muted);
+}
+
+.order-line-qty {
+  flex: none;
+  min-width: 1.5rem;
+  color: var(--color-gold);
+  font-weight: 500;
+}
+
+/* The dish takes what is left and wraps inside it. This is what keeps a
+   long name on a 360px screen from setting the amount — and the panel —
+   out past the edge. */
+.order-line-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.order-line-amount {
+  flex: none;
+  color: var(--color-ivory);
+  white-space: nowrap;
+}
+
+.order-round-empty {
+  margin: 0 0 1.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--color-ivory-faint);
+}
+
+/* ---- A round's own thread.
+
+   The session thread above is the head of this page's argument; a thread
+   inside a panel, under a dish list, is support for one round and reads
+   as furniture if given the same weight. So the marks come down to
+   1rem, the labels to 0.625rem, and the whole thing is set faint
+   until a stop is actually reached. */
+.service-line-compact {
+  margin-top: 0.25rem;
+}
+
+.service-line-compact .service-mark {
+  width: 1rem;
+  height: 1rem;
+}
+
+.service-line-compact .service-step {
+  gap: 0.75rem;
+  padding-bottom: 1.125rem;
+}
+
+/* The thread re-registers a little further in, because the marks are
+   smaller and the line must still run through their centres. */
+.service-line-compact::before {
+  left: 0.5rem;
+  right: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .service-line-compact .service-step {
+    gap: 0.625rem;
+  }
+}
+
+.service-line-compact .service-label {
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+}
+
 /* =====================================================================
    Masthead
    ===================================================================== */
