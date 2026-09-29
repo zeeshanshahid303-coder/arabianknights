@@ -64,33 +64,54 @@ export default function StaffLoginPage() {
   };
 
   return (
-    <main className="max-w-md mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">
-        Staff Login
-      </h1>
+    <main className="auth-page">
+      <div className="auth-card">
+        <p className="auth-eyebrow">Arabian Nights</p>
+        <h1 className="auth-title">Staff Login</h1>
+        <p className="auth-subtitle">
+          Kitchen, service and counter access.
+        </p>
 
-      <input
-        className="border p-2 w-full mb-3"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+        <hr className="auth-rule" />
 
-      <input
-        type="password"
-        className="border p-2 w-full mb-3"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+        <div className="auth-form">
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="staff-email">
+              Email
+            </label>
+            <input
+              id="staff-email"
+              type="email"
+              className="auth-input"
+              placeholder="you@restaurant.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-      <button
-        onClick={handleLogin}
-        disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded w-full"
-      >
-        {loading ? "Logging in..." : "Login"}
-      </button>
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="staff-password">
+              Password
+            </label>
+            <input
+              id="staff-password"
+              type="password"
+              className="auth-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            className="auth-submit"
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </div>
+      </div>
     </main>
   );
 }

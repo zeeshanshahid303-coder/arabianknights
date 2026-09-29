@@ -47,23 +47,50 @@ router.push("/admin");
   };
 
   return (
-    <div>
-      <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
-      />
+    <main className="auth-page">
+      <div className="auth-card">
+        <p className="auth-eyebrow">Arabian Nights</p>
+        <h1 className="auth-title">Admin Login</h1>
+        <p className="auth-subtitle">
+          Menu and staff administration.
+        </p>
 
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-      />
+        <hr className="auth-rule" />
 
-      <button onClick={handleLogin}>
-        {loading ? "Loading..." : "Login"}
-      </button>
-    </div>
+        <div className="auth-form">
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="admin-email">
+              Email
+            </label>
+            <input
+              id="admin-email"
+              type="email"
+              className="auth-input"
+              placeholder="you@restaurant.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="admin-password">
+              Password
+            </label>
+            <input
+              id="admin-password"
+              type="password"
+              className="auth-input"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <button onClick={handleLogin} disabled={loading} className="auth-submit">
+            {loading ? "Loading..." : "Login"}
+          </button>
+        </div>
+      </div>
+    </main>
   );
 }

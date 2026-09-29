@@ -2807,8 +2807,221 @@ body {
 .owner-chart-bar { width: 100%; background: linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.6)); border-top-left-radius: 0.25rem; border-top-right-radius: 0.25rem; }
 .owner-chart-label { font-size: 0.625rem; color: var(--color-ivory-muted); margin-top: 0.25rem; text-align: center; }
 
-.owner-breakdown-row { display: flex; items-center: center; gap: 1rem; margin-bottom: 0.75rem; }
+.owner-breakdown-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
 .owner-breakdown-track { flex: 1; background: rgba(0,0,0,0.3); border-radius: 9999px; height: 0.5rem; overflow: hidden; align-self: center; }
 .owner-breakdown-fill { height: 100%; border-radius: 9999px; }
 .owner-breakdown-label { width: 3.5rem; font-size: 0.875rem; color: var(--color-ivory-muted); }
 .owner-breakdown-value { width: 5rem; text-align: right; font-size: 0.875rem; color: var(--color-ivory); font-weight: 500; }
+
+/* =====================================================================
+   Login — one card, three doors
+
+   Staff, Admin and Owner sign-in are the same interaction wearing
+   different labels, so they share this one system rather than three
+   near-identical CSS blocks. A role is expressed by the text passed in
+   (eyebrow, title, subtitle), never by a variant class — which means a
+   fourth door added later inherits the look for free.
+
+   Deliberately spare. This screen is read by someone standing at a
+   tablet in a dark dining room, so: one card, one hairline, one gold
+   rule, and nothing that moves.
+   ===================================================================== */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  /* The same night air the rest of the house sits in, drawn from the
+     shared tokens so a door never looks like a different restaurant. */
+  background:
+    radial-gradient(
+      80% 60% at 50% 0%,
+      rgba(212, 175, 55, 0.08) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      90% 70% at 50% 100%,
+      var(--color-maroon-core) 0%,
+      transparent 75%
+    ),
+    var(--color-night);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 24rem;
+  padding: 2rem 1.75rem 1.75rem;
+  border-radius: 0.875rem;
+  background: linear-gradient(
+    165deg,
+    rgba(244, 239, 228, 0.06) 0%,
+    rgba(244, 239, 228, 0.015) 100%
+  );
+  border: 1px solid var(--color-hairline);
+  backdrop-filter: blur(14px) saturate(115%);
+  box-shadow:
+    inset 0 1px 0 rgba(244, 239, 228, 0.08),
+    0 30px 60px -40px rgba(0, 0, 0, 0.95);
+}
+
+/* Eyebrow, then title, then one line of quiet context. The rule between
+   the head and the form is the same hairline used everywhere else. */
+.auth-eyebrow {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.auth-title {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.875rem;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--color-ivory);
+}
+
+.auth-subtitle {
+  margin: 0.375rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-ivory-muted);
+}
+
+.auth-rule {
+  height: 1px;
+  margin: 1.5rem 0;
+  border: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 175, 55, 0.4) 50%,
+    transparent 100%
+  );
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.auth-label {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ivory-muted);
+}
+
+/* Dark glass input. The UA autofill chrome is a light yellow box on
+   most platforms and would blow a hole in the card, so it is forced
+   back to the same ink and face as the rest of the field. */
+.auth-input {
+  width: 100%;
+  padding: 0.6875rem 0.875rem;
+  border-radius: 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--color-hairline);
+  color: var(--color-ivory);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  transition: border-color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-input::placeholder {
+  color: var(--color-ivory-faint);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-ivory);
+  -webkit-box-shadow: 0 0 0 1000px rgba(4, 2, 6, 0.9) inset;
+  caret-color: var(--color-ivory);
+}
+
+/* Errors stay inline rather than in a dialog, so the message lands
+   where the eye already is and the form is still usable after it. */
+.auth-error {
+  margin: 0;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.5rem;
+  background: rgba(185, 28, 28, 0.12);
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  color: #fca5a5;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.8125rem 1.25rem;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    180deg,
+    rgba(212, 175, 55, 0.92) 0%,
+    rgba(184, 151, 44, 0.92) 100%
+  );
+  color: #120c04;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    filter 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.auth-submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.auth-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-submit:focus-visible,
+.auth-input:focus-visible {
+  outline: 1px solid var(--color-gold-soft);
+  outline-offset: 2px;
+}
+
+.auth-note {
+  margin: 1.25rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--color-ivory-faint);
+}

@@ -48,49 +48,54 @@ export default function OwnerLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-      <div className="bg-white rounded-xl shadow p-8 w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">Owner Login</h1>
-        <p className="text-sm text-gray-500 mb-6">
+    <main className="auth-page">
+      <div className="auth-card">
+        <p className="auth-eyebrow">Arabian Nights</p>
+        <h1 className="auth-title">Owner Login</h1>
+        <p className="auth-subtitle">
           Restaurant management — owner access
         </p>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">
+        <hr className="auth-rule" />
+
+        <div className="auth-form">
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="owner-email">
               Email
             </label>
             <input
+              id="owner-email"
               type="email"
+              className="auth-input"
+              placeholder="owner@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border p-3 rounded"
-              placeholder="owner@example.com"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="owner-password">
               Password
             </label>
             <input
+              id="owner-password"
               type="password"
+              className="auth-input"
+              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border p-3 rounded"
-              placeholder="••••••••"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleLogin();
               }}
             />
           </div>
 
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && <p className="auth-error">{error}</p>}
 
           <button
             onClick={handleLogin}
             disabled={loading}
-            className="w-full bg-black text-white px-4 py-3 rounded disabled:opacity-60"
+            className="auth-submit"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
