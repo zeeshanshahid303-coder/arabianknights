@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -399,442 +400,479 @@ export default function OwnerDashboardPage() {
       : "Custom Range";
 if (checkingAccess) {
   return (
-    <main className="p-6">
-      Checking access...
+    <main className="owner-page flex items-center justify-center">
+      <p className="text-gray-500 font-medium">Checking access...</p>
     </main>
   );
 }
 
   return (
-    <main className="min-h-screen bg-gray-100 p-4 sm:p-6">
-    <div className="flex justify-between items-center mb-6">
-  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-    Owner Dashboard
-  </h1>
+    <main className="owner-page">
+      <div className="owner-head">
+        <div>
+          <div className="owner-eyebrow">Arabian Nights</div>
+          <h1 className="owner-title">Owner Dashboard</h1>
+        </div>
 
-  <button
-    onClick={async () => {
-      await supabase.auth.signOut();
-      router.push("/owner/login");
-    }}
-    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
-  >
-    Logout
-  </button>
-</div>
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut();
+            router.push("/owner/login");
+          }}
+          className="admin-btn admin-btn-primary"
+        >
+          Logout
+        </button>
+      </div>
+
       {loading ? (
-        <p className="text-gray-500">Loading dashboard...</p>
+        <p className="text-gray-500 font-medium text-center py-10">Loading dashboard...</p>
       ) : (
         <>
           {/* SUMMARY CARDS */}
-          <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 mb-8">
-            <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-sm text-gray-500">Today's Sales</p>
-              <p className="text-2xl font-bold text-gray-900">₹{todaysSales}</p>
-            </div>
+          <div className="owner-section">
+            <div className="owner-grid-summary">
+              <div className="owner-summary-card">
+                <p className="owner-summary-label">Today&apos;s Sales</p>
+                <p className="owner-summary-value">₹{todaysSales}</p>
+              </div>
 
-            <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-sm text-gray-500">Today's Orders</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {todaysOrders.length}
-              </p>
-            </div>
+              <div className="owner-summary-card">
+                <p className="owner-summary-label">Today&apos;s Orders</p>
+                <p className="owner-summary-value">
+                  {todaysOrders.length}
+                </p>
+              </div>
 
-            <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-sm text-gray-500">Monthly Sales</p>
-              <p className="text-2xl font-bold text-gray-900">₹{monthlySales}</p>
-            </div>
+              <div className="owner-summary-card">
+                <p className="owner-summary-label">Monthly Sales</p>
+                <p className="owner-summary-value">₹{monthlySales}</p>
+              </div>
 
-            <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-sm text-gray-500">Monthly Orders</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {monthOrders.length}
-              </p>
-            </div>
+              <div className="owner-summary-card">
+                <p className="owner-summary-label">Monthly Orders</p>
+                <p className="owner-summary-value">
+                  {monthOrders.length}
+                </p>
+              </div>
 
-            <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-sm text-gray-500">Cancelled This Month</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {cancelledThisMonth.length}
-              </p>
-            </div>
+              <div className="owner-summary-card">
+                <p className="owner-summary-label">Cancelled This Month</p>
+                <p className="owner-summary-value">
+                  {cancelledThisMonth.length}
+                </p>
+              </div>
 
-            <div className="bg-white rounded-xl shadow p-4">
-              <p className="text-sm text-gray-500">Active Owners</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {activeOwnersCount}
-              </p>
+              <div className="owner-summary-card">
+                <p className="owner-summary-label">Active Owners</p>
+                <p className="owner-summary-value">
+                  {activeOwnersCount}
+                </p>
+              </div>
             </div>
           </div>
 
           {/* SALES ANALYTICS */}
-          <h2 className="text-xl font-bold mb-4 text-gray-900">
-            📊 Sales Analytics
-          </h2>
-
-          <div className="bg-white rounded-xl shadow p-4 mb-8">
-            <div className="flex flex-wrap gap-2 mb-4">
-              {(["today", "7d", "30d", "custom"] as RangeKey[]).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setRange(key)}
-                  className={`px-4 py-2 rounded font-medium text-sm ${
-                    range === key
-                      ? "bg-black text-white"
-                      : "bg-gray-200 text-gray-800"
-                  }`}
-                >
-                  {key === "today"
-                    ? "Today"
-                    : key === "7d"
-                    ? "Last 7 Days"
-                    : key === "30d"
-                    ? "Last 30 Days"
-                    : "Custom Range"}
-                </button>
-              ))}
+          <div className="owner-section">
+            <div className="owner-section-head">
+              <h2 className="owner-section-title pr-4">Sales Analytics</h2>
             </div>
 
-            {range === "custom" && (
-              <div className="flex flex-wrap items-end gap-3 mb-4">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">From</label>
-                  <input
-                    type="date"
-                    value={customStart}
-                    onChange={(e) => setCustomStart(e.target.value)}
-                    className="border p-2 rounded"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">To</label>
-                  <input
-                    type="date"
-                    value={customEnd}
-                    onChange={(e) => setCustomEnd(e.target.value)}
-                    className="border p-2 rounded"
-                  />
-                </div>
-                <button
-                  onClick={applyCustomRange}
-                  disabled={customLoading || !customStart || !customEnd}
-                  className="bg-slate-800 text-white px-4 py-2 rounded disabled:opacity-60"
-                >
-                  {customLoading ? "Loading..." : "Apply"}
-                </button>
-              </div>
-            )}
-
-            <p className="text-sm text-gray-500 mb-3">{rangeLabel}</p>
-
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500">Total Sales</p>
-                <p className="text-xl font-bold text-gray-900">
-                  ₹{rangeTotalSales}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500">Cash Sales</p>
-                <p className="text-xl font-bold text-gray-900">₹{cashSales}</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500">UPI Sales</p>
-                <p className="text-xl font-bold text-gray-900">₹{upiSales}</p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-500">Card Sales</p>
-                <p className="text-xl font-bold text-gray-900">₹{cardSales}</p>
-              </div>
-            </div>
-
-            {rangePayments.length === 0 && (
-              <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 mb-6">
-                No payment records yet — Cash/UPI/Card breakdown will populate
-                automatically once payments start being recorded to the
-                database. Total Sales above is accurate today (computed from
-                orders); the breakdown is not yet, since payment mode isn't
-                persisted anywhere currently.
-              </p>
-            )}
-
-            {/* REVENUE TREND — plain div bar chart, no charting library */}
-            <p className="text-sm font-semibold text-gray-700 mb-2">
-              Revenue Trend
-            </p>
-            {trendByDay.length === 0 ? (
-              <p className="text-sm text-gray-500">No orders in this range.</p>
-            ) : (
-              <div className="flex items-end gap-2 h-40 border-b border-l p-2">
-                {trendByDay.map((d) => (
-                  <div
-                    key={d.date}
-                    className="flex-1 flex flex-col items-center justify-end h-full"
-                    title={`${d.date}: ₹${d.total}`}
+            <div className="owner-card">
+              <div className="owner-filter-bar">
+                {(["today", "7d", "30d", "custom"] as RangeKey[]).map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => setRange(key)}
+                    className={`owner-filter-btn ${
+                      range === key
+                        ? "owner-filter-btn-active"
+                        : ""
+                    }`}
                   >
-                    <div
-                      className="w-full bg-slate-700 rounded-t"
-                      style={{
-                        height: `${(d.total / maxTrendValue) * 100}%`,
-                        minHeight: d.total > 0 ? "4px" : "0px",
-                      }}
-                    />
-                    <p className="text-[10px] text-gray-500 mt-1 rotate-0">
-                      {d.date.slice(5)}
-                    </p>
-                  </div>
+                    {key === "today"
+                      ? "Today"
+                      : key === "7d"
+                      ? "Last 7 Days"
+                      : key === "30d"
+                      ? "Last 30 Days"
+                      : "Custom Range"}
+                  </button>
                 ))}
               </div>
-            )}
 
-            {/* PAYMENT METHOD BREAKDOWN — plain bar chart */}
-            <p className="text-sm font-semibold text-gray-700 mt-6 mb-2">
-              Payment Method Breakdown
-            </p>
-            <div className="space-y-2">
-              {[
-                { label: "Cash", value: cashSales, color: "bg-green-600" },
-                { label: "UPI", value: upiSales, color: "bg-blue-600" },
-                { label: "Card", value: cardSales, color: "bg-purple-600" },
-              ].map((row) => {
-                const max = Math.max(1, cashSales, upiSales, cardSales);
-                return (
-                  <div key={row.label} className="flex items-center gap-3">
-                    <span className="w-14 text-sm text-gray-600">{row.label}</span>
-                    <div className="flex-1 bg-gray-100 rounded h-4">
-                      <div
-                        className={`${row.color} h-4 rounded`}
-                        style={{ width: `${(row.value / max) * 100}%` }}
-                      />
-                    </div>
-                    <span className="w-20 text-right text-sm text-gray-700">
-                      ₹{row.value}
-                    </span>
+              {range === "custom" && (
+                <div className="flex flex-wrap items-end gap-3 mb-6 p-4 bg-[rgba(0,0,0,0.2)] rounded-lg border border-[var(--color-hairline)]">
+                  <div>
+                    <label className="owner-input-label">From</label>
+                    <input
+                      type="date"
+                      value={customStart}
+                      onChange={(e) => setCustomStart(e.target.value)}
+                      className="owner-input"
+                    />
                   </div>
-                );
-              })}
+                  <div>
+                    <label className="owner-input-label">To</label>
+                    <input
+                      type="date"
+                      value={customEnd}
+                      onChange={(e) => setCustomEnd(e.target.value)}
+                      className="owner-input"
+                    />
+                  </div>
+                  <button
+                    onClick={applyCustomRange}
+                    disabled={customLoading || !customStart || !customEnd}
+                    className="admin-btn admin-btn-primary disabled:opacity-50 !py-[0.6rem]"
+                  >
+                    {customLoading ? "Loading..." : "Apply"}
+                  </button>
+                </div>
+              )}
+
+              <p className="text-sm text-[var(--color-gold)] opacity-80 mb-4 font-medium uppercase tracking-wider">{rangeLabel}</p>
+
+              <div className="owner-grid-sales">
+                <div className="owner-sales-metric">
+                  <p className="owner-summary-label">Total Sales</p>
+                  <p className="text-2xl font-bold text-[var(--color-ivory)] mt-1">
+                    ₹{rangeTotalSales}
+                  </p>
+                </div>
+                <div className="owner-sales-metric">
+                  <p className="owner-summary-label">Cash Sales</p>
+                  <p className="text-xl font-bold text-[var(--color-ivory-muted)] mt-1">₹{cashSales}</p>
+                </div>
+                <div className="owner-sales-metric">
+                  <p className="owner-summary-label">UPI Sales</p>
+                  <p className="text-xl font-bold text-[var(--color-ivory-muted)] mt-1">₹{upiSales}</p>
+                </div>
+                <div className="owner-sales-metric">
+                  <p className="owner-summary-label">Card Sales</p>
+                  <p className="text-xl font-bold text-[var(--color-ivory-muted)] mt-1">₹{cardSales}</p>
+                </div>
+              </div>
+
+              {rangePayments.length === 0 && (
+                <p className="text-sm text-[var(--color-gold)] bg-[rgba(212,175,55,0.05)] border border-[var(--color-hairline)] rounded-md p-3 mb-6">
+                  No payment records yet — Cash/UPI/Card breakdown will populate
+                  automatically once payments start being recorded to the
+                  database. Total Sales above is accurate today (computed from
+                  orders); the breakdown is not yet, since payment mode isn&apos;t
+                  persisted anywhere currently.
+                </p>
+              )}
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* REVENUE TREND */}
+                <div>
+                  <p className="text-sm font-semibold text-[var(--color-ivory)] uppercase tracking-wider mb-2">
+                    Revenue Trend
+                  </p>
+                  {trendByDay.length === 0 ? (
+                    <p className="text-sm text-[var(--color-ivory-muted)]">No orders in this range.</p>
+                  ) : (
+                    <div className="owner-chart-wrap">
+                      {trendByDay.map((d) => (
+                        <div
+                          key={d.date}
+                          className="owner-chart-bar-wrap"
+                          title={`${d.date}: ₹${d.total}`}
+                        >
+                          <div
+                            className="owner-chart-bar"
+                            style={{
+                              height: `${(d.total / maxTrendValue) * 100}%`,
+                              minHeight: d.total > 0 ? "4px" : "0px",
+                            }}
+                          />
+                          <p className="owner-chart-label">
+                            {d.date.slice(5)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* PAYMENT METHOD BREAKDOWN */}
+                <div>
+                  <p className="text-sm font-semibold text-[var(--color-ivory)] uppercase tracking-wider mb-4 lg:mb-2">
+                    Payment Method Breakdown
+                  </p>
+                  <div className="pt-2">
+                    {[
+                      { label: "Cash", value: cashSales, color: "bg-[var(--color-gold)]" },
+                      { label: "UPI", value: upiSales, color: "bg-blue-500" },
+                      { label: "Card", value: cardSales, color: "bg-purple-500" },
+                    ].map((row) => {
+                      const max = Math.max(1, cashSales, upiSales, cardSales);
+                      return (
+                        <div key={row.label} className="owner-breakdown-row">
+                          <span className="owner-breakdown-label">{row.label}</span>
+                          <div className="owner-breakdown-track">
+                            <div
+                              className={`owner-breakdown-fill ${row.color}`}
+                              style={{ width: `${(row.value / max) * 100}%` }}
+                            />
+                          </div>
+                          <span className="owner-breakdown-value">
+                            ₹{row.value}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* DISCOUNTS OVERVIEW */}
-          <h2 className="text-xl font-bold mb-4 text-gray-900">
-            🏷️ Discounts Overview
-          </h2>
+          <div className="owner-section">
+            <div className="owner-section-head">
+              <h2 className="owner-section-title pr-4">Discounts Overview</h2>
+            </div>
 
-          <div className="bg-white rounded-xl shadow p-4 mb-8 overflow-x-auto">
-            <table className="w-full text-sm min-w-[700px]">
-              <thead>
-                <tr className="text-left text-gray-500 border-b">
-                  <th className="py-2">Order/Session Info</th>
-                  <th className="py-2">Subtotal</th>
-                  <th className="py-2">Discount</th>
-                  <th className="py-2">Effective %</th>
-                  <th className="py-2">Requested At</th>
-                  <th className="py-2 text-center">Status</th>
-                  <th className="py-2">Approver</th>
-                  <th className="py-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentDiscounts.map((discount) => {
-                  const effectivePercent = ((discount.discount_amount / discount.original_subtotal) * 100).toFixed(1);
-                  let statusColor = "bg-gray-100 text-gray-700";
-                  if (discount.status === "PENDING") statusColor = "bg-amber-100 text-amber-700";
-                  if (discount.status === "APPROVED" || discount.status === "AUTO_APPROVED") statusColor = "bg-green-100 text-green-700";
-                  if (discount.status === "REJECTED") statusColor = "bg-red-100 text-red-700";
-
-                  const identifier = discount.orders?.customer_name
-                    ? `Order: ${discount.orders.customer_name}`
-                    : `Table ${discount.table_sessions?.tables?.table_number || discount.orders?.table_id || "Unk"}`;
-
-                  const approverLine = discount.status === "AUTO_APPROVED"
-                    ? "System"
-                    : discount.owners?.email || "—";
-
-                  return (
-                    <tr key={discount.id} className="border-b last:border-0 hover:bg-gray-50">
-                      <td className="py-3">{identifier}</td>
-                      <td className="py-3">₹{discount.original_subtotal}</td>
-                      <td className="py-3">
-                        {discount.discount_type === "PERCENTAGE" ? `${discount.discount_value}%` : `₹${discount.discount_value}`} (₹{discount.discount_amount})
-                      </td>
-                      <td className="py-3">{effectivePercent}%</td>
-                      <td className="py-3">{new Date(discount.requested_at).toLocaleString()}</td>
-                      <td className="py-3 text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${statusColor}`}>
-                          {discount.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-xs">{approverLine}</td>
-                      <td className="py-3 text-right">
-                        {discount.status === "PENDING" && (
-                          <div className="flex gap-2 justify-end">
-                            <button
-                              onClick={() => resolveDiscount(discount.id, "APPROVED")}
-                              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => resolveDiscount(discount.id, "REJECTED")}
-                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                      </td>
+            <div className="owner-card p-0">
+              <div className="owner-table-wrapper">
+                <table className="owner-table">
+                  <thead>
+                    <tr>
+                      <th className="pl-6">Order/Session Info</th>
+                      <th>Subtotal</th>
+                      <th>Discount</th>
+                      <th>Effective %</th>
+                      <th>Requested At</th>
+                      <th className="text-center">Status</th>
+                      <th>Approver</th>
+                      <th className="text-right pr-6">Actions</th>
                     </tr>
-                  );
-                })}
-                {recentDiscounts.length === 0 && (
-                  <tr>
-                    <td colSpan={8} className="py-4 text-center text-gray-500">
-                      No discounts requested in the last 31 days.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {recentDiscounts.map((discount) => {
+                      const effectivePercent = ((discount.discount_amount / discount.original_subtotal) * 100).toFixed(1);
+                      let statusClass = "owner-badge-neutral";
+                      if (discount.status === "PENDING") statusClass = "owner-badge-amber";
+                      if (discount.status === "APPROVED" || discount.status === "AUTO_APPROVED") statusClass = "owner-badge-green";
+                      if (discount.status === "REJECTED") statusClass = "owner-badge-red";
+
+                      const identifier = discount.orders?.customer_name
+                        ? `Order: ${discount.orders.customer_name}`
+                        : `Table ${discount.table_sessions?.tables?.table_number || discount.orders?.table_id || "Unk"}`;
+
+                      const approverLine = discount.status === "AUTO_APPROVED"
+                        ? "System"
+                        : discount.owners?.email || "—";
+
+                      return (
+                        <tr key={discount.id}>
+                          <td className="pl-6">{identifier}</td>
+                          <td className="font-semibold">₹{discount.original_subtotal}</td>
+                          <td className="text-[var(--color-ivory-muted)]">
+                            {discount.discount_type === "PERCENTAGE" ? `${discount.discount_value}%` : `₹${discount.discount_value}`} <br/>
+                            <span className="text-xs">(-₹{discount.discount_amount})</span>
+                          </td>
+                          <td>{effectivePercent}%</td>
+                          <td className="text-sm text-[var(--color-ivory-muted)]">{new Date(discount.requested_at).toLocaleString()}</td>
+                          <td className="text-center">
+                            <span className={`owner-badge ${statusClass}`}>
+                              {discount.status}
+                            </span>
+                          </td>
+                          <td className="text-sm opacity-80">{approverLine}</td>
+                          <td className="text-right pr-6">
+                            {discount.status === "PENDING" && (
+                              <div className="flex gap-2 justify-end">
+                                <button
+                                  onClick={() => resolveDiscount(discount.id, "APPROVED")}
+                                  className="owner-btn owner-btn-green"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => resolveDiscount(discount.id, "REJECTED")}
+                                  className="owner-btn owner-btn-red"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {recentDiscounts.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className="py-8 text-center text-[var(--color-ivory-muted)]">
+                          No discounts requested in the last 31 days.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           {/* MENU PERFORMANCE */}
-          <h2 className="text-xl font-bold mb-4 text-gray-900">
-            🍽 Menu Performance — Top Selling Items
-          </h2>
+          <div className="owner-section">
+            <div className="owner-section-head">
+              <h2 className="owner-section-title pr-4">Menu Performance</h2>
+            </div>
 
-          <div className="bg-white rounded-xl shadow p-4 mb-8 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-500 border-b">
-                  <th className="py-2">Item Name</th>
-                  <th className="py-2 text-center">Quantity Sold</th>
-                  <th className="py-2 text-right">Revenue Generated</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topItems.map((item, index) => (
-                  <tr key={index} className="border-b last:border-0">
-                    <td className="py-2">{item.name}</td>
-                    <td className="py-2 text-center">{item.quantity}</td>
-                    <td className="py-2 text-right">₹{item.revenue}</td>
-                  </tr>
-                ))}
+            <p className="text-sm text-[var(--color-gold)] opacity-80 mb-4 font-medium uppercase tracking-wider">Top Selling Items</p>
 
-                {topItems.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="py-4 text-center text-gray-500">
-                      No completed orders in the last 31 days yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            <div className="owner-card p-0">
+              <div className="owner-table-wrapper">
+                <table className="owner-table">
+                  <thead>
+                    <tr>
+                      <th className="pl-6">Item Name</th>
+                      <th className="text-center">Quantity Sold</th>
+                      <th className="text-right pr-6">Revenue Generated</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topItems.map((item, index) => (
+                      <tr key={index}>
+                        <td className="pl-6 font-medium">{item.name}</td>
+                        <td className="text-center">
+                          <span className="bg-[rgba(255,255,255,0.05)] px-3 py-1 rounded-md text-[var(--color-gold)] font-bold">
+                            {item.quantity}
+                          </span>
+                        </td>
+                        <td className="text-right pr-6 font-bold text-[var(--color-gold)]">₹{item.revenue}</td>
+                      </tr>
+                    ))}
+
+                    {topItems.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="py-8 text-center text-[var(--color-ivory-muted)]">
+                          No completed orders in the last 31 days yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           {/* OWNER MANAGEMENT */}
-          <h2 className="text-xl font-bold mb-4 text-gray-900">
-            👤 Owner Management
-          </h2>
+          <div className="owner-section">
+            <div className="owner-section-head">
+              <h2 className="owner-section-title pr-4">Owner Management</h2>
+            </div>
 
-          <div className="bg-white rounded-xl shadow p-4 mb-8">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-gray-500 border-b">
-                  <th className="py-2">Owner Email</th>
-                  <th className="py-2">Status</th>
-                  <th className="py-2">Last Login</th>
-                  <th className="py-2 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {owners.map((owner) => (
-                  <tr key={owner.id} className="border-b last:border-0">
-                    <td className="py-2">{owner.email}</td>
-                    <td className="py-2">
-                      <span
-                        className={`px-2 py-1 rounded text-xs font-medium ${
-                          owner.status === "active"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-gray-200 text-gray-600"
-                        }`}
-                      >
-                        {owner.status}
-                      </span>
-                    </td>
-                    <td className="py-2">
-                      {owner.last_login
-                        ? new Date(owner.last_login).toLocaleString()
-                        : "Never"}
-                    </td>
-                    <td className="py-2 text-right">
-                      {owner.status === "active" && (
-                        <button
-                          onClick={() => removeOwner(owner.id, owner.email)}
-                          className="bg-red-600 text-white px-3 py-1 rounded text-xs"
-                        >
-                          Remove Owner
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+            <div className="owner-card p-0">
+              <div className="owner-table-wrapper">
+                <table className="owner-table">
+                  <thead>
+                    <tr>
+                      <th className="pl-6">Owner Email</th>
+                      <th>Status</th>
+                      <th>Last Login</th>
+                      <th className="text-right pr-6">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {owners.map((owner) => (
+                      <tr key={owner.id}>
+                        <td className="pl-6">{owner.email}</td>
+                        <td>
+                          <span
+                            className={`owner-badge ${
+                              owner.status === "active"
+                                ? "owner-badge-green"
+                                : "owner-badge-neutral"
+                            }`}
+                          >
+                            {owner.status}
+                          </span>
+                        </td>
+                        <td className="text-sm text-[var(--color-ivory-muted)]">
+                          {owner.last_login
+                            ? new Date(owner.last_login).toLocaleString()
+                            : "Never"}
+                        </td>
+                        <td className="text-right pr-6">
+                          {owner.status === "active" && (
+                            <button
+                              onClick={() => removeOwner(owner.id, owner.email)}
+                              className="owner-btn owner-btn-red"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
 
-                {owners.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="py-4 text-center text-gray-500">
-                      No owners added yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* SECURITY CENTER — static placeholders only, no query, no
-              writes. owner_security_events exists in the schema for
-              a future phase to start populating. */}
-          <h2 className="text-xl font-bold mb-4 text-gray-900">
-            🛡 Security Center
-          </h2>
-
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 mb-8">
-            {[
-              "Login Alerts",
-              "Password Changes",
-              "Password Resets",
-              "Owner Added",
-              "Owner Removed",
-            ].map((label) => (
-              <div key={label} className="bg-white rounded-xl shadow p-4">
-                <p className="text-sm text-gray-500">{label}</p>
-                <p className="text-sm text-gray-400 mt-2">
-                  No events recorded yet
-                </p>
+                    {owners.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className="py-8 text-center text-[var(--color-ivory-muted)]">
+                          No owners added yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-            ))}
+            </div>
           </div>
 
-          {/* REPORTS — button stubs only, no report generation yet */}
-          <h2 className="text-xl font-bold mb-4 text-gray-900">📄 Reports</h2>
+          {/* SECURITY CENTER */}
+          <div className="owner-section">
+            <div className="owner-section-head">
+              <h2 className="owner-section-title pr-4">Security Center</h2>
+            </div>
 
-          <div className="bg-white rounded-xl shadow p-4 mb-8 flex flex-wrap gap-3">
-            <button
-              onClick={() =>
-                alert("Daily Report generation will be available in a future phase.")
-              }
-              className="bg-slate-800 text-white px-4 py-2 rounded"
-            >
-              Daily Report
-            </button>
-            <button
-              onClick={() =>
-                alert("Monthly Report generation will be available in a future phase.")
-              }
-              className="bg-slate-800 text-white px-4 py-2 rounded"
-            >
-              Monthly Report
-            </button>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              {[
+                "Login Alerts",
+                "Password Changes",
+                "Password Resets",
+                "Owner Added",
+                "Owner Removed",
+              ].map((label) => (
+                <div key={label} className="owner-card">
+                  <p className="owner-summary-label">{label}</p>
+                  <p className="text-sm text-[var(--color-ivory-muted)] mt-2 italic">
+                    No events
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* REPORTS */}
+          <div className="owner-section pb-8">
+            <div className="owner-section-head">
+              <h2 className="owner-section-title pr-4">Reports</h2>
+            </div>
+
+            <div className="owner-card">
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() =>
+                    alert("Daily Report generation will be available in a future phase.")
+                  }
+                  className="owner-btn owner-btn-primary"
+                >
+                  Daily Report
+                </button>
+                <button
+                  onClick={() =>
+                    alert("Monthly Report generation will be available in a future phase.")
+                  }
+                  className="owner-btn owner-btn-primary"
+                >
+                  Monthly Report
+                </button>
+              </div>
+            </div>
           </div>
         </>
       )}
