@@ -552,7 +552,6 @@ const handleSessionClosed = async (tableRow: {
 // - orderStatus is where the session has got to on the service line
 // - activeOrders and runningTotal are that same result read out in full
 const loadSessionState = async () => {
-  console.log("loadSessionState called!");
   const tableRow = await getTableRow();
 
   if (!tableRow?.current_session_id) {

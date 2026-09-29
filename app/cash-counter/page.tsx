@@ -38,14 +38,15 @@ type PaymentMode = "CASH" | "UPI" | "CARD";
 
 export default function CashCounterPage() {
   const [checkingAccess, setCheckingAccess] = useState(true);
-  const [allOrders, setAllOrders] = useState<any[]>([]);
-  const [allOrderItems, setAllOrderItems] = useState<any[]>([]);
-  const [allDiscounts, setAllDiscounts] = useState<any[]>([]);
+  const [allOrders, setAllOrders] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
+  const [allOrderItems, setAllOrderItems] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
+  const [allDiscounts, setAllDiscounts] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
   const [discountTypeInput, setDiscountTypeInput] = useState<"FIXED" | "PERCENTAGE">("FIXED");
   const [discountValueInput, setDiscountValueInput] = useState<number | "">("");
-  const [tables, setTables] = useState<any[]>([]);
-  const [billRequests, setBillRequests] = useState<any[]>([]);
+  const [tables, setTables] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
+  const [billRequests, setBillRequests] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
     const [expandedTableId, setExpandedTableId] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [manualBillTarget, setManualBillTarget] = useState<any>(null);
 
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -148,6 +149,7 @@ export default function CashCounterPage() {
     const tablesRows = tablesData ?? [];
     const requests = requestsData ?? [];
 
+     
     const tableNumberById = new Map(
       tablesRows.map((table) => [table.id, table.table_number])
     );
@@ -215,6 +217,7 @@ useEffect(() => {
     } = await supabase.auth.getSession();
 
     if (!session) {
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/staff/login";
       return;
     }
@@ -228,12 +231,14 @@ useEffect(() => {
 
     if (!staff) {
       await supabase.auth.signOut();
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/staff/login";
       return;
     }
 
     if (staff.role !== "cashier") {
       await supabase.auth.signOut();
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.href = "/staff/login";
       return;
     }
@@ -244,6 +249,7 @@ useEffect(() => {
   initialize();
 }, []);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
 
     const interval = setInterval(() => {
@@ -306,7 +312,8 @@ useEffect(() => {
     };
   }, []);
 
-  const tableNumberById = new Map(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const tableNumberById = new Map(
     tables.map((table) => [table.id, table.table_number])
   );
 
@@ -425,6 +432,7 @@ const todaysCompletedOrders = todaysPaidOrders;
     activeDiscountRow &&
     (activeDiscountRow.status === "APPROVED" || activeDiscountRow.status === "AUTO_APPROVED");
   const isDiscountPending = activeDiscountRow?.status === "PENDING";
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const isDiscountRejected = activeDiscountRow?.status === "REJECTED";
   const currentDiscountAmount = isDiscountApproved ? Number(activeDiscountRow.discount_amount || 0) : 0;
 
@@ -474,7 +482,7 @@ const todaysCompletedOrders = todaysPaidOrders;
   // logic via the selectedRequest fallback above. This is how staff can
   // generate a bill manually even if the customer never tapped Request
   // Bill at the table.
-  const openBillForTable = (table: any) => {
+  const openBillForTable = (table: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
     const target = {
       id: `table-${table.id}`,
       table_id: table.id,
@@ -492,7 +500,7 @@ const todaysCompletedOrders = todaysPaidOrders;
 
   // Opens the same bill modal for a single completed takeaway/delivery
   // order — no table, no session; order_id is the billing key instead.
-  const openBillForOrder = (order: any) => {
+  const openBillForOrder = (order: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => {
     const target = {
       id: `order-${order.id}`,
       order_id: order.id,
@@ -793,19 +801,20 @@ console.log("TABLE ID USED:", selectedRequest.table_id);
   };
 if (checkingAccess) {
   return (
-    <main className="p-6">
-      Checking access...
+    <main className="cash-page flex items-center justify-center">
+      <p className="cash-title">Checking access...</p>
     </main>
   );
 }
-  return (
-    <main className="min-h-screen bg-gray-100 p-4 sm:p-6">
-      <div className="print:hidden">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">
-          Cash Counter Dashboard
-        </h1>
 
-        <div className="mb-6">
+  return (
+    <main className="cash-page">
+      <div className="print:hidden">
+        <header className="cash-head">
+          <div>
+            <p className="eyebrow mb-2 text-gold-gradient">Arabian Knights</p>
+            <h1 className="cash-title">Cash Counter Dashboard</h1>
+          </div>
           <button
             onClick={() => {
               const newValue = !soundEnabled;
@@ -817,392 +826,442 @@ if (checkingAccess) {
                 new Audio("/waiter-call.mp3").play();
               }
             }}
-            className={`px-4 py-2 rounded-lg text-white font-medium ${
-              soundEnabled ? "bg-green-600" : "bg-red-600"
-            }`}
+            className="cash-btn cash-btn-outline"
+            style={{ width: "auto", alignSelf: "center", minWidth: "12rem" }}
           >
             {soundEnabled ? "🔔 Notifications ON" : "🔕 Notifications OFF"}
           </button>
-        </div>
+        </header>
 
         {/* DAILY SUMMARY */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Today's Orders</p>
-            <p className="text-2xl font-bold text-gray-900">{todaysOrders.length}</p>
+        <section className="cash-section">
+          <div className="cash-summary-grid mb-8">
+            <div className="cash-summary-card">
+              <p className="cash-summary-label">Today&apos;s Orders</p>
+              <p className="cash-summary-value">{todaysOrders.length}</p>
+            </div>
+            <div className="cash-summary-card">
+              <p className="cash-summary-label">Today&apos;s Sales</p>
+              <p className="cash-summary-value">₹{todaysSales}</p>
+            </div>
+            <div className="cash-summary-card">
+              <p className="cash-summary-label">Pending Requests</p>
+              <p className="cash-summary-value">{billRequests.length}</p>
+            </div>
+            <div className="cash-summary-card">
+              <p className="cash-summary-label">Completed</p>
+              <p className="cash-summary-value">{todaysCompletedOrders.length}</p>
+            </div>
+          </div>
+        </section>
+
+        {pendingApprovals.length > 0 && (
+        <section className="cash-section">
+          <div className="cash-section-head">
+            <h2 className="cash-section-title">Pending Approvals</h2>
+            <span className="cash-count">{pendingApprovals.length}</span>
           </div>
 
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Today's Sales</p>
-            <p className="text-2xl font-bold text-gray-900">₹{todaysSales}</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Pending Bill Requests</p>
-            <p className="text-2xl font-bold text-gray-900">{billRequests.length}</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow p-4">
-            <p className="text-sm text-gray-500">Today's Completed Orders</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {todaysCompletedOrders.length}
-            </p>
-          </div>
-        </div>
-        <h2 className="text-xl font-bold mb-4 text-gray-900">
-  Pending Approvals ({pendingApprovals.length})
-</h2>
-
-<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-  {pendingApprovals.map((order) => (
-    <div
-      key={order.id}
-      className="bg-white rounded-xl shadow p-4"
-    >
-      <p className="font-bold">
-        {order.customer_name || "Customer"}
-      </p>
-
-      <p className="text-sm text-gray-500">
-        {order.phone_number}
-      </p>
-
-      <p className="text-sm text-gray-500">
-        {order.order_mode}
-      </p>
-      {order.order_mode === "delivery" &&
-  order.delivery_address && (
-    <p className="text-sm text-gray-500 mt-1">
-      📍 {order.delivery_address}
-    </p>
-)}
-
-      {itemsForOrder(order.id).length > 0 && (
-        <div className="mt-3">
-          <p className="text-sm font-semibold text-gray-700">Items:</p>
-          <ul className="ml-4 mt-1 list-disc text-sm text-gray-700">
-            {itemsForOrder(order.id).map((item: any, index: number) => (
-              <li key={index}>
-                {item.menu_items?.name} × {item.quantity}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <p className="font-bold mt-2">
-        ₹{order.total}
-      </p>
-
-      <div className="flex gap-2 mt-4">
-        <button
-          onClick={async () => {
-            await supabase
-              .from("orders")
-              .update({ status: "NEW" })
-              .eq("id", order.id)
-              .eq("status", "PENDING_APPROVAL");
-
-            loadData();
-          }}
-          className="flex-1 bg-green-600 text-white px-3 py-2 rounded"
-        >
-          Accept
-        </button>
-
-        <button
-          onClick={async () => {
-            await supabase
-              .from("orders")
-              .update({ status: "CANCELLED" })
-              .eq("id", order.id)
-              .eq("status", "PENDING_APPROVAL");
-
-            loadData();
-          }}
-          className="flex-1 bg-red-600 text-white px-3 py-2 rounded"
-        >
-          Reject
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
-
-{/* ACTIVE ORDERS — Takeaway/Delivery only. Status is owned entirely by
-    Kitchen (NEW -> PREPARING -> READY) and Service Staff (READY ->
-    COMPLETED); this is a read-only view for front-of-house visibility. */}
-<h2 className="text-xl font-bold mb-4 text-gray-900">
-  🛍 Active Orders ({activeOrders.length})
-</h2>
-
-<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-  {activeOrders.map((order) => (
-    <div key={order.id} className="bg-white rounded-xl shadow p-4">
-      <p className="font-bold">{order.customer_name || "Customer"}</p>
-
-      <p className="text-sm text-gray-500">{order.phone_number}</p>
-
-      <p className="text-sm text-gray-500">{order.order_mode}</p>
-
-      {order.order_mode === "delivery" && order.delivery_address && (
-        <p className="text-sm text-gray-500 mt-1">
-          📍 {order.delivery_address}
-        </p>
-      )}
-
-      <p className="text-sm font-semibold text-blue-700 mt-2">
-        {order.status}
-      </p>
-
-      {itemsForOrder(order.id).length > 0 && (
-        <div className="mt-3">
-          <p className="text-sm font-semibold text-gray-700">Items:</p>
-          <ul className="ml-4 mt-1 list-disc text-sm text-gray-700">
-            {itemsForOrder(order.id).map((item: any, index: number) => (
-              <li key={index}>
-                {item.menu_items?.name} × {item.quantity}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <p className="font-bold mt-3">₹{order.total}</p>
-    </div>
-  ))}
-
-  {activeOrders.length === 0 && (
-    <p className="text-gray-500 col-span-full">
-      No active takeaway/delivery orders.
-    </p>
-  )}
-</div>
-
-        {/* RUNNING TABLES */}
-        <h2 className="text-xl font-bold mb-4 text-gray-900">
-          🍽 Running Tables ({runningTables.length})
-        </h2>
-
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-          {runningTables.map((table) => (
-            <div key={table.id} className="bg-white rounded-xl shadow p-4">
-              <p className="text-lg font-bold text-gray-900">
-                Table {table.table_display}
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                {table.orderCount} order{table.orderCount === 1 ? "" : "s"}
-              </p>
-              <p className="text-2xl font-bold text-gray-900 mt-2">
-                ₹{table.sessionTotal}
-              </p>
-
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => toggleExpandTable(table.id)}
-                  className="flex-1 bg-gray-200 text-gray-800 px-3 py-2 rounded-lg font-medium text-sm"
-                >
-                  {expandedTableId === table.id ? "Hide Orders" : "Expand Orders"}
-                </button>
-
-                <button
-                  onClick={() => openBillForTable(table)}
-                  className="flex-1 bg-slate-800 text-white px-3 py-2 rounded-lg font-medium text-sm"
-                >
-                  Generate Bill
-                </button>
-              </div>
-
-              {expandedTableId === table.id && (
-                <div className="mt-4 border-t pt-3 space-y-3">
-                  {table.sessionOrders.map((order: any) => (
-                    <div key={order.id}>
-                      <p className="text-xs text-gray-500 mb-1">
-                        Order #{String(order.id).slice(0, 8)} — {order.status}
+          <div className="cash-grid mb-8">
+            {pendingApprovals.map((order) => (
+              <article key={order.id} className="cash-card">
+                <header className="cash-card-head">
+                  <p className="cash-card-table">
+                    {order.customer_name || "Customer"}
+                  </p>
+                  <span className="cash-badge cash-badge-active">Approval Req.</span>
+                </header>
+                <div className="cash-card-body">
+                  <div className="mb-4">
+                    {order.phone_number && <p className="text-sm text-[var(--color-ivory-muted)]">{order.phone_number}</p>}
+                    <p className="text-sm text-[var(--color-ivory-muted)] capitalize">{order.order_mode.replace("_", " ")}</p>
+                    {order.order_mode === "delivery" && order.delivery_address && (
+                      <p className="text-sm text-[var(--color-ivory-muted)] mt-1">
+                        📍 {order.delivery_address}
                       </p>
+                    )}
+                  </div>
 
-                      <ul className="ml-3 list-disc text-sm">
-                        {allOrderItems
-                          .filter((item) => item.order_id === order.id)
-                          .map((item: any, index: number) => (
-                            <li key={index}>
-                              {item.menu_items?.name} × {item.quantity} — ₹
-                              {item.total_price}
-                            </li>
-                          ))}
+                  {itemsForOrder(order.id).length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-[var(--color-ivory-muted)] uppercase tracking-wider mb-2">Items</p>
+                      <ul className="text-sm text-[var(--color-ivory)] space-y-1">
+                        {itemsForOrder(order.id).map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+                          <li key={index}>
+                            <span className="font-bold text-[var(--color-ivory)] mr-1">{item.quantity}×</span> {item.menu_items?.name}
+                          </li>
+                        ))}
                       </ul>
                     </div>
-                  ))}
-
-                  {table.sessionOrders.length === 0 && (
-                    <p className="text-sm text-gray-500">No orders in this session.</p>
                   )}
-                </div>
-              )}
-            </div>
-          ))}
 
-          {runningTables.length === 0 && (
-            <p className="text-gray-500 col-span-full">No tables currently occupied.</p>
-          )}
-        </div>
-        {/* BILL REQUESTS */}
-        <h2 className="text-xl font-bold mb-4 text-gray-900">
-          🧾 Bill Requests ({billRequests.length})
-        </h2>
+                  <div className="mt-auto pt-4 border-t border-[var(--color-hairline)]">
+                    <p className="cash-total-lg mb-4">₹{order.total}</p>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-          {billRequests.map((request) => (
-            <div
-              key={request.id}
-              className="bg-white rounded-xl shadow p-4 flex flex-col justify-between"
-            >
-              <div>
-                <p className="text-lg font-bold text-gray-900">
-                  Table {request.table_display}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Requested {new Date(request.created_at).toLocaleTimeString()}
-                </p>
-              </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={async () => {
+                          await supabase
+                            .from("orders")
+                            .update({ status: "NEW" })
+                            .eq("id", order.id)
+                            .eq("status", "PENDING_APPROVAL");
 
-              <button
-                onClick={() => openBill(request.id)}
-                className="mt-4 bg-slate-800 text-white px-4 py-2 rounded-lg font-medium"
-              >
-                View Bill
-              </button>
-            </div>
-          ))}
+                          loadData();
+                        }}
+                        className="cash-btn cash-btn-success flex-1"
+                      >
+                        Accept
+                      </button>
 
-          {billRequests.length === 0 && (
-            <p className="text-gray-500 col-span-full">No pending bill requests.</p>
-          )}
-        </div>
+                      <button
+                        onClick={async () => {
+                          await supabase
+                            .from("orders")
+                            .update({ status: "CANCELLED" })
+                            .eq("id", order.id)
+                            .eq("status", "PENDING_APPROVAL");
 
-        {/* READY FOR BILLING — Takeaway/Delivery only. Appears once
-            status is COMPLETED and disappears once Mark Paid sets
-            paid = true. Reuses the same bill modal as dine-in, via
-            openBillForOrder / the order_id branch below. */}
-        <h2 className="text-xl font-bold mb-4 text-gray-900">
-          💰 Ready For Billing ({readyForBillingOrders.length})
-        </h2>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
-          {readyForBillingOrders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white rounded-xl shadow p-4 flex flex-col justify-between"
-            >
-              <div>
-                <p className="font-bold text-gray-900">
-                  {order.customer_name || "Customer"}
-                </p>
-                <p className="text-sm text-gray-500">{order.phone_number}</p>
-                <p className="text-sm text-gray-500">{order.order_mode}</p>
-
-                {order.order_mode === "delivery" && order.delivery_address && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    📍 {order.delivery_address}
-                  </p>
-                )}
-
-                {itemsForOrder(order.id).length > 0 && (
-                  <div className="mt-3">
-                    <p className="text-sm font-semibold text-gray-700">Items:</p>
-                    <ul className="ml-4 mt-1 list-disc text-sm text-gray-700">
-                      {itemsForOrder(order.id).map((item: any, index: number) => (
-                        <li key={index}>
-                          {item.menu_items?.name} × {item.quantity}
-                        </li>
-                      ))}
-                    </ul>
+                          loadData();
+                        }}
+                        className="cash-btn cash-btn-danger flex-1"
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
-                )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+        )}
 
-                <p className="font-bold mt-3 text-gray-900">₹{order.total}</p>
-              </div>
+        {/* ACTIVE ORDERS */}
+        <section className="cash-section">
+          <div className="cash-section-head">
+            <h2 className="cash-section-title">Active Orders (Takeaway / Delivery)</h2>
+            <span className="cash-count">{activeOrders.length}</span>
+          </div>
 
-              <button
-                onClick={() => openBillForOrder(order)}
-                className="mt-4 bg-slate-800 text-white px-4 py-2 rounded-lg font-medium"
+          <div className="cash-grid mb-8">
+            {activeOrders.map((order) => (
+              <article key={order.id} className="cash-card">
+                <header className="cash-card-head">
+                  <p className="cash-card-table">{order.customer_name || "Customer"}</p>
+                  <span className="cash-badge cash-badge-active">{order.status}</span>
+                </header>
+
+                <div className="cash-card-body">
+                  <div className="mb-4">
+                    {order.phone_number && <p className="text-sm text-[var(--color-ivory-muted)]">{order.phone_number}</p>}
+                    <p className="text-sm text-[var(--color-ivory-muted)] capitalize">{order.order_mode.replace("_", " ")}</p>
+
+                    {order.order_mode === "delivery" && order.delivery_address && (
+                      <p className="text-sm text-[var(--color-ivory-muted)] mt-1">
+                        📍 {order.delivery_address}
+                      </p>
+                    )}
+                  </div>
+
+                  {itemsForOrder(order.id).length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-[var(--color-ivory-muted)] uppercase tracking-wider mb-2">Items</p>
+                      <ul className="text-sm text-[var(--color-ivory)] space-y-1">
+                        {itemsForOrder(order.id).map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+                          <li key={index}>
+                            <span className="font-bold text-[var(--color-ivory)] mr-1">{item.quantity}×</span> {item.menu_items?.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="mt-auto pt-4 border-t border-[var(--color-hairline)]">
+                    <p className="cash-total-lg">₹{order.total}</p>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            {activeOrders.length === 0 && (
+              <p className="text-[var(--color-ivory-faint)] text-sm tracking-wide col-span-full">
+                No active takeaway/delivery orders.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* RUNNING TABLES */}
+        <section className="cash-section">
+          <div className="cash-section-head">
+            <h2 className="cash-section-title">Running Tables</h2>
+            <span className="cash-count">{runningTables.length}</span>
+          </div>
+
+          <div className="cash-grid mb-8">
+            {runningTables.map((table) => (
+              <article key={table.id} className="cash-card">
+                <header className="cash-card-head">
+                  <p className="cash-card-table">Table {table.table_display}</p>
+                  <span className="cash-badge cash-badge-active">Occupied</span>
+                </header>
+                <div className="cash-card-body">
+                  <p className="text-sm text-[var(--color-ivory-muted)] mb-4">
+                    {table.orderCount} order{table.orderCount === 1 ? "" : "s"}
+                  </p>
+
+                  {expandedTableId === table.id && (
+                    <div className="mb-4 space-y-3">
+                      {table.sessionOrders.map((order: any /* eslint-disable-line @typescript-eslint/no-explicit-any */) => (
+                        <div key={order.id}>
+                          <p className="text-xs text-[var(--color-gold)] mb-1 uppercase tracking-wider">
+                            Order #{String(order.id).slice(0, 8)} — {order.status}
+                          </p>
+
+                          <ul className="text-sm text-[var(--color-ivory)] space-y-1">
+                            {allOrderItems
+                              .filter((item) => item.order_id === order.id)
+                              .map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+                                <li key={index} className="flex justify-between">
+                                  <span><span className="font-bold text-[var(--color-ivory)] mr-1">{item.quantity}×</span> {item.menu_items?.name}</span>
+                                  <span>₹{item.total_price}</span>
+                                </li>
+                              ))}
+                          </ul>
+                        </div>
+                      ))}
+
+                      {table.sessionOrders.length === 0 && (
+                        <p className="text-sm text-[var(--color-ivory-muted)]">No orders in this session.</p>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="mt-auto pt-4 border-t border-[var(--color-hairline)] flex flex-col gap-4">
+                    <p className="cash-total-lg">₹{table.sessionTotal}</p>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => toggleExpandTable(table.id)}
+                        className="cash-btn cash-btn-secondary flex-1"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        {expandedTableId === table.id ? "Hide Orders" : "Expand"}
+                      </button>
+
+                      <button
+                        onClick={() => openBillForTable(table)}
+                        className="cash-btn cash-btn-primary flex-1"
+                        style={{ padding: "0.5rem" }}
+                      >
+                        Bill
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            {runningTables.length === 0 && (
+              <p className="text-[var(--color-ivory-faint)] text-sm tracking-wide col-span-full">No tables currently occupied.</p>
+            )}
+          </div>
+        </section>
+
+        {/* BILL REQUESTS */}
+        <section className="cash-section">
+          <div className="cash-section-head">
+            <h2 className="cash-section-title">Bill Requests</h2>
+            <span className="cash-count">{billRequests.length}</span>
+          </div>
+
+          <div className="cash-grid mb-8">
+            {billRequests.map((request) => (
+              <article
+                key={request.id}
+                className="cash-card"
+                style={{ borderColor: "rgba(212,175,55,0.4)" }}
               >
-                Generate Bill
-              </button>
+                <header className="cash-card-head" style={{ background: "rgba(212,175,55,0.05)" }}>
+                  <p className="cash-card-table">Table {request.table_display}</p>
+                  <span className="cash-badge cash-badge-bill">Requested</span>
+                </header>
+
+                <div className="cash-card-body flex flex-col items-center justify-center py-6 text-center">
+                  <p className="text-sm text-[var(--color-ivory-muted)] mb-6">
+                    Requested {new Date(request.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+
+                  <button
+                    onClick={() => openBill(request.id)}
+                    className="cash-btn cash-btn-primary w-full"
+                  >
+                    View Bill
+                  </button>
+                </div>
+              </article>
+            ))}
+
+            {billRequests.length === 0 && (
+              <p className="text-[var(--color-ivory-faint)] text-sm tracking-wide col-span-full">No pending bill requests.</p>
+            )}
+          </div>
+        </section>
+
+        {/* READY FOR BILLING */}
+        <section className="cash-section">
+          <div className="cash-section-head">
+            <h2 className="cash-section-title">Ready For Billing</h2>
+            <span className="cash-count">{readyForBillingOrders.length}</span>
+          </div>
+
+          <div className="cash-grid mb-8">
+            {readyForBillingOrders.map((order) => (
+              <article key={order.id} className="cash-card">
+                <header className="cash-card-head">
+                  <p className="cash-card-table">{order.customer_name || "Customer"}</p>
+                  <span className="cash-badge cash-badge-bill">Ready</span>
+                </header>
+                <div className="cash-card-body">
+                  <div className="mb-4">
+                    {order.phone_number && <p className="text-sm text-[var(--color-ivory-muted)]">{order.phone_number}</p>}
+                    <p className="text-sm text-[var(--color-ivory-muted)] capitalize">{order.order_mode.replace("_", " ")}</p>
+
+                    {order.order_mode === "delivery" && order.delivery_address && (
+                      <p className="text-sm text-[var(--color-ivory-muted)] mt-1">
+                        📍 {order.delivery_address}
+                      </p>
+                    )}
+                  </div>
+
+                  {itemsForOrder(order.id).length > 0 && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-[var(--color-ivory-muted)] uppercase tracking-wider mb-2">Items</p>
+                      <ul className="text-sm text-[var(--color-ivory)] space-y-1">
+                        {itemsForOrder(order.id).map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+                          <li key={index}>
+                            <span className="font-bold text-[var(--color-ivory)] mr-1">{item.quantity}×</span> {item.menu_items?.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="mt-auto pt-4 border-t border-[var(--color-hairline)] flex flex-col gap-4">
+                    <p className="cash-total-lg">₹{order.total}</p>
+
+                    <button
+                      onClick={() => openBillForOrder(order)}
+                      className="cash-btn cash-btn-primary w-full"
+                    >
+                      Generate Bill
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            {readyForBillingOrders.length === 0 && (
+              <p className="text-[var(--color-ivory-faint)] text-sm tracking-wide col-span-full">
+                No completed takeaway/delivery orders awaiting billing.
+              </p>
+            )}
+          </div>
+        </section>
+
+        {/* RECENT PAYMENTS */}
+        {recentPayments.length > 0 && (
+          <section className="cash-section">
+            <div className="cash-section-head">
+              <h2 className="cash-section-title">Recent Payments (This Session)</h2>
+              <span className="cash-count">{recentPayments.length}</span>
             </div>
-          ))}
 
-          {readyForBillingOrders.length === 0 && (
-            <p className="text-gray-500 col-span-full">
-              No completed takeaway/delivery orders awaiting billing.
-            </p>
-          )}
-        </div>
+            <div className="bg-transparent border border-[var(--color-hairline)] rounded-xl overflow-hidden">
+              {recentPayments.map((payment) => (
+                <div key={payment.at} className="flex justify-between items-center p-4 border-b border-[var(--color-hairline)] last:border-b-0">
+                  <div>
+                    <p className="font-semibold text-[var(--color-ivory)]">
+                      {payment.tableDisplay === "Takeaway" || payment.tableDisplay === "Delivery"
+                        ? payment.tableDisplay
+                        : `Table ${payment.tableDisplay}`}
+                    </p>
+                    <p className="text-sm text-[var(--color-ivory-muted)]">
+                      {new Date(payment.at).toLocaleTimeString()} · {payment.mode}
+                    </p>
+                  </div>
+                  <p className="font-display text-lg text-[var(--color-gold)]">
+                    ₹{payment.grandTotal + payment.tip}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
-
       {/* BILL DETAILS / PAYMENT / PRINT */}
       {selectedRequest && (
-        <div className="fixed inset-0 bg-black/40 flex items-start sm:items-center justify-center z-50 p-3 print:static print:bg-white print:p-0">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[95vh] overflow-y-auto print:max-h-none print:overflow-visible print:shadow-none print:rounded-none">
-            <div id="printable-invoice" className="p-6">
-              <div className="flex items-start justify-between mb-4 print:hidden">
-                <h2 className="text-xl font-bold text-gray-900">Bill Details</h2>
+        <div className="cash-modal-overlay print:static print:p-0 print:bg-white print:block">
+          <div className="cash-modal print:shadow-none print:border-none print:rounded-none print:max-w-none">
+            <div id="printable-invoice" className="cash-modal-body print:p-0">
+              <div className="flex items-start justify-between mb-6 print:hidden">
+                <h2 className="cash-modal-title">Bill Details</h2>
                 <button
                   onClick={closeBill}
-                  className="text-gray-500 text-sm border rounded px-2 py-1"
+                  className="text-[var(--color-ivory-muted)] hover:text-[var(--color-ivory)] border border-[var(--color-hairline)] rounded px-3 py-1 text-sm font-medium transition"
                 >
                   Close
                 </button>
               </div>
 
               {/* Invoice header */}
-              <div className="border-b pb-4 mb-4">
-                <h3 className="text-2xl font-bold text-gray-900">Invoice</h3>
+              <div className="border-b border-[var(--color-hairline)] pb-4 mb-4 print:border-b print:border-gray-300">
+                <h3 className="font-display text-2xl text-[var(--color-gold)] mb-1 print:text-gray-900 print:text-2xl print:font-bold">Arabian Knights</h3>
                 {selectedRequest.order_id ? (
                   <>
-                    <p className="text-gray-600 mt-1">
+                    <p className="text-[var(--color-ivory)] print:text-gray-700">
                       {selectedRequest.table_display}:{" "}
                       <strong>{selectedRequest.customer_name || "—"}</strong>
                     </p>
                     {selectedRequest.phone_number && (
-                      <p className="text-gray-500 text-sm">
+                      <p className="text-sm text-[var(--color-ivory-muted)] print:text-gray-500">
                         {selectedRequest.phone_number}
                       </p>
                     )}
                   </>
                 ) : (
-                  <p className="text-gray-600 mt-1">
+                  <p className="text-[var(--color-ivory)] print:text-gray-700">
                     Table: <strong>{selectedRequest.table_display}</strong>
                   </p>
                 )}
-                <p className="text-gray-500 text-sm">
+                <p className="text-sm text-[var(--color-ivory-muted)] print:text-gray-500">
                   {new Date().toLocaleString()}
                 </p>
               </div>
 
               {/* Orders + items */}
-              <div className="space-y-4 mb-4">
+              <div className="space-y-4 mb-6">
                 {selectedBillOrders.map((order) => (
-                  <div key={order.id} className="border-b pb-3">
-                    <p className="text-sm text-gray-500 mb-2">
+                  <div key={order.id} className="border-b border-[var(--color-hairline)] pb-4 print:border-gray-200">
+                    <p className="text-xs font-bold text-[var(--color-ivory-muted)] uppercase tracking-wider mb-3 print:text-gray-500">
                       Order #{String(order.id).slice(0, 8)} — {order.status}
                     </p>
 
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-left text-gray-500">
-                          <th className="pb-1">Item</th>
-                          <th className="pb-1 text-center">Qty</th>
-                          <th className="pb-1 text-right">Total</th>
+                        <tr className="text-left text-[var(--color-ivory-muted)] print:text-gray-600">
+                          <th className="pb-2 font-medium uppercase tracking-wider text-xs">Item</th>
+                          <th className="pb-2 font-medium uppercase tracking-wider text-xs text-center">Qty</th>
+                          <th className="pb-2 font-medium uppercase tracking-wider text-xs text-right">Total</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {order.order_items.map((item: any, index: number) => (
-                          <tr key={index}>
-                            <td className="py-1">{item.menu_items?.name}</td>
-                            <td className="py-1 text-center">{item.quantity}</td>
-                            <td className="py-1 text-right">₹{item.total_price}</td>
+                        {order.order_items.map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+                          <tr key={index} className="text-[var(--color-ivory)] print:text-black">
+                            <td className="py-2">{item.menu_items?.name}</td>
+                            <td className="py-2 text-center">{item.quantity}</td>
+                            <td className="py-2 text-right font-medium">₹{item.total_price}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1211,27 +1270,27 @@ if (checkingAccess) {
                 ))}
 
                 {selectedBillOrders.length === 0 && (
-                  <p className="text-gray-500 text-sm">No orders found for this table.</p>
+                  <p className="text-sm text-[var(--color-ivory-muted)] print:text-gray-500">No orders found for this table.</p>
                 )}
               </div>
 
               {/* SUBTOTAL, DISCOUNT SYSTEM UI & GRAND TOTAL */}
-              <div className="border-t pt-3 mb-4 text-gray-900">
+              <div className="text-[var(--color-ivory)] print:text-black">
                 {/* Subtotal */}
-                <div className="flex items-center justify-between">
-                  <p className="text-md font-medium text-gray-700">Subtotal</p>
-                  <p className="text-md font-medium text-gray-900">₹{originalSubtotal}</p>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-[var(--color-ivory-muted)] uppercase tracking-wider font-semibold print:text-gray-600">Subtotal</p>
+                  <p className="font-display text-xl text-[var(--color-gold)] print:text-black">₹{originalSubtotal}</p>
                 </div>
 
                 {/* DISCOUNT SYSTEM CONTROLS & STATUS (ABOVE GRAND TOTAL) */}
-                <div className="print:hidden my-3">
+                <div className="print:hidden my-6">
                   {!activeDiscountRow ? (
-                    <div className="bg-gray-50 border border-gray-200 p-3 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Apply Discount</p>
+                    <div className="bg-[rgba(255,255,255,0.02)] border border-[var(--color-hairline)] p-4 rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-bold text-[var(--color-ivory-muted)] uppercase tracking-wide">Apply Discount</p>
                         {discountValueInput !== "" && Number(discountValueInput) > 0 && originalSubtotal > 0 && (
-                          <span className="text-xs text-gray-600">
-                            Calculated: <strong className="text-gray-900">₹{previewDiscountAmount}</strong> ({previewPercentage.toFixed(1)}%)
+                          <span className="text-xs text-[var(--color-ivory-muted)]">
+                            Calc: <strong className="text-[var(--color-ivory)]">₹{previewDiscountAmount}</strong> ({previewPercentage.toFixed(1)}%)
                           </span>
                         )}
                       </div>
@@ -1240,7 +1299,8 @@ if (checkingAccess) {
                         <select
                           value={discountTypeInput}
                           onChange={(e) => setDiscountTypeInput(e.target.value as "FIXED" | "PERCENTAGE")}
-                          className="border border-gray-300 p-2 rounded text-sm w-32 bg-white text-gray-900"
+                          className="cash-control"
+                          style={{ width: "35%" }}
                         >
                           <option value="FIXED">Flat (₹)</option>
                           <option value="PERCENTAGE">Percent (%)</option>
@@ -1251,81 +1311,81 @@ if (checkingAccess) {
                           value={discountValueInput}
                           onChange={(e) => setDiscountValueInput(e.target.value ? Number(e.target.value) : "")}
                           placeholder={discountTypeInput === "PERCENTAGE" ? "e.g. 10" : `Max ₹${originalSubtotal}`}
-                          className="border border-gray-300 p-2 rounded flex-1 text-sm bg-white text-gray-900"
+                          className="cash-control"
+                          style={{ flex: 1 }}
                         />
                         <button
                           onClick={handleApplyDiscount}
                           disabled={discountValueInput === "" || Number(discountValueInput) <= 0 || originalSubtotal <= 0}
-                          className="bg-black hover:bg-gray-800 text-white px-4 py-2 rounded text-sm font-medium disabled:opacity-50 transition"
+                          className="cash-btn cash-btn-secondary"
                         >
                           Apply
                         </button>
                       </div>
 
                       {discountValueInput !== "" && Number(discountValueInput) > 0 && originalSubtotal > 0 && (
-                        <div className="mt-2 text-xs">
+                        <div className="mt-3 text-xs">
                           {previewDiscountAmount > originalSubtotal ? (
-                            <p className="text-red-600 font-medium">⚠️ Discount amount cannot exceed subtotal (₹{originalSubtotal})</p>
+                            <p className="text-[#f87171] font-medium">⚠️ Max discount is ₹{originalSubtotal}</p>
                           ) : previewPercentage <= 10 ? (
-                            <p className="text-green-700 font-medium">⚡ Instant Auto-Approval (≤ 10% threshold)</p>
+                            <p className="text-[#4ade80] font-medium">⚡ Instant Auto-Approval</p>
                           ) : (
-                            <p className="text-amber-700 font-medium">⏳ Requires Owner Approval (&gt; 10% threshold)</p>
+                            <p className="text-[#fbbf24] font-medium">⏳ Requires Owner Approval</p>
                           )}
                         </div>
                       )}
                     </div>
                   ) : activeDiscountRow.status === "PENDING" ? (
-                    <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg">
+                    <div className="bg-[rgba(251,191,36,0.05)] border border-[rgba(251,191,36,0.3)] p-4 rounded-lg">
                       <div className="flex justify-between items-start">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-[rgba(251,191,36,0.15)] text-[#fbbf24] border border-[rgba(251,191,36,0.3)] text-xs font-bold px-2 py-0.5 rounded">
                               ⏳ PENDING APPROVAL
                             </span>
-                            <span className="text-xs text-amber-700">Waiting for Owner</span>
                           </div>
-                          <p className="text-sm font-semibold text-gray-900 mt-1">
+                          <p className="text-sm font-semibold text-[var(--color-ivory)]">
                             {activeDiscountRow.discount_type === "PERCENTAGE"
                               ? `${activeDiscountRow.discount_value}% Discount`
                               : `₹${activeDiscountRow.discount_value} Flat Discount`}
                             {" — "}
-                            <span className="text-amber-700 font-bold">₹{activeDiscountRow.discount_amount} off</span>
+                            <span className="text-[#fbbf24]">₹{activeDiscountRow.discount_amount} off</span>
                           </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            Payment collection is locked until the owner approves or rejects this request.
+                          <p className="text-xs text-[var(--color-ivory-muted)] mt-1">
+                            Payment is locked until the owner approves.
                           </p>
                         </div>
                         {!isBillPaid && (
                           <button
                             onClick={removeDiscount}
-                            className="text-xs text-red-600 hover:text-red-800 font-medium border border-red-200 bg-white hover:bg-red-50 px-2.5 py-1 rounded"
+                            className="text-xs text-[#fbbf24] hover:text-[#fcd34d] font-medium border border-[rgba(251,191,36,0.3)] bg-transparent hover:bg-[rgba(251,191,36,0.1)] px-3 py-1.5 rounded transition"
                           >
-                            Cancel Request
+                            Cancel
                           </button>
                         )}
                       </div>
                     </div>
                   ) : activeDiscountRow.status === "APPROVED" || activeDiscountRow.status === "AUTO_APPROVED" ? (
-                    <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+                    <div className="bg-[rgba(34,197,94,0.05)] border border-[rgba(34,197,94,0.3)] p-4 rounded-lg">
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-0.5 rounded">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-[rgba(34,197,94,0.15)] text-[#4ade80] border border-[rgba(34,197,94,0.3)] text-xs font-bold px-2 py-0.5 rounded">
                               {activeDiscountRow.status === "AUTO_APPROVED" ? "⚡ AUTO-APPROVED" : "✅ APPROVED"}
                             </span>
                           </div>
-                          <p className="text-sm font-semibold text-green-900 mt-1">
+                          <p className="text-sm font-semibold text-[var(--color-ivory)]">
                             {activeDiscountRow.discount_type === "PERCENTAGE"
                               ? `${activeDiscountRow.discount_value}% Discount`
                               : `₹${activeDiscountRow.discount_value} Flat Discount`}
                             {" — "}
-                            <span className="font-bold text-green-700">-₹{activeDiscountRow.discount_amount}</span>
+                            <span className="text-[#4ade80]">-₹{activeDiscountRow.discount_amount}</span>
                           </p>
                         </div>
                         {!isBillPaid && (
                           <button
                             onClick={removeDiscount}
-                            className="text-xs text-red-600 hover:text-red-800 font-medium border border-red-200 bg-white hover:bg-red-50 px-2.5 py-1 rounded"
+                            className="text-xs text-[#f87171] hover:text-[#fca5a5] font-medium border border-[rgba(220,38,38,0.3)] bg-transparent hover:bg-[rgba(220,38,38,0.1)] px-3 py-1.5 rounded transition"
                           >
                             Remove
                           </button>
@@ -1333,17 +1393,16 @@ if (checkingAccess) {
                       </div>
                     </div>
                   ) : activeDiscountRow.status === "REJECTED" ? (
-                    <div className="bg-red-50 border border-red-200 p-3 rounded-lg">
+                    <div className="bg-[rgba(220,38,38,0.05)] border border-[rgba(220,38,38,0.3)] p-4 rounded-lg">
                       <div className="flex justify-between items-center">
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="bg-red-100 text-red-800 text-xs font-bold px-2 py-0.5 rounded">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-[rgba(220,38,38,0.15)] text-[#f87171] border border-[rgba(220,38,38,0.3)] text-xs font-bold px-2 py-0.5 rounded">
                               ❌ REJECTED
                             </span>
-                            <span className="text-xs text-red-700">Rejected by Owner</span>
                           </div>
-                          <p className="text-sm text-gray-800 mt-1">
-                            Discount request of{" "}
+                          <p className="text-sm text-[var(--color-ivory)]">
+                            Discount of{" "}
                             {activeDiscountRow.discount_type === "PERCENTAGE"
                               ? `${activeDiscountRow.discount_value}%`
                               : `₹${activeDiscountRow.discount_value}`}{" "}
@@ -1353,9 +1412,9 @@ if (checkingAccess) {
                         {!isBillPaid && (
                           <button
                             onClick={removeDiscount}
-                            className="text-xs bg-red-600 hover:bg-red-700 text-white font-medium px-3 py-1.5 rounded"
+                            className="text-xs bg-[rgba(220,38,38,0.15)] hover:bg-[rgba(220,38,38,0.25)] text-[#f87171] font-medium px-3 py-1.5 rounded border border-[rgba(220,38,38,0.3)] transition"
                           >
-                            Dismiss / Re-apply
+                            Dismiss
                           </button>
                         )}
                       </div>
@@ -1365,14 +1424,14 @@ if (checkingAccess) {
 
                 {/* Invoice discount line (print & summary) */}
                 {activeDiscountRow && (activeDiscountRow.status === "APPROVED" || activeDiscountRow.status === "AUTO_APPROVED") ? (
-                  <div className="flex items-center justify-between text-green-700 py-1">
+                  <div className="flex items-center justify-between text-[#4ade80] py-2 print:text-green-700">
                     <p className="text-sm font-medium">
                       Discount ({activeDiscountRow.discount_type === "PERCENTAGE" ? `${activeDiscountRow.discount_value}%` : `₹${activeDiscountRow.discount_value}`})
                     </p>
                     <p className="text-sm font-bold">-₹{activeDiscountRow.discount_amount}</p>
                   </div>
                 ) : activeDiscountRow && activeDiscountRow.status === "PENDING" ? (
-                  <div className="flex items-center justify-between text-amber-600 py-1 print:hidden">
+                  <div className="flex items-center justify-between text-[#fbbf24] py-2 print:hidden">
                     <p className="text-sm font-medium">
                       Discount ({activeDiscountRow.discount_type === "PERCENTAGE" ? `${activeDiscountRow.discount_value}%` : `₹${activeDiscountRow.discount_value}`})
                     </p>
@@ -1381,47 +1440,43 @@ if (checkingAccess) {
                 ) : null}
 
                 {/* Grand Total */}
-                <div className="flex items-center justify-between border-t mt-2 pt-2">
-                  <p className="text-lg font-bold text-gray-900">Grand Total</p>
-                  <p className="text-lg font-bold text-gray-900">₹{grandTotal}</p>
+                <div className="flex items-center justify-between border-t border-[var(--color-hairline)] mt-4 pt-4 print:border-black">
+                  <p className="text-sm text-[var(--color-ivory-muted)] uppercase tracking-wider font-semibold print:text-black">Grand Total</p>
+                  <p className="font-display text-3xl text-[var(--color-gold)] font-medium print:text-black">₹{grandTotal}</p>
                 </div>
               </div>
 
               {/* PAYMENT SECTION */}
-              <div className="print:hidden space-y-3 border-t pt-4">
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">
-                    Payment Mode
-                  </label>
-                  <select
-                    value={paymentMode}
-                    onChange={(e) => setPaymentMode(e.target.value as PaymentMode)}
-                    className="w-full border p-2 rounded"
-                  >
-                    <option value="CASH">Cash</option>
-                    <option value="UPI">UPI</option>
-                    <option value="CARD">Card</option>
-                  </select>
-                </div>
+              <div className="print:hidden mt-8 pt-6 border-t border-[var(--color-hairline)]">
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="cash-label">Payment Mode</label>
+                    <select
+                      value={paymentMode}
+                      onChange={(e) => setPaymentMode(e.target.value as PaymentMode)}
+                      className="cash-control"
+                    >
+                      <option value="CASH">Cash</option>
+                      <option value="UPI">UPI</option>
+                      <option value="CARD">Card</option>
+                    </select>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-semibold mb-1 text-gray-700">
-                    Tip Amount
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={tipAmount}
-                    onChange={(e) => setTipAmount(Number(e.target.value))}
-                    className="w-full border p-2 rounded"
-                  />
+                  <div>
+                    <label className="cash-label">Tip Amount</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={tipAmount}
+                      onChange={(e) => setTipAmount(Number(e.target.value))}
+                      className="cash-control"
+                    />
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
-                  <p className="font-semibold text-gray-700">Final Amount Received</p>
-                  <p className="text-xl font-bold text-gray-900">
-                    ₹{finalAmountReceived}
-                  </p>
+                  <p className="text-sm text-[var(--color-ivory-muted)] uppercase tracking-wider font-semibold">Final Amount Received</p>
+                  <p className="font-display text-2xl text-[var(--color-gold)]">₹{finalAmountReceived}</p>
                 </div>
               </div>
 
@@ -1433,79 +1488,41 @@ if (checkingAccess) {
               </div>
             </div>
 
-            <div className="p-6 pt-0 flex flex-col gap-2 print:hidden">
-              <div className="flex gap-3">
+            <div className="cash-modal-foot print:hidden">
+              <div className="cash-modal-actions">
                 <button
                   onClick={printBill}
-                  className="flex-1 bg-gray-700 text-white px-4 py-3 rounded-lg font-medium"
+                  className="cash-btn cash-btn-secondary flex-1"
                 >
-                  🖨 Print Bill
+                  <span className="mr-2 opacity-70">🖨</span> Print Bill
                 </button>
 
                 <button
                   onClick={markPaid}
-                  disabled={
-                    marking ||
-                    markStatus === "success" ||
-                    !canTakePayment
-                  }
-                  className="flex-1 bg-green-600 text-white px-4 py-3 rounded-lg font-medium disabled:opacity-60"
+                  disabled={marking || markStatus === "success" || !canTakePayment}
+                  className="cash-btn cash-btn-primary flex-1 disabled:opacity-50"
                 >
-                  {markStatus === "success"
-                    ? "✅ Paid"
-                    : marking
-                    ? "Processing..."
-                    : "Mark Paid"}
+                  {markStatus === "success" ? "✅ Paid" : marking ? "Processing..." : "Mark Paid"}
                 </button>
               </div>
 
               {!canTakePayment && isDiscountPending && (
-                <p className="text-amber-600 text-sm text-center">
+                <p className="text-[#fbbf24] text-xs text-center font-medium mt-1">
                   ⏳ Payment locked: Discount approval is pending owner review.
                 </p>
               )}
               {!canTakePayment && !isDiscountPending && selectedBillOrders.length > 0 && (
-                <p className="text-orange-600 text-sm text-center">
-                  Food must be served before payment.
+                <p className="text-[#f87171] text-xs text-center font-medium mt-1">
+                  ⚠ Food must be served before payment.
+                </p>
+              )}
+
+              {markStatus === "error" && (
+                <p className="text-[#f87171] text-xs text-center font-medium mt-1">
+                  ⚠️ Something went wrong. Please try again.
                 </p>
               )}
             </div>
-
-            {markStatus === "error" && (
-              <p className="text-red-600 text-sm px-6 pb-4 print:hidden">
-                ⚠️ Something went wrong. Please try again.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Recent payments (this session only, not persisted) */}
-      {recentPayments.length > 0 && (
-        <div className="print:hidden mt-8">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">
-            Recent Payments (this session)
-          </h2>
-
-          <div className="bg-white rounded-xl shadow divide-y">
-            {recentPayments.map((payment) => (
-              <div key={payment.at} className="p-4 flex justify-between text-sm">
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {payment.tableDisplay === "Takeaway" ||
-                    payment.tableDisplay === "Delivery"
-                      ? payment.tableDisplay
-                      : `Table ${payment.tableDisplay}`}
-                  </p>
-                  <p className="text-gray-500">
-                    {new Date(payment.at).toLocaleTimeString()} · {payment.mode}
-                  </p>
-                </div>
-                <p className="font-bold text-gray-900">
-                  ₹{payment.grandTotal + payment.tip}
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       )}

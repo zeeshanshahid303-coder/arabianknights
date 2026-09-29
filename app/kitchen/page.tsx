@@ -24,10 +24,201 @@ function formatTableNumber(tableNumber: string | number | null | undefined): str
   return `T${String(num).padStart(2, "0")}`;
 }
 
+/* How long ago an order was placed, in whole minutes, read off the
+   `created_at` the kitchen already has. Display only — it decides
+   nothing about an order, it only decides how loudly the ticket is
+   asking to be read. */
+function orderAgeMinutes(createdAt: string | null | undefined): number {
+  if (!createdAt) return 0;
+  const placed = new Date(createdAt).getTime();
+  if (Number.isNaN(placed)) return 0;
+  return Math.max(0, Math.floor((Date.now() - placed) / 60000));
+}
+
+/* Three voices, not thirty. Under five minutes is on time and stays
+   plain gold; five to ten wants a second look; past ten the ticket
+   should be findable from across the pass. */
+function ageBand(minutes: number): "normal" | "warning" | "critical" {
+  if (minutes >= 10) return "critical";
+  if (minutes >= 5) return "warning";
+  return "normal";
+}
+
+/* The same age, written the way a cook says it out loud. */
+function formatAgeLabel(minutes: number): string {
+  if (minutes < 1) return "NOW";
+  return `${minutes} MIN`;
+}
+
+/* One ticket. The three lanes differ only in which actions they offer
+   and how the head is drawn, so the card is built once and given its
+   lane's colours — a cook who knows one lane's cards knows all three. */
+function OrderCard({
+  order,
+  lane,
+  onAccept,
+  onReject,
+  onReady,
+  onComplete,
+}: {
+  order: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  lane: "new" | "preparing" | "ready";
+  onAccept?: (id: string) => void;
+  onReject?: (id: string) => void;
+  onReady?: (id: string) => void;
+  onComplete?: (id: string) => void;
+}) {
+  const minutes = orderAgeMinutes(order.created_at);
+  const band = ageBand(minutes);
+  const isDineIn = order.order_mode === "dine_in";
+
+  /* The one place a lane's actions are decided, so a card can never
+     offer a step that does not belong to where it is sitting. */
+  let actions: React.ReactNode = null;
+  let footnote: string | null = null;
+
+  if (lane === "new") {
+    actions = (
+      <>
+        <button
+          onClick={() => onAccept?.(order.id)}
+          className="kitchen-btn"
+          data-action="accept"
+        >
+          Accept
+        </button>
+
+        <button
+          onClick={() => onReject?.(order.id)}
+          className="kitchen-btn"
+          data-action="reject"
+        >
+          Reject
+        </button>
+      </>
+    );
+  } else if (lane === "preparing") {
+    actions = (
+      <button
+        onClick={() => onReady?.(order.id)}
+        className="kitchen-btn"
+        data-action="ready"
+      >
+        Mark Ready
+      </button>
+    );
+  } else if (isDineIn) {
+    /* READY, dine-in — read-only. Service Staff owns "Mark Served". */
+    footnote = "Service staff will serve";
+  } else {
+    actions = (
+      <button
+        onClick={() => onComplete?.(order.id)}
+        className="kitchen-btn"
+        data-action="complete"
+      >
+        Mark Completed
+      </button>
+    );
+  }
+
+  return (
+    <article className="kitchen-card" data-age={band} data-lane={lane}>
+      <header className="kitchen-card-head">
+        <p
+          className="kitchen-table"
+          data-mode={isDineIn ? "dine_in" : "delivery"}
+        >
+          {order.table_display}
+        </p>
+
+        <span
+          className="kitchen-age"
+          title={`Placed ${minutes} minute${minutes === 1 ? "" : "s"} ago`}
+        >
+          {formatAgeLabel(minutes)}
+        </span>
+      </header>
+
+      <div className="kitchen-card-sub">
+        <span>
+          {order.order_mode === "dine_in" ? "Dine In" : order.order_mode}
+        </span>
+
+        {order.customer_name && <strong>{order.customer_name}</strong>}
+
+        {order.phone_number && <span>{order.phone_number}</span>}
+      </div>
+
+      {order.delivery_address && (
+        <p className="kitchen-card-note">{order.delivery_address}</p>
+      )}
+
+      {order.order_items?.length > 0 && (
+        <ul className="kitchen-items">
+          {order.order_items.map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+            <li className="kitchen-item" key={index}>
+              <span
+                className="kitchen-item-qty"
+                data-qty={(item.quantity ?? 0) >= 4 ? "many" : "some"}
+              >
+                {item.quantity}×
+              </span>
+
+              <span className="kitchen-item-name">
+                {item.menu_items?.name}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {actions ? (
+        <div className="kitchen-actions">{actions}</div>
+      ) : footnote ? (
+        <p className="kitchen-handoff">{footnote}</p>
+      ) : null}
+    </article>
+  );
+}
+
+/* A lane: its own name, its own count, and one grid of tickets under
+   it. Counted from the same array it renders, so the number in the
+   header can never disagree with the cards below it. */
+function Lane({
+  lane,
+  name,
+  orders,
+  renderCard,
+}: {
+  lane: "new" | "preparing" | "ready";
+  name: string;
+  orders: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  renderCard: (order: any) => React.ReactNode; // eslint-disable-line @typescript-eslint/no-explicit-any
+}) {
+  return (
+    <section className="kitchen-lane" data-lane={lane}>
+      <div className="kitchen-lane-head">
+        <span className="kitchen-lane-dot" aria-hidden />
+
+        <h2 className="kitchen-lane-name">{name}</h2>
+
+        <span className="kitchen-lane-count">{orders.length}</span>
+      </div>
+
+      {orders.length === 0 ? (
+        <p className="kitchen-lane-empty">Nothing waiting</p>
+      ) : (
+        <div className="kitchen-grid">{orders.map(renderCard)}</div>
+      )}
+    </section>
+  );
+}
+
 export default function KitchenPage() {
   const router = useRouter();
 const [checkingAccess, setCheckingAccess] = useState(true);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
 const [soundEnabled, setSoundEnabled] = useState(false);
 const soundEnabledRef = useRef(false);
 const notifiedOrdersRef = useRef(new Set<string>());
@@ -120,10 +311,16 @@ if (
 setOrders(mergedOrders);
 };
 useEffect(() => {
-  loadOrders();
+  let mounted = true;
+  if (mounted) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadOrders().catch(console.error);
+  }
 
   const interval = setInterval(() => {
-    loadOrders();
+    if (mounted) {
+      loadOrders().catch(console.error);
+    }
   }, 5000);
 
   const channel = supabase
@@ -136,15 +333,17 @@ useEffect(() => {
         table: "orders",
       },
       () => {
-        loadOrders();
+        if (mounted) loadOrders().catch(console.error);
       }
     )
     .subscribe();
 
   return () => {
+    mounted = false;
     clearInterval(interval);
     supabase.removeChannel(channel);
   };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
 const acceptOrder = async (id: string) => {
@@ -254,175 +453,52 @@ useEffect(() => {
 
 if (checkingAccess) {
   return (
-    <main className="p-6">
-      Checking access...
+    <main className="kitchen-page flex items-center justify-center">
+      <p className="kitchen-title">Checking access...</p>
     </main>
   );
 }
-return (
-  <main className="p-6">
-    <h1 className="text-3xl font-bold mb-6">
-      Kitchen Dashboard
-    </h1>
-<div className="mb-4">
-  <button
-   onClick={() => {
-  const newValue = !soundEnabled;
 
-  setSoundEnabled(newValue);
-  soundEnabledRef.current = newValue;
-
-if (newValue) {
-  requestNotificationPermission();
-
-  new Audio("/notification.mp3").play();
-}
-}}
-    className={`px-4 py-2 rounded text-white ${
-      soundEnabled ? "bg-green-600" : "bg-red-600"
-    }`}
-  >
-    {soundEnabled
-      ? "🔔 Notifications ON"
-      : "🔕 Notifications OFF"}
-  </button>
-</div>
-
-    {/* NEW */}
-    <h2 className="text-xl font-bold mb-4">
-      🆕 New Orders ({newOrders.length})
-    </h2>
-
-    <div className="space-y-4 mb-8">
-      {newOrders.map((order) => (
-        <div key={order.id} className="border rounded-xl p-4">
-          <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Table:</strong> {order.table_display}</p>
-          <p><strong>Mode:</strong> {order.order_mode}</p>
-
-          {order.customer_name && (
-            <p><strong>Customer:</strong> {order.customer_name}</p>
-          )}
-
-          {order.phone_number && (
-            <p><strong>Phone:</strong> {order.phone_number}</p>
-          )}
-
-          {order.delivery_address && (
-            <p><strong>Address:</strong> {order.delivery_address}</p>
-          )}
-
-          <p><strong>Total:</strong> ₹{order.total}</p>
-{order.order_items?.length > 0 && (
-  <div className="mt-3">
-    <strong>Items:</strong>
-
-    <ul className="ml-4 mt-2 list-disc">
-      {order.order_items.map(
-        (item: any, index: number) => (
-          <li key={index}>
-            {item.menu_items?.name} × {item.quantity}
-          </li>
-        )
-      )}
-    </ul>
-  </div>
-)}
-          <div className="flex gap-3 mt-4">
-            <button
-              onClick={() => acceptOrder(order.id)}
-              className="bg-green-600 text-white px-4 py-2 rounded"
-            >
-              ✅ Accept
-            </button>
-
-            <button
-              onClick={() => rejectOrder(order.id)}
-              className="bg-red-600 text-white px-4 py-2 rounded"
-            >
-             ❌ Reject
-</button>
-</div>
-
-</div>
-))}
-</div>
-
-    {/* PREPARING */}
-    <h2 className="text-xl font-bold mb-4">
-      🍳 Preparing ({preparingOrders.length})
-    </h2>
-
-    <div className="space-y-4 mb-8">
-      {preparingOrders.map((order) => (
-        <div key={order.id} className="border rounded-xl p-4">
-          <p><strong>Order ID:</strong> {order.id}</p>
-          <p><strong>Table:</strong> {order.table_display}</p>
-          <p><strong>Total:</strong> ₹{order.total}</p>
-{order.order_items?.length > 0 && (
-  <div className="mt-3">
-    <strong>Items:</strong>
-
-    <ul className="ml-4 mt-2 list-disc">
-      {order.order_items.map((item: any, index: number) => (
-        <li key={index}>
-          {item.menu_items?.name} × {item.quantity}
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
-          <button
-            onClick={() => markReady(order.id)}
-            className="bg-blue-600 text-white px-4 py-2 rounded mt-4"
-          >
-            🍽 Mark Ready
-          </button>
+  return (
+    <main className="kitchen-page">
+      <header className="kitchen-head">
+        <div>
+          <p className="eyebrow mb-2 text-gold-gradient">Arabian Knights</p>
+          <h1 className="kitchen-title">Kitchen Display</h1>
         </div>
-      ))}
-    </div>
-
-{/* READY (read-only — Service Staff owns "Mark Served") */}
-<h2 className="text-xl font-bold mb-4">
-  🍽 Ready ({readyOrders.length})
-</h2>
-
-<div className="space-y-4 mb-8">
-  {readyOrders.map((order) => (
-    <div key={order.id} className="border rounded-xl p-4 bg-gray-50">
-      <p><strong>Order ID:</strong> {order.id}</p>
-      <p><strong>Table:</strong> {order.table_display}</p>
-      <p><strong>Total:</strong> ₹{order.total}</p>
-
-      {order.order_items?.length > 0 && (
-        <div className="mt-3">
-          <strong>Items:</strong>
-
-          <ul className="ml-4 mt-2 list-disc">
-            {order.order_items.map((item: any, index: number) => (
-              <li key={index}>
-                {item.menu_items?.name} × {item.quantity}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {order.order_mode === "dine_in" ? (
-        <p className="text-sm text-gray-500 mt-3">
-          Waiting for service staff to serve this order.
-        </p>
-      ) : (
         <button
-          onClick={() => markCompleted(order.id)}
-          className="bg-green-700 text-white px-4 py-2 rounded mt-4"
+          onClick={() => {
+            const newValue = !soundEnabled;
+            setSoundEnabled(newValue);
+            soundEnabledRef.current = newValue;
+            if (newValue) {
+              requestNotificationPermission();
+              new Audio("/notification.mp3").play().catch(console.error);
+            }
+          }}
+          className="kitchen-btn"
+          data-action={soundEnabled ? "accept" : "reject"}
+          style={{ flex: "0 0 auto", minWidth: "13rem", padding: "0 1.25rem" }}
+          aria-pressed={soundEnabled}
         >
-          ✅ Mark Completed
+          {soundEnabled ? "Sound On 🔊" : "Sound Off 🔇"}
         </button>
-      )}
-    </div>
-  ))}
-</div>
-  </main>
-);
+      </header>
+      <Lane lane="new" name="New Orders" orders={newOrders}
+        renderCard={(order) => (
+          <OrderCard key={order.id} order={order} lane="new"
+            onAccept={acceptOrder} onReject={rejectOrder} />
+        )} />
+      <Lane lane="preparing" name="Preparing" orders={preparingOrders}
+        renderCard={(order) => (
+          <OrderCard key={order.id} order={order} lane="preparing"
+            onReady={markReady} />
+        )} />
+      <Lane lane="ready" name="Ready" orders={readyOrders}
+        renderCard={(order) => (
+          <OrderCard key={order.id} order={order} lane="ready"
+            onComplete={markCompleted} />
+        )} />
+    </main>
+  );
 }

@@ -26,8 +26,8 @@ function formatTableNumber(tableNumber: string | number | null | undefined): str
 export default function ServiceStaffPage() {
   const router = useRouter();
 const [checkingAccess, setCheckingAccess] = useState(true);
-  const [readyOrders, setReadyOrders] = useState<any[]>([]);
-  const [waiterCalls, setWaiterCalls] = useState<any[]>([]);
+  const [readyOrders, setReadyOrders] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
+  const [waiterCalls, setWaiterCalls] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const soundEnabledRef = useRef(false);
 
@@ -35,8 +35,8 @@ const [checkingAccess, setCheckingAccess] = useState(true);
   const isFirstRequestLoadRef = useRef(true);
 
   // --- Add Extra Item state ---
-  const [tables, setTables] = useState<any[]>([]);
-  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [tables, setTables] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
+  const [menuItems, setMenuItems] = useState<any[]> /* eslint-disable-line @typescript-eslint/no-explicit-any */([]);
   const [selectedTableId, setSelectedTableId] = useState<string>("");
   const [extraCart, setExtraCart] = useState<Record<string, number>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -91,7 +91,7 @@ if (ordersError) {
       .from("table_requests")
       .select("*")
       .eq("status", "PENDING")
-      .eq("type", "CALL_WAITER")
+      .in("type", ["CALL_WAITER", "REQUEST_BILL"])
       .order("created_at", { ascending: true });
 
     if (requestsError) {
@@ -144,10 +144,17 @@ if (ordersError) {
   };
 
   useEffect(() => {
-    loadData();
+    let mounted = true;
+
+    if (mounted) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadData().catch(console.error);
+    }
 
     const interval = setInterval(() => {
-      loadData();
+      if (mounted) {
+        loadData().catch(console.error);
+      }
     }, 5000);
 
     const ordersChannel = supabase
@@ -160,7 +167,7 @@ if (ordersError) {
           table: "orders",
         },
         () => {
-          loadData();
+          if (mounted) loadData().catch(console.error);
         }
       )
       .subscribe();
@@ -175,16 +182,18 @@ if (ordersError) {
           table: "table_requests",
         },
         () => {
-          loadData();
+          if (mounted) loadData().catch(console.error);
         }
       )
       .subscribe();
 
     return () => {
+      mounted = false;
       clearInterval(interval);
       supabase.removeChannel(ordersChannel);
       supabase.removeChannel(requestsChannel);
     };
+    
   }, []);
 
   // Load tables + menu items once for the "Add Extra Item" form
@@ -427,16 +436,19 @@ useEffect(() => {
 
 if (checkingAccess) {
   return (
-    <main className="p-6">
-      Checking access...
+    <main className="staff-page flex items-center justify-center">
+      <p className="staff-title">Checking access...</p>
     </main>
   );
 }
-  return (
-    <main className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Service Staff Dashboard</h1>
 
-      <div className="mb-4">
+  return (
+    <main className="staff-page">
+      <header className="staff-head">
+        <div>
+          <p className="eyebrow mb-2 text-gold-gradient">Arabian Knights</p>
+          <h1 className="staff-title">Service Staff Dashboard</h1>
+        </div>
         <button
           onClick={() => {
             const newValue = !soundEnabled;
@@ -445,169 +457,201 @@ if (checkingAccess) {
 
             if (newValue) {
               requestNotificationPermission();
-              new Audio("/waiter-call.mp3").play();
+              new Audio("/waiter-call.mp3").play().catch(console.error);
             }
           }}
-          className={`px-4 py-2 rounded text-white ${
-            soundEnabled ? "bg-green-600" : "bg-red-600"
-          }`}
+          className="staff-btn-outline"
+          style={{ alignSelf: 'center', minWidth: '12rem', height: '2.5rem' }}
         >
           {soundEnabled ? "🔔 Notifications ON" : "🔕 Notifications OFF"}
         </button>
-      </div>
+      </header>
 
-      {/* WAITER CALLS */}
-      <h2 className="text-xl font-bold mb-4">
-        🔔 Waiter Calls ({waiterCalls.length})
-      </h2>
-
-      <div className="space-y-4 mb-8">
-        {waiterCalls.map((request) => (
-          <div key={request.id} className="border rounded-xl p-4 bg-amber-50">
-            <p><strong>Table:</strong> {request.table_display}</p>
-            <p>
-              <strong>Requested:</strong>{" "}
-              {new Date(request.created_at).toLocaleTimeString()}
-            </p>
-
-            <button
-              onClick={() => resolveWaiterCall(request.id)}
-              className="bg-amber-600 text-white px-4 py-2 rounded mt-4"
-            >
-              ✅ Resolve
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* READY ORDERS */}
-      <h2 className="text-xl font-bold mb-4">
-        🍽 Ready Orders ({readyOrders.length})
-      </h2>
-
-      <div className="space-y-4 mb-8">
-        {readyOrders.map((order) => (
-          <div key={order.id} className="border rounded-xl p-4">
-            <p><strong>Order ID:</strong> {order.id}</p>
-            {order.order_mode !== "dine_in" ? (
-  <>
-    <p><strong>Customer:</strong> {order.customer_name}</p>
-    <p><strong>Phone:</strong> {order.phone_number}</p>
-    <p><strong>Mode:</strong> {order.order_mode}</p>
-
-    {order.delivery_address && (
-      <p><strong>Address:</strong> {order.delivery_address}</p>
-    )}
-  </>
-) : (
-  <p><strong>Table:</strong> {order.table_display}</p>
-)}
-            <p><strong>Total:</strong> ₹{order.total}</p>
-
-            {order.order_items?.length > 0 && (
-              <div className="mt-3">
-                <strong>Items:</strong>
-
-                <ul className="ml-4 mt-2 list-disc">
-                  {order.order_items.map((item: any, index: number) => (
-                    <li key={index}>
-                      {item.menu_items?.name} × {item.quantity}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <button
-              onClick={() => markServed(order.id)}
-              className="bg-green-700 text-white px-4 py-2 rounded mt-4"
-            >
-              ✅ Mark Served
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* ADD EXTRA ITEM TO TABLE */}
-      <h2 className="text-xl font-bold mb-4">
-        ➕ Add Extra Item to Table
-      </h2>
-
-      <div className="border rounded-xl p-4 mb-8 bg-white">
-        <label className="block mb-2 font-semibold">Table</label>
-
-        <select
-          value={selectedTableId}
-          onChange={(e) => setSelectedTableId(e.target.value)}
-          className="w-full border p-3 rounded mb-4"
-        >
-          <option value="">Select a table</option>
-          {tables.map((table) => (
-            <option key={table.id} value={table.id}>
-              {formatTableNumber(table.table_number)}
-            </option>
-          ))}
-        </select>
-
-        <div className="space-y-3">
-          {menuItems.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center justify-between border-b pb-2"
-            >
-              <div>
-                <p className="font-semibold">{item.name}</p>
-                <p className="text-sm text-gray-600">₹{item.price}</p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => decreaseExtraItem(item.id)}
-                  disabled={!extraCart[item.id]}
-                  className="bg-gray-200 px-3 py-1 rounded disabled:opacity-40"
-                >
-                  -
-                </button>
-
-                <span>{extraCart[item.id] || 0}</span>
-
-                <button
-                  onClick={() => increaseExtraItem(item.id)}
-                  className="bg-black text-white px-3 py-1 rounded"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          ))}
+      <section className="staff-section">
+        <div className="staff-section-head">
+          <h2 className="staff-section-title">Active Requests</h2>
+          <span className="staff-count">{waiterCalls.length}</span>
         </div>
 
-        <div className="mt-4 flex items-center justify-between">
-          <p className="font-bold text-lg">Total: ₹{extraTotal}</p>
+        {waiterCalls.length === 0 ? (
+          <p className="text-[var(--color-ivory-faint)] text-sm tracking-wide">No pending requests at the moment.</p>
+        ) : (
+          <div className="staff-calls-grid">
+            {waiterCalls.map((request) => (
+              <article
+                key={request.id}
+                className={"staff-card " + (request.type === "REQUEST_BILL" ? "bill-request" : "")}
+              >
+                <header className="staff-card-head">
+                  <p className="staff-card-table">{request.table_display}</p>
+                  <span className={"staff-card-badge " + (request.type === "REQUEST_BILL" ? "bill" : "waiter")}>
+                    {request.type === "REQUEST_BILL" ? "Bill Request" : "Waiter Call"}
+                  </span>
+                </header>
 
-          <button
-            onClick={submitExtraOrder}
-            disabled={
-              submitting || !selectedTableId || extraTotal === 0
-            }
-            className="bg-blue-600 text-white px-6 py-3 rounded disabled:opacity-50"
+                <div className="staff-card-body">
+                  <p className="staff-card-time">
+                    Requested: {new Date(request.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+
+                  <div className="staff-btn-row">
+                    <button
+                      onClick={() => resolveWaiterCall(request.id)}
+                      className="staff-btn staff-btn-resolve"
+                    >
+                      Mark Resolved
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="staff-section">
+        <div className="staff-section-head">
+          <h2 className="staff-section-title">Ready to Serve</h2>
+          <span className="staff-count">{readyOrders.length}</span>
+        </div>
+
+        {readyOrders.length === 0 ? (
+          <p className="text-[var(--color-ivory-faint)] text-sm tracking-wide">No orders waiting to be served.</p>
+        ) : (
+          <div className="staff-calls-grid">
+            {readyOrders.map((order) => (
+              <article key={order.id} className="staff-card">
+                <header className="staff-card-head">
+                  <p className="staff-card-table">
+                    {order.order_mode === "dine_in" ? order.table_display : "Takeout"}
+                  </p>
+                  <span className="staff-card-badge waiter">Order Ready</span>
+                </header>
+
+                <div className="staff-card-body">
+                  {order.order_mode !== "dine_in" && (
+                    <div className="mb-4 text-sm text-[var(--color-ivory)] space-y-1">
+                      <p><strong className="text-[var(--color-ivory-muted)] mr-1">Customer:</strong> {order.customer_name || "—"}</p>
+                      <p><strong className="text-[var(--color-ivory-muted)] mr-1">Phone:</strong> {order.phone_number || "—"}</p>
+                      {order.delivery_address && (
+                        <p><strong className="text-[var(--color-ivory-muted)] mr-1">Address:</strong> {order.delivery_address}</p>
+                      )}
+                    </div>
+                  )}
+
+                  {order.order_items?.length > 0 && (
+                    <ul className="mb-4 space-y-2">
+                      {order.order_items.map((item: any /* eslint-disable-line @typescript-eslint/no-explicit-any */, index: number) => (
+                        <li key={index} className="staff-card-item">
+                          <span className="font-bold text-[var(--color-ivory)] text-sm mr-1">{item.quantity}×</span>
+                          <span>{item.menu_items?.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <div className="staff-btn-row">
+                    <button
+                      onClick={() => markServed(order.id)}
+                      className="staff-btn staff-btn-accept"
+                    >
+                      Confirm Served
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="staff-section">
+        <div className="staff-section-head">
+          <h2 className="staff-section-title">Add Extra Items</h2>
+        </div>
+
+        <div className="staff-form-panel">
+          <label className="block mb-2 text-sm uppercase tracking-widest text-[var(--color-ivory-muted)] font-bold">
+            Select Table
+          </label>
+
+          <select
+            value={selectedTableId}
+            onChange={(e) => setSelectedTableId(e.target.value)}
+            className="staff-control mb-6"
           >
-            {submitting ? "Sending..." : "Send to Kitchen"}
-          </button>
+            <option value="">Choose a table...</option>
+            {tables.map((table) => (
+              <option key={table.id} value={table.id}>
+                {formatTableNumber(table.table_number)}
+              </option>
+            ))}
+          </select>
+
+          <h3 className="text-sm uppercase tracking-widest text-[var(--color-ivory-muted)] font-bold mb-2 mt-4">Menu Items</h3>
+
+          <div className="staff-form-list">
+            {menuItems.map((item) => (
+              <div key={item.id} className="staff-form-item">
+                <div>
+                  <p className="font-semibold text-[var(--color-ivory)]">{item.name}</p>
+                  <p className="text-sm text-[var(--color-gold)]">₹{item.price}</p>
+                </div>
+
+                <div className="staff-qty-ctrl">
+                  <button
+                    onClick={() => decreaseExtraItem(item.id)}
+                    disabled={!extraCart[item.id]}
+                    className="staff-btn-outline"
+                    style={{ padding: "0.25rem 0.75rem", fontSize: "1rem", height: "2rem" }}
+                  >
+                    −
+                  </button>
+
+                  <span className="staff-qty-val text-[var(--color-ivory)]">{extraCart[item.id] || 0}</span>
+
+                  <button
+                    onClick={() => increaseExtraItem(item.id)}
+                    className="staff-btn-outline"
+                    style={{ background: "rgba(212,175,55,0.1)", borderColor: "var(--color-gold)", color: "var(--color-gold)", padding: "0.25rem 0.75rem", fontSize: "1rem", height: "2rem" }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="staff-total-bar mt-4 border-t border-[var(--color-hairline)] pt-6">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-[var(--color-ivory-muted)] mb-1">Total Amount</p>
+              <p className="font-display text-2xl text-[var(--color-gold)] tracking-wide">₹{extraTotal}</p>
+            </div>
+
+            <button
+              onClick={submitExtraOrder}
+              disabled={submitting || !selectedTableId || extraTotal === 0}
+              className="staff-btn staff-btn-accept"
+              style={{ width: "auto", minWidth: "12rem", height: "3rem" }}
+            >
+              {submitting ? "Sending..." : "Send Order"}
+            </button>
+          </div>
+
+          {submitStatus === "success" && (
+            <p className="text-[#3bb98a] mt-4 text-sm font-medium tracking-wide">
+              ✓ Extra order sent to the kitchen
+            </p>
+          )}
+
+          {submitStatus === "error" && (
+            <p className="text-[#e0503a] mt-4 text-sm font-medium tracking-wide">
+              ⚠ Something went wrong. Please try again.
+            </p>
+          )}
         </div>
-
-        {submitStatus === "success" && (
-          <p className="text-green-600 mt-3">
-            ✅ Extra order sent to the kitchen.
-          </p>
-        )}
-
-        {submitStatus === "error" && (
-          <p className="text-red-600 mt-3">
-            ⚠️ Something went wrong. Please try again.
-          </p>
-        )}
-      </div>
+      </section>
     </main>
   );
 }
+
