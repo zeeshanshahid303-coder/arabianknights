@@ -612,174 +612,54 @@ const handleApplyDiscount = async () => {
     if (!selectedRequest) return;
 
     setMarking(true);
+    setMarkStatus("idle");
 
-    // Resolve any pending table_requests tied to this session (e.g. the
-    // REQUEST_BILL notification row). Kept non-blocking by design, but the
-    // error is now captured and logged instead of being silently discarded
-    // — a failure here is exactly what leaves a stale PENDING row behind
-    // and causes the next customer's Request Bill tap to hit the
-    // unique-constraint error.
-    if (selectedRequest.session_id) {
-      const { error: requestResolveError } = await supabase
-        .from("table_requests")
-        .update({
-          status: "RESOLVED",
-          resolved_at: new Date().toISOString(),
-        })
-        .eq("session_id", selectedRequest.session_id)
-        .eq("status", "PENDING");
-
-      if (requestResolveError) {
-        console.error(
-          "Failed to resolve table_requests for session",
-          selectedRequest.session_id,
-          requestResolveError
-        );
+    // Settlement is a single database call. It marks the orders paid,
+    // closes the table session, frees the table, resolves the pending
+    // bill request and records the payment — in one transaction, so a
+    // failure part-way through can no longer leave money taken against
+    // an occupied table, or a closed session with no payment on record.
+    //
+    // This deliberately no longer writes `table_sessions` (or `tables`)
+    // from the browser. Those UPDATEs are gated by
+    // `staff_update_sessions` / `staff_update_tables`, which admit only
+    // an approved cashier/serving row whose `staff.email` matches the
+    // JWT email exactly; anyone else gets an opaque
+    // "42501 new row violates row-level security policy" and the bill
+    // silently never settles. The function re-checks the same
+    // authorisation server-side and is granted to no one else.
+    const { data: settlement, error: settleError } = await supabase.rpc(
+      "settle_cashier_bill",
+      {
+        p_order_id: selectedRequest.order_id || null,
+        p_session_id: selectedRequest.session_id || null,
+        p_tip: Number(tipAmount) || 0,
+        p_payment_mode: paymentMode,
       }
+    );
+
+    if (settleError) {
+      console.error("Failed to settle bill:", settleError);
+      setMarkStatus("error");
+      setMarking(false);
+      return;
     }
 
-    const approvedDiscountAmount = isDiscountApproved ? currentDiscountAmount : 0;
-
-    if (selectedRequest.order_id) {
-      // Takeaway/Delivery path.
-      const currentOrder = selectedBillOrders.find((o) => o.id === selectedRequest.order_id) || selectedBillOrders[0];
-      const orderSubtotal = Number(currentOrder?.subtotal || 0);
-      const deliveryCharge = Number(currentOrder?.delivery_charge || 0);
-      const newTotal = Math.max(0, Number((orderSubtotal - approvedDiscountAmount + deliveryCharge).toFixed(2)));
-
-      const { error: orderPaidError } = await supabase
-        .from("orders")
-        .update({
-          paid: true,
-          paid_at: new Date().toISOString(),
-          status: "COMPLETED",
-          discount: approvedDiscountAmount,
-          total: newTotal,
-        })
-        .eq("id", selectedRequest.order_id);
-
-      if (orderPaidError) {
-        console.error(orderPaidError);
-        setMarkStatus("error");
-        setMarking(false);
-        return;
-      }
-    } else {
-      // Dine-in path.
-      const sessionOrderIds = selectedBillOrders.map((order) => order.id);
-
-      if (sessionOrderIds.length > 0) {
-        let remainingDiscount = approvedDiscountAmount;
-
-        for (let i = 0; i < selectedBillOrders.length; i++) {
-          const order = selectedBillOrders[i];
-          const orderSub = Number(order.subtotal || 0);
-          const isLast = i === selectedBillOrders.length - 1;
-
-          let allocatedDiscount = 0;
-          if (approvedDiscountAmount > 0 && originalSubtotal > 0) {
-            if (isLast) {
-              allocatedDiscount = Number(remainingDiscount.toFixed(2));
-            } else {
-              allocatedDiscount = Number(((orderSub / originalSubtotal) * approvedDiscountAmount).toFixed(2));
-              remainingDiscount -= allocatedDiscount;
-            }
-          }
-
-          const deliveryCharge = Number(order.delivery_charge || 0);
-          const newOrderTotal = Math.max(0, Number((orderSub - allocatedDiscount + deliveryCharge).toFixed(2)));
-
-          const { error: orderPaidError } = await supabase
-            .from("orders")
-            .update({
-              status: "COMPLETED",
-              paid: true,
-              paid_at: new Date().toISOString(),
-              discount: allocatedDiscount,
-              total: newOrderTotal,
-            })
-            .eq("id", order.id);
-
-          if (orderPaidError) {
-            console.error(orderPaidError);
-            setMarkStatus("error");
-            setMarking(false);
-            return;
-          }
-        }
-      }
-
-      // End the session — unconditional. This must happen whether the
-      // customer ever tapped "Request Bill" or staff generated the bill
-      // manually from Running Tables, so a session never lingers "active"
-      // after payment (which would otherwise leak into the next customer).
-      if (selectedRequest.session_id) {
-        const { error: sessionError } = await supabase
-          .from("table_sessions")
-          .update({
-            status: "completed",
-            ended_at: new Date().toISOString(),
-            bill_requested: false,
-            bill_requested_at: null,
-          })
-          .eq("id", selectedRequest.session_id);
-
-     if (sessionError) {
-  alert(JSON.stringify(sessionError, null, 2));
-  console.error(sessionError);
-  setMarkStatus("error");
-  setMarking(false);
-  return;
-}
-      }
-
-      // Free the table and clear current_session_id.
-  const { data: tableData, error: tableError } = await supabase
-  .from("tables")
-  .update({
-    status: "FREE",
-    current_session_id: null,
-  })
-  .eq("id", selectedRequest.table_id)
-  .select();
-
-console.log("TABLE UPDATE RESULT:", tableData);
-console.log("TABLE UPDATE ERROR:", tableError);
-console.log("TABLE ID USED:", selectedRequest.table_id);
-
-     if (tableError) {
-  alert(JSON.stringify(tableError, null, 2));
-  console.error(tableError);
-  setMarkStatus("error");
-  setMarking(false);
-  return;
-}
-    }
-
-    // Insert payment record into payments table
-    const { error: paymentInsertError } = await supabase
-      .from("payments")
-      .insert({
-        order_id: selectedRequest.order_id || null,
-        session_id: selectedRequest.session_id || null,
-        amount: grandTotal,
-        tip: Number(tipAmount) || 0,
-        payment_mode: paymentMode,
-        paid_at: new Date().toISOString(),
-      });
-
-    if (paymentInsertError) {
-      console.error("Failed to insert payment record:", paymentInsertError);
-      alert("Payment recorded locally but failed to save to database. Please notify management.");
-      // Continue anyway since orders are already marked as paid
-    }
+    // The amount actually charged comes back from the database rather
+    // than being recomputed here, so what the cashier sees is what was
+    // written. Falls back to the on-screen figure only if the function
+    // returned nothing.
+    const settledGrandTotal = Number(
+      settlement?.grand_total ?? grandTotal
+    );
+    const settledTip = Number(settlement?.tip ?? (Number(tipAmount) || 0));
 
     // Payment mode + tip are also kept in memory for UI display
     setRecentPayments((prev) => [
       {
         tableDisplay: selectedRequest.table_display,
-        grandTotal,
-        tip: Number(tipAmount) || 0,
+        grandTotal: settledGrandTotal,
+        tip: settledTip,
         mode: paymentMode,
         at: new Date().toISOString(),
       },
