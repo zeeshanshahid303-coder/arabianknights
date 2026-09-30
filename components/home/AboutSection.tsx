@@ -98,8 +98,12 @@ export function AboutSection({
           </div>
 
           {/* Image — first on mobile, right on desktop */}
-          <Reveal variant="left" delay={200} className="order-1 lg:order-2 lg:col-span-5 lg:col-start-8">
-            <div className="relative mx-auto w-full max-w-[500px]">
+          <Reveal variant="left" delay={200} className="order-1 lg:order-2 lg:col-span-6 lg:col-start-7">
+            {/* Six of the twelve tracks rather than five: the section's
+                own 16-unit column gap keeps the text column and this one
+                apart, so the image can grow without ever reaching the
+                words beside it. */}
+            <div className="relative mx-auto w-full max-w-[560px]">
               {/* The image's own dimensions (2734x1536, read from the
                  asset's header) are handed to <Image> so it lays out at
                  the correct intrinsic size before the bytes land, with
@@ -112,9 +116,9 @@ export function AboutSection({
                 alt="Arabian Knights Restaurant & Cafe"
                 width={2734}
                 height={1536}
-                sizes="(max-width: 1024px) 100vw, 500px"
+                sizes="(max-width: 1024px) 100vw, 560px"
                 priority
-                className="block h-auto w-full"
+                className="heritage-figure block h-auto w-full"
               />
 
               {/* Architectural framing overlay */}

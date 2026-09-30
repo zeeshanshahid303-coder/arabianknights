@@ -1795,9 +1795,38 @@ body {
   will-change: auto;
 }
 
+/* The Our Heritage photograph earns a moment of its own once it comes
+   into view. The section's Reveal slides the whole column in from the
+   left; this settles the photograph within it, so the two movements
+   read as one arrival rather than a card being dragged onto a page.
+   Deliberately smaller than the column's own reveal — a photograph
+   arriving should not draw more attention than the words it sits
+   beside. */
+
+.heritage-figure {
+  opacity: 0;
+  transform: translateY(18px) scale(0.97);
+  transition:
+    opacity 800ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal-left.is-visible .heritage-figure {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /* Both halves of the arrival, the photograph as well as the column
+     it belongs to. Shown outright, not merely shortened. */
+  .heritage-figure {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .reveal-up,
