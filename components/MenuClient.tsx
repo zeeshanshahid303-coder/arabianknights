@@ -372,6 +372,12 @@ type Farewell = {
 const FAREWELL_SETTLE_MS = 400;
 const FAREWELL_GIVE_UP_MS = 5000;
 
+/* How often the menu page re-reads the table's open session while a
+   guest is sitting under one. Long enough that the read is not worth
+   batching for, short enough that a guest watching their order needs
+   no more than this to see it move. */
+const POLL_INTERVAL_MS = 5000;
+
 /* A pause, awaited. */
 function wait(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -551,12 +557,16 @@ const handleSessionClosed = async (tableRow: {
 //   session is COMPLETED (orders table only ever has NEW/COMPLETED)
 // - orderStatus is where the session has got to on the service line
 // - activeOrders and runningTotal are that same result read out in full
-const loadSessionState = async () => {
+//
+// It answers whether this table still has a session to watch. That is
+// the one question the poller underneath asks of it, and the only thing
+// it changed: nothing here decides anything differently because of it.
+const loadSessionState = async (): Promise<boolean> => {
   const tableRow = await getTableRow();
 
   if (!tableRow?.current_session_id) {
     await handleSessionClosed(tableRow);
-    return;
+    return false;
   }
 
   const sessionId = tableRow.current_session_id;
@@ -595,7 +605,7 @@ const loadSessionState = async () => {
 
   if (sessionRow?.status === "completed" || sessionRow?.ended_at) {
     await handleSessionClosed(tableRow);
-    return;
+    return false;
   }
 
   setBillRequested(Boolean(sessionRow?.bill_requested));
@@ -638,6 +648,9 @@ const loadSessionState = async () => {
       };
     })
   );
+
+  // Still dining: there is a session here, and it is open.
+  return true;
 };
 
 useEffect(() => {
@@ -694,6 +707,55 @@ useEffect(() => {
 
   return () => {
     supabase.removeChannel(channel);
+  };
+}, [dineInSession]);
+
+useEffect(() => {
+  if (!dineInSession) return;
+
+  // The channel above is the fast path, and it is left exactly as it
+  // was: when it delivers, the guest sees the kitchen's change at once.
+  // What follows is the dependable path, for the times it does not —
+  // a dropped websocket, a channel that never reaches SUBSCRIBED, a
+  // change the server declines to broadcast. The guest is still told,
+  // just up to five seconds later instead of immediately.
+  //
+  // So this is the same call the channel makes, on a timer: the same
+  // rows, the same derivations, the same state it writes. It adds no
+  // business logic of its own, and there is nothing for it to
+  // reconcile afterwards — both paths end in setState with the values
+  // the database holds right now, so whichever lands last is simply
+  // the more recent truth.
+  let timer: number | undefined;
+  let cancelled = false;
+
+  const poll = async () => {
+    // The next tick is armed only after this one has come back, so two
+    // polls can never be in the air together however slow the network
+    // gets. setTimeout rather than setInterval for that reason alone.
+    let stillDining = false;
+
+    try {
+      stillDining = await loadSessionState();
+    } catch {
+      // A failed read is a hiccup, not an answer: keep watching. The
+      // one thing polling must not do is invent "the session ended".
+    }
+
+    // Once there is nothing left to watch — the session is closed, or
+    // the table has no session on it at all — the loop lets itself
+    // lapse instead of asking again. Unmount does the same, through
+    // `cancelled`.
+    if (cancelled || !stillDining) return;
+
+    timer = window.setTimeout(poll, POLL_INTERVAL_MS);
+  };
+
+  timer = window.setTimeout(poll, POLL_INTERVAL_MS);
+
+  return () => {
+    cancelled = true;
+    if (timer !== undefined) window.clearTimeout(timer);
   };
 }, [dineInSession]);
 
