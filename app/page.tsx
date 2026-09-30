@@ -39,7 +39,6 @@ export default async function HomePage() {
       <FeaturedDishes dishes={featuredDishes} />
 
       <AboutSection
-        imageUrl={settings.hero_image_url}
         storyText={content.story_section}
         aboutText={content.about_section}
         address={settings.contact_info.address}
