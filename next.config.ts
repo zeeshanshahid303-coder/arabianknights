@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
+const isCapacitor = process.env.BUILD_TARGET === "capacitor";
+
 const nextConfig: NextConfig = {
+  output: isCapacitor ? "export" : undefined,
+  trailingSlash: true,
   images: {
+    unoptimized: isCapacitor,
     dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {

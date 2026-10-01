@@ -9,8 +9,7 @@ import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { ReservationCTA } from "@/components/home/ReservationCTA";
 import { SiteFooter } from "@/components/home/SiteFooter";
 
-// Re-fetch menu, settings and reviews hourly on the server rather than on
-// every request. `revalidate` must be a static, analysable value.
+// Revalidate hourly on Vercel. Next static export will ignore this or fail.
 export const revalidate = 3600;
 
 export default async function HomePage() {
